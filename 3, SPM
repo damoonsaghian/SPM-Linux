@@ -1,0 +1,21 @@
+SPM packages are simple source code directories containing a "spmbuild.sh" file
+the script puts all output files in .cache/spm under the source code directory
+
+to install a package:
+; spm install <package-name> [<gnunet/git-url> <public-key>]
+
+the only thing "spm" program does is that:
+, it downloads the source directory from the given url (gnunet/git) to "../spm/package"
+	(this path is relative to the path of the directory containing "spm" program)
+, it runs the included "spmbuild.sh"
+	if "spm" is run as root, it will run the script as "spm" user
+, it creates "/spm/package/<package-name>" hardlinks
+, it creates a symbolic link from "/spm/package/<package-name>/.cache/spm/0" to "./<package-name>"
+, it creates a symbolic link from "/spm/package/<package-name>/.cache/spm/0.desktop" to "../share/applications"
+, it adds the given name and url, to "../spm/url-list", so it can later do updates
+
+when no URL is given, it means to install a package already present in "/spm/packages/<package-name>",
+	as is the case for built'in packages
+
+SPM packages do not need dependency tracking
+because all the dependencies will be hard'linked to the packages directory
