@@ -1,4 +1,4 @@
-#!/usr/bin/env -S pkexec /bin/bash
+#!/bin/sh
 
 if [ "$PKEXEC_UID" = 0 ]; then
 	spm_path=/var/spm

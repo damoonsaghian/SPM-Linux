@@ -21,6 +21,14 @@ fi
 __EOF__
 chmod +x /usr/local/bin/chkpasswd
 
+# sudo
+# if program is /bin/spm run it without asking for password
+# https://unix.stackexchange.com/questions/364/allow-setuid-on-shell-scripts
+# https://security.stackexchange.com/questions/194166/why-is-suid-disabled-for-shell-scripts-but-not-for-binaries
+# https://www.drdobbs.com/dangers-of-suid-shell-scripts/199101190
+# https://github.com/Lancia-Greggori/lanciautils/blob/main/C/priv.c
+# https://salsa.debian.org/debian/super/
+
 cat <<'__EOF__' > /usr/local/bin/sudo
 #!/usr/bin/env -S pkexec --keep-cwd /bin/bash
 set -e
