@@ -5,15 +5,14 @@ to install a package:
 ; spm install <package-name> [<gnunet/git-url> [<public-key>]]
 
 this is what "spm" program does:
-, it downloads the source directory from the given url to "../state/spm/packages/<url-hash|package-name>"
+, downloads the source directory from the given url to "../state/spm/packages/<url-hash|package-name>"
 	(this path is relative to the path of the directory containing "spm" program)
-, it runs the included "spmbuild.sh" in a jail that its write access is restricted to:
-	"../state/spm/packages/<package-name>/.cache/spm/"
+, runs the included "spmbuild.sh"
 , if there is a file named "0" in "../state/spm/packages/<package-name>/.cache/spm/"
 	, it creates hardlinks from "../state/spm/packages/<package-name>/.cache/spm/" to "../apps/<package-name>/"
 	, it creates a symbolic link from "../apps/<package-name>/0" to "./<package-name>"
 	, it creates a symbolic link from "../apps/<package-name>/0.desktop" to "../share/applications"
-	, it adds the given name, url, and public key, to "../state/spm/apps", so it can later do updates
+	, it adds the given name, url, and public key, to "../state/spm/apps-list", so it can later do updates
 
 when no URL is given, it means to install a package already present in "../state/spm/packages/<package-name>",
 	as is the case for built'in packages

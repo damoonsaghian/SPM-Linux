@@ -1,5 +1,13 @@
 #!/bin/sh
 
+# if  UID=0, create a system user:
+# user add --system --root="$this_script_dir/.." spm-<url-hash|package-name>
+# mkdir -p /state/spm/packages/<url-hash|package-name>
+# chown spm-<url-hash|package-name> /state/spm/packages/<url-hash|package-name>
+#
+# the following commands will be run using this system user
+# when removing the package, remove this user
+
 if [ "$PKEXEC_UID" = 0 ]; then
 	spm_path=/var/spm
 	bin_path=/usr/local/bin

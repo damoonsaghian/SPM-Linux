@@ -191,7 +191,18 @@ echo -n 'polkit.addRule(function(action, subject) {
 });
 ' > /etc/polkit-1/rules.d/49-timezone.rules
 
-. /mnt/os/install-spm.sh
+cp /mnt/os/spm.sh /bin/spm
+chmod +x /bin/spm
+
+# /bin/spm autoupdate
+# if AC Power
+# after network online
+# oneshot service
+# TimeoutStopSec=900
+# 5min after boot
+# every 24h
+# 5min randomized delay
+
 . /mnt/os/install-user.sh
 
 cp -r /mnt /var/spm/codev
