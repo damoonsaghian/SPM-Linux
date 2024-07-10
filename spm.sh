@@ -8,6 +8,8 @@
 # the following commands will be run using this system user
 # when removing the package, remove this user
 
+# when running a spmbuild.sh file lock it, to avoid creating cyclic dependencies to create infinite loops
+
 if [ "$PKEXEC_UID" = 0 ]; then
 	spm_path=/var/spm
 	bin_path=/usr/local/bin
