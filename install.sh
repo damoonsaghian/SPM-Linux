@@ -81,8 +81,8 @@ genfstab -U /mnt > /mnt/etc/fstab
 
 echo 'LANG=C.UTF-8' > /mnt/etc/default/locale
 
-# create symlinks of minimum needed files for the system to compile itself (bootstrap)
-# put the symlinks in "/bin" and "/state/spm/packages/<package-name>/.cache/spm/" directories
+# copy minimum needed files for the system to compile itself (bootstrap)
+# put them in "/bin" and "/state/spm/packages/<package-name>/.cache/spm/" directories
 # chroot and run spm update
 
 if [ -d /sys/firmware/efi ]; then
