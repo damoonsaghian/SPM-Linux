@@ -1,6 +1,6 @@
 SPM Linux is a Linux based operating system, built and maintained using SPM (simple package manager)
-SPM uses a simple and innovative way that unifies building and package management processes,
-	as is explained in the next chapter
+SPM uses a simple and innovative way that unifies software building and package management
+	it's explained in the next chapter
 
 to install SPM Linux, first we need to be in a Posix compliant system, with these packages installed:
 	gcc g++ bison flex texinfo gawk zip gmp-dev mpfr-dev mpc1-dev zlib-dev git fdisk btrf-progs
