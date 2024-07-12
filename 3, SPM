@@ -2,40 +2,36 @@ SPM packages are simple source code directories containing a "spmbuild.sh" file
 the script puts all output files in .cache/spm under the source code directory
 
 to install a package:
-; spm install <package-name> [<gnunet-or-git-url>]
-here is what it does:
-, it downloads the source directory from the given url to "../spm/built/<url-hash>"
+; spm add <package-name> [<gnunet-or-git-url>]
+; spm add <gnunet-or-git-url>
+here is what happens:
+, the source from the given URL will be downloaded to "../state/spm/packages/<url-hash>"
 	(this path is relative to the path of the directory containing "spm" program)
-, when no URL is given, it means to install a package already present in "../spm/built/<package-name>",
-	as is the case for builtin packages, and customized packages
-, it puts the URL (if any) in "../spm/installed/<package-name>/spm-url"
-, it runs the "spmbuild.sh" script of the package
-, it creates hard links from "../spm/built/<package-name|url-hash>/.cache/spm/" to
-	"../spm/installed/<package-name>/"
-, it creates a symbolic link from "../spm/installed/<package-name>/0" to "./<package-name>"
-, it creates a symbolic link from "../spm/installed/<package-name>/0.desktop" to
-	"../share/applications/<package-name>.desktop"
+, when no URL is given, it means to install a package already present in "../state/spm/packages/<package-name>",
+	which is the case for builtin packages, and customized packages
+, the "spmbuild.sh" script of the package will be executed
+, if a package name is given and "../state/spm/packages/<package-name|url-hash>/.cache/spm/0" file exists:
+	, it creates hard links from "../state/spm/packages/<package-name|url-hash>/.cache/spm/" to
+		"../apps/<package-name>/"
+	, it creates a symbolic link from "../apps/<package-name>/0" to "./<package-name>"
+	, it creates a symbolic link from "../apps/<package-name>/0.desktop" to
+		"../share/applications/<package-name>.desktop"
+	, the package name and URL (if any) will be put into "../state/spm/autoupdate-list"
+, if a package name is given and in "../state/spm/<package-name|url-hash>/.cache/spm":
+	, "fonts" directory exist, symlink it to "../share/fonts/<package-name>"
+	, "icons" directory exist, symlink it to "../share/icons/<package-name>"
+	, ...
+	, the package name and URL (if any) will be put into "../state/spm/autoupdate-list"
 
-automatic update service goes through directories in "spm/installed" and runs:
-; spm install <package-name> [url-from-spm-url-file]
-
-to build (but not install) a package:
-; spm build <package-name|gnunet-or-git-url>
-here is what it does:
-, it downloads the source directory from the given url to "../state/spm/packages/<url-hash>"
-, when instead of URL a package name is given,
-	it builds a package already present in "../state/spm/packages/<package-name>"
-, it runs the "spmbuild.sh" script of the package
-
-public keys for packages downloaded from a URL can be stored in "spm/keys/<url-hash>"
+public keys for packages downloaded from a URL can be stored in "../spm/keys/<url-hash>"
 spm uses these keys to check the signature of packages when downloading/updating them
 
 if you want to customize configurations for an SPM package:
 , create "../state/spm/packages/<package-name>/spmbuild.sh"
 , put this line in the script:
-	spm install <gnunet-or-git-url> [<public-key>]
+	spm add <gnunet-or-git-url>
 , add your custom configs
-, run: spm install <package-name>
+, run: spm add <package-name>
 this way to customize packages, without the need for "/etc"
 
 SPM packages do not need dependency tracking
@@ -43,3 +39,6 @@ because all the dependencies will be hard'linked to the same directory alongside
 for removing a package, just remove "../apps/<package-name>" directory, plus these symlinks (if any):
 	./<package-name>
 	../share/applications/<package-name>.desktop
+	../share/fonts/<package-name>
+	../share/icons/<package-name>
+	...
