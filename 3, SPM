@@ -23,6 +23,10 @@ here is what happens:
 	, ...
 	, the package name and URL (if any) will be put into "../state/spm/autoupdate-list"
 
+when spm is run as root, the "spmbuild.sh" scripts run as specific system users
+so for each package installed by root, there is a system user with name "spm-<package-name|url-hash>"
+also when spm is run as root, it stores its state in "../var/spm/" instead of "../state/spm/"
+
 public keys for packages downloaded from a URL can be stored in "../spm/keys/<url-hash>"
 spm uses these keys to check the signature of packages when downloading/updating them
 

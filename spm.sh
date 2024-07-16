@@ -10,6 +10,8 @@
 
 # when running a spmbuild.sh file lock it, to avoid creating cyclic dependencies to create infinite loops
 
+# https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
+
 if [ "$PKEXEC_UID" = 0 ]; then
 	spm_path=/var/spm
 	bin_path=/usr/local/bin
