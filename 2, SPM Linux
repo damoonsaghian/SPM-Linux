@@ -8,25 +8,19 @@ then run this in a terminal:
 ; sudo sh install.sh
 
 the user interface of SPM Linux is very simple
-press "super" (mod+mod) or "alt+tab" to show the main menu
+press "super" (mod+mod) or "alt+tab" to show the application launcher
 press "super" or "alt+tab" again to go to previously viewed application (if any)
-the main menu contains two views:
-, the first view shows the list of installed GUI applications
-, the second view provides a command'line (to switch to it, press any punctuation character)
-	it will run the entered command, and when it exits, the menu will be closed
-	the default command which will be run when empty line is entered, is "system"
-using "system" one can:
-	, manage session: lock, suspend, exit, reboot, poweroff
-	, manage connections
-	, set timezone
-	, change passwords
-	, manage packages
+the first item in application launcher is "system"; it opens the system menu:
+	, session (lock, suspend, exit, reboot, poweroff)
+	, connections
+	, timezone
+	, password
+	, packages
 press "super+backspace" or "alt+escape" to close a window
 
 the package management process is atomic
 nonetheless, to have a really fail'safe system, redundant backups are necessary
-one can make a portable SPM Linux for emergency, using "system" command
-	just select "create a portable SPM Linux" from "manage packages" section
+to create a portable SPM Linux for emergency, go to "system -> packages -> create a portable SPM Linux"
 this can also be used to create a cross'compiled SPM Linux
 
 to run a program as root:
@@ -35,15 +29,15 @@ this will switch to the first available virtual terminal, shows the command at t
 	and asks for root password
 if the user is in "sudo" group and the entered password is correct,
 	it returns back to previous virtual terminal, and runs the command as root
-
-note that you can't login as root; root account is locked
 this means that if a malicious program steals root password (eg by faking sudo password entry),
 	it still can't run programs as root (because it can't enter the password in a virtual terminal)
-also you must never type the user's password anywhere except at the login prompt
-	and make sure the login prompt isn't fake, by pressing "F1" or "XF86Lock" for locking/unlocking
 take a look at these:
 "https://www.reddit.com/r/linuxquestions/comments/8mlil7/whats_the_point_of_the_sudo_password_prompt_if/"
 "https://security.stackexchange.com/questions/119410/why-should-one-use-sudo"
+	
+note that it's not possible to login as root; root account is locked
+and you must never type the user's password anywhere except at the login prompt
+	and make sure the login prompt isn't fake, by pressing "F1" or "XF86Lock" for locking/unlocking
 
 to protect the computer from physical attacks, don't leave the computer with an unlocked session
 in addition you must:
