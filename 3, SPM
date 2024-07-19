@@ -1,48 +1,48 @@
 SPM packages are simple source code directories containing a "spmbuild.sh" file
-the script puts all output files in .cache/spm under the source code directory
+the script puts all output files in ".cache/spm" under the source code directory
+SPM packages do not need dependency tracking
+because all the dependencies will be hard'linked to the application's directory
+
+to build a package:
+; spm build <url|package-name>
+this downloads the source code from the given URL (gnunet/git) into "$spm_dir/packages/<url-hash>",
+	then runs "sh $spm_dir/packages/<url-hash>/spmbuild.sh"
+	("$spm_dir" is "/spm" when "spm" is run as root, and "~/.local/spm" otherwise)
+when instead of a URL, a package name is given,
+	it just runs the "spmbuild.sh" script of a package already exists in "$spm_dir/packages/<package-name>"
+	this happens for builtin or customized packages
 
 to install a package:
-; spm add <package-name> [<gnunet-or-git-url>]
-; spm add <gnunet-or-git-url>
-here is what happens:
-, the source from the given URL will be downloaded to "../state/spm/packages/<url-hash>"
-	(this path is relative to the path of the directory containing "spm" program)
-, when no URL is given, it means to install a package already present in "../state/spm/packages/<package-name>",
-	which is the case for builtin packages, and customized packages
-, the "spmbuild.sh" script of the package will be executed
-, if a package name is given and "../state/spm/packages/<package-name|url-hash>/.cache/spm/0" file exists:
-	, it creates hard links from "../state/spm/packages/<package-name|url-hash>/.cache/spm/" to
-		"../apps/<package-name>/"
-	, it creates a symbolic link from "../apps/<package-name>/0" to "./<package-name>"
-	, it creates a symbolic link from "../apps/<package-name>/0.desktop" to
-		"../share/applications/<package-name>.desktop"
-	, the package name and URL (if any) will be put into "../state/spm/autoupdate-list"
-, if a package name is given and in "../state/spm/<package-name|url-hash>/.cache/spm":
-	, "fonts" directory exist, symlink it to "../share/fonts/<package-name>"
-	, "icons" directory exist, symlink it to "../share/icons/<package-name>"
-	, ...
-	, the package name and URL (if any) will be put into "../state/spm/autoupdate-list"
+; spm install <package-name> [<url>]
+this command:
+, builds the package (as explained above)
+, if a URL is given, put it in "$spm_dir/packages/<package-name>/.cache/spm/data/url" file
+	later this will be used to update the app
+, creates hard links from files in "$spm_dir/packages/<package-name>/.cache/spm" directory,
+	into "$spm_dir/installed/<package-name>" directory (recursively)
+, creates symlinks from files mentioned in "$spm_dir/installed/<package-name>/data/apps" file,
+	into "$apps_dir" directory
+	("$apps_dir" is "/apps" when "spm" is run as root, and "~/.local/bin" otherwise)
+, creates symlinks from "$spm_dir/installed/<package-name>/data/*.desktop" files into "$gui_apps_dir"
+	("$gui_apps_dir" is "/apps/gui" when "spm" is run as root, and "~/.local/share/applications" otherwise)
 
-when spm is run as root, the "spmbuild.sh" scripts run as specific system users
-so for each package installed by root, there is a system user with name "spm-<package-name|url-hash>"
-also when spm is run as root, it stores its state in "../var/spm/" instead of "../state/spm/"
+when "spm" is run as root, the "spmbuild.sh" scripts will be run as specific system users
+so for each package installed by root, there is a system user with the name "spm-<package-name|url-hash>"
 
-public keys for packages downloaded from a URL can be stored in "../spm/keys/<url-hash>"
+public keys for a package downloaded from a URL can be stored in "$spm_dir/keys/<url-hash>"
 spm uses these keys to check the signature of packages when downloading/updating them
 
-if you want to customize configurations for an SPM package:
-, create "../state/spm/packages/<package-name>/spmbuild.sh"
-, put this line in the script:
-	spm add <gnunet-or-git-url>
-, add your custom configs
-, run: spm add <package-name>
+if you want to customize the configurations of an SPM package:
+, create "$spm_dir/packages/<package-name>/spmbuild.sh" containing:
+	, build command for the package we want to customize: spm build <url>
+	, commands to hard link the required files
+	, commands to apply the custom configurations
+, run "spm install <package-name>"
 this way to customize packages, without the need for "/etc"
 
-SPM packages do not need dependency tracking
-because all the dependencies will be hard'linked to the same directory alongside the executable
-for removing a package, just remove "../apps/<package-name>" directory, plus these symlinks (if any):
-	./<package-name>
-	../share/applications/<package-name>.desktop
-	../share/fonts/<package-name>
-	../share/icons/<package-name>
-	...
+to remove an installed app:
+; spm remove <package-name>
+this command:
+, removes the files mentioned in "$spm_dir/installed/<package-name>/data/apps" from "/apps"
+, removes files in "/apps/gui/" corresponding to "$spm_dir/installed/<package-name>/data/*.desktop"
+, removes "$spm_dir/installed/<package-name>" directory

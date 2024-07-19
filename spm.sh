@@ -8,9 +8,22 @@
 # the following commands will be run using this system user
 # when removing the package, remove this user
 
+# create symlinks from busybox executables into /apps/bb
+# sudo only runs programs in /apps/bb
+
+# if package or app with the same name exist, error
+
 # when running a spmbuild.sh file lock it, to avoid creating cyclic dependencies to create infinite loops
 
+# in spambuild.sh
+# hard link all needed files in ".cache/apm" directory of dependencies
+
+# if linux package is installed/updated, mount boot partition, and copy the kernel to it
+
 # https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
+
+# signing Git tags
+# https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work
 
 if [ "$PKEXEC_UID" = 0 ]; then
 	spm_path=/var/spm
