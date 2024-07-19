@@ -9,6 +9,8 @@ if [ ! "$(id -u)" = 0 ] && [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
 fi
 ' > /etc/profile.d/zz-sway.sh
 
+# gtk-layer-shell
+
 # mono'space fonts:
 # , wide characters are forced to squeeze
 # , narrow characters are forced to stretch

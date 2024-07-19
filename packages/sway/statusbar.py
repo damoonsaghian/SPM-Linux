@@ -22,6 +22,11 @@ from gi.repository import GLib, Gio, Gdk, Gtk
 # find "POWER_SUPPLY_CAPACITY=<value>" in contents
 # POWER_SUPPLY_CAPACITY=Charging/Full/Discharging
 
+# click on empty space -> swapps
+# another click on empty space -> previous app
+# click on status -> system
+# right click -> close window
+
 ''' cpu
 , 0 to 2: white
 , 2 to 50: yellow
