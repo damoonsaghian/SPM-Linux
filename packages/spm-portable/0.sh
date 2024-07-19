@@ -9,6 +9,7 @@
 # https://gcc.gnu.org/onlinedocs/gcc-3.0.4/gcc/Cross-Compiler.html
 # https://github.com/narke/gcc-cross-compiler
 # https://github.com/crosstool-ng/crosstool-ng
+# https://buildroot.org/
 target_arch="$(uname -m)"
 printf "supported architectures:
 	x86_64
