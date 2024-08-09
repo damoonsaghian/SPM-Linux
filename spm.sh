@@ -1,29 +1,36 @@
-#!/bin/sh
+# mkdir -p /spm/packages/<url-hash|package-name>
 
-# if  UID=0, create a system user:
-# user add --system --root="$this_script_dir/.." spm-<url-hash|package-name>
-# mkdir -p /state/spm/packages/<url-hash|package-name>
-# chown spm-<url-hash|package-name> /state/spm/packages/<url-hash|package-name>
-#
-# the following commands will be run using this system user
-# when removing the package, remove this user
-
-# create symlinks from busybox executables into /apps/bb
-# sudo only runs programs in /apps/bb
+if [ $(id -u) = 0 ]; then
+fi
 
 # if package or app with the same name exist, error
 
-# when running a spmbuild.sh file lock it, to avoid creating cyclic dependencies to create infinite loops
-
-# in spambuild.sh
-# hard link all needed files in ".cache/apm" directory of dependencies
+# if "spmbuild" file is already open, it means that there is a cyclic dependency
+# so exit to avoid an infinite loop
 
 # if linux package is installed/updated, mount boot partition, and copy the kernel to it
+
+# create symlinks from executables in "system" package, into /apps/system
+# sudo only runs programs in /apps/system
+
+# /apps/gui
+# /apps/services
+# /apps/dbus (dbus configs)
+# /apps/polkit (polkit configs)
 
 # https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
 
 # signing Git tags
 # https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work
+
+# if during auto update an error occures: echo error > $spm_dir/status
+
+# lib load paths: .:./deps
+# when creating a package
+
+# when mod time of .cache/spm is newer than mod time of project directory, skip
+
+# PATH and LD_LIBRARY_PATH -> app's directory
 
 if [ "$PKEXEC_UID" = 0 ]; then
 	spm_path=/var/spm
@@ -121,6 +128,8 @@ elif [ "$1" == remove ]; then
 	# , spm remove $app_name
 	# try to remove app as the owner of the path
 	
+	# non'removable packages; linux busybox
+	
 	# if $2 is an absolute path (start with "/"), meta_package=spm--path-hash
 	# /var/spm/hash-path-map-file
 	# after each update and remove, check all, if the path does not exist, remove package
@@ -132,7 +141,8 @@ elif [ "$1" == sync ]; then
 	apt-get update
 	exit
 elif [ "$1" == update ]; then
-	# read url lines in $spm_path/url-list
+	# directories in $spm_dir/installed/
+	# see if "$spm_dir/installed/<package-nam>/url" file exists
 	# download
 	# if third line exists, it's a public key; use it to check the signature (in ".data/sig")
 	# run install.sh in each one

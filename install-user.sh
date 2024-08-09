@@ -60,6 +60,7 @@ echo -n '<?xml version="1.0" encoding="UTF-8"?>
 </policyconfig>
 ' > /usr/share/polkit-1/actions/local.pkexec.sudo.policy
 
+# this method is wrong; ctrl+c in the lockscreen, disables it
 cat <<'__EOF__' > /usr/local/bin/lock
 #!/usr/bin/pkexec /bin/sh
 set -e
@@ -120,11 +121,10 @@ echo; echo -n "set username: "
 read -r username
 groupadd -f netdev; groupadd -f bluetooth
 useradd --create-home --groups "$username",netdev,bluetooth,sudo --shell /bin/bash "$username" || true
-echo >> "/home/$username/.bashrc"
 cat <<'__EOF__' >> "/home/$username/.bashrc"
 export PS1="\e[7m \u@\h \e[0m \e[7m \w \e[0m\n> "
-shopt -q login_shell && echo
-echo 'enter "system" to configure system settings'
+shopt -q login_shell &&
+	printf '\nenter "system" to configure system settings\n'
 __EOF__
 
 while ! passwd --quiet "$username"; do
@@ -136,14 +136,3 @@ while ! passwd --quiet; do
 done
 # lock root account
 passwd --lock root
-
-# guest user
-useradd --create-home --shell /bin/bash guest || true
-passwd --quiet --delete guest
-printf 'no user account? login as "guest"\n\n' >> /etc/issue
-echo >> "/home/guest/.bashrc"
-cat <<'__EOF__' >> "/home/guest/.bashrc"
-export PS1="\e[7m \u@\h \e[0m \e[7m \w \e[0m\n> "
-shopt -q login_shell && echo
-echo 'enter "system" to configure system settings'
-__EOF__

@@ -1,33 +1,48 @@
 SPM packages are simple source code directories containing a "spmbuild.sh" file
-the script puts all output files in ".cache/spm" under the source code directory
+"spmbuild.sh" is a shell script file with special comment lines:
+	#dep <gnu-url|package-name>
+if "spm" is run as root, "spmbuild.sh" files will be run in a namespace, using "unshare"
+	"https://en.wikipedia.org/wiki/Linux_namespaces"
+	"https://git.busybox.net/busybox/tree/util-linux/unshare.c"
+	"https://manpages.debian.org/bookworm/util-linux/unshare.1.en.html"
+	"https://github.com/containers/bubblewrap"
+
+the "spmbuild.sh" file can be in a gnunet URL
+the source can be in the same place, or in a Git URL (in which case it will git'cloned in the spmbuild file)
+when a package is published:
+, the source is published to gnunet://<domain-name>/packages/src/<package-name>/
+, the files ".cache/spm/<arch>/" (not recursively) will be put into:
+	gnunet://<domain-name>/packages/<arch>/<package-name>/
+
+when downloading a dep, if the a built one for the arch exist,
+	just download that (and put it in .cache/spm/<arch>/) plus the spmbuild.sh file,
+	otherwise download the whole source
+
+"spm" program puts all output files in ".cache/spm" under the source code directory
 SPM packages do not need dependency tracking
 because all the dependencies will be hard'linked to the application's directory
 
-to build a package:
-; spm build <url|package-name>
-this downloads the source code from the given URL (gnunet/git) into "$spm_dir/packages/<url-hash>",
-	then runs "sh $spm_dir/packages/<url-hash>/spmbuild.sh"
+to build a package (including deps):
+this downloads the source code from the given URL into "$spm_dir/packages/<url-hash>",
+	then builds the package using "$spm_dir/packages/<url-hash>/spmbuild"
 	("$spm_dir" is "/spm" when "spm" is run as root, and "~/.local/spm" otherwise)
 when instead of a URL, a package name is given,
-	it just runs the "spmbuild.sh" script of a package already exists in "$spm_dir/packages/<package-name>"
+	it just builds a package that already exists in "$spm_dir/packages/<package-name>"
 	this happens for builtin or customized packages
 
 to install a package:
 ; spm install <package-name> [<url>]
 this command:
 , builds the package (as explained above)
-, if a URL is given, put it in "$spm_dir/packages/<package-name>/.cache/spm/data/url" file
-	later this will be used to update the app
-, creates hard links from files in "$spm_dir/packages/<package-name>/.cache/spm" directory,
+, creates hard links from files in "$spm_dir/packages/<url-hash|package-name>/.cache/spm/<arch>" directory,
 	into "$spm_dir/installed/<package-name>" directory (recursively)
+, if a URL is given, put it in "$spm_dir/installed/<package-name>/data/url" file
+	later this will be used to update the app
 , creates symlinks from files mentioned in "$spm_dir/installed/<package-name>/data/apps" file,
 	into "$apps_dir" directory
 	("$apps_dir" is "/apps" when "spm" is run as root, and "~/.local/bin" otherwise)
 , creates symlinks from "$spm_dir/installed/<package-name>/data/*.desktop" files into "$gui_apps_dir"
 	("$gui_apps_dir" is "/apps/gui" when "spm" is run as root, and "~/.local/share/applications" otherwise)
-
-when "spm" is run as root, the "spmbuild.sh" scripts will be run as specific system users
-so for each package installed by root, there is a system user with the name "spm-<package-name|url-hash>"
 
 public keys for a package downloaded from a URL can be stored in "$spm_dir/keys/<url-hash>"
 spm uses these keys to check the signature of packages when downloading/updating them

@@ -8,26 +8,41 @@ lsblk --nodep -o NAME,SIZE,MODEL,MOUNTPOINTS | while read -r line; do echo "    
 printf "enter the name of the device to install the system on: "
 read -r target_device
 
+# repair or install
+
 printf "WARNING! all the data on \"$target_device\" will be erased; continue? (y/N) "
 read -r answer
 [ "$answer" = y ] || exit
 
-# if arch is ppc64el:
-# , create a HFS partition
-# , make the root dir blessed
-# , create a CHRP script with file type "tbxi"
-# , create "/syslinux/syslinux.cfg" or "/syslinux.cfg"
-# https://github.com/void-ppc/void-ppc-docs/blob/master/src/installation/live-images/booting.md
-# https://manpages.debian.org/jessie/yaboot/bootstrap.8.en.html
+# https://wiki.artixlinux.org/Main/Installation
+# https://gitea.artixlinux.org/artix
+# https://packages.artixlinux.org/
 #
-# otherwise:
+# https://docs.alpinelinux.org/user-handbook/0.1a/Installing/setup_alpine.html
+# https://gitlab.alpinelinux.org/alpine
+# https://gitlab.alpinelinux.org/alpine/alpine-conf
+# https://pkgs.alpinelinux.org/package/edge/main/x86_64/alpine-base
 #
-# if arch is x86 or x86_64: syslinux
+# https://kisslinux.org/ https://github.com/kisslinux/
+# https://www.linuxfromscratch.org/ https://www.linuxfromscratch.org/lfs/view/stable/
+# https://github.com/gobolinux
+# https://sta.li/
+# https://t2sde.org/handbook/html/index.html
+# https://buildroot.org/downloads/manual/manual.html
+
+# create vfat boot partition
+#
+# if arch is ppc64el, create "syslinux.cfg"
+# only OPAL Petitboot based systems are supported
+#
+# if arch is x86 or x86_64, install syslinux
 # https://wiki.archlinux.org/title/Syslinux
-#
-# EFI: unified kernel
-# root=
-# init=/spm/busybox/init
+
+# fdisk script
+# https://askubuntu.com/questions/741679/automated-shell-script-to-run-fdisk-command-with-user-input
+# https://stackoverflow.com/questions/35166147/bash-script-with-fdisk
+# https://superuser.com/questions/332252/how-to-create-and-format-a-partition-using-a-bash-script
+# https://wiki.archlinux.org/title/Fdisk
 
 # create partitions
 if [ -d /sys/firmware/efi ]; then
@@ -98,9 +113,17 @@ genfstab -U /mnt > /mnt/etc/fstab
 
 echo 'LANG=C.UTF-8' > /mnt/etc/default/locale
 
-# copy minimum needed files for the system to compile itself (bootstrap)
-# put them in "/bin" and "/state/spm/packages/<package-name>/.cache/spm/" directories
-# chroot and run spm update
+# create partitions
+# format the main partition with BTRFS
+# create a directory in /tmp and mount the root
+# create these directories:
+# apps spm dev proc sys tmp
+# copy builtin packages to $mount_dir/spm/packages
+# add $mount_dir/apps/bb and $mount_dir/apps to the begining of $PATH
+
+# bootstrap
+# mount /apps and /spm
+# install gcc busybox linux git gnunet fsprogs sway
 
 if [ -d /sys/firmware/efi ]; then
 	echo "root=UUID=$(findmnt -n -o UUID /) ro quiet" > /etc/kernel/cmdline

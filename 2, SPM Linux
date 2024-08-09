@@ -1,9 +1,11 @@
 SPM Linux is a Linux based operating system, built and maintained using SPM (simple package manager)
-SPM uses a simple and innovative way that unifies software building and package management
-	it's explained in the next chapter
+SPM uses a simple and innovative method that unifies software building and package management,
+	as will be explained in the next chapter
 
-to install SPM Linux, first we need to be in a Posix compliant system, with these packages installed:
-	gcc g++ bison flex texinfo gawk zip gmp-dev mpfr-dev mpc1-dev zlib-dev git fdisk btrf-progs
+to install SPM Linux, first we need to be in a Posix compliant system, with these programs installed:
+	fdisk mkfs.vfat mkfs.btrfs gcc g++ git gnunet
+for example you can boot into an Alpine Linux live system, then:
+; apt add btrfs-progs gcc g++ git gnunet
 then run this in a terminal:
 ; sudo sh install.sh
 
@@ -25,19 +27,17 @@ this can also be used to create a cross'compiled SPM Linux
 
 to run a program as root:
 ; sudo command
-this will switch to the first available virtual terminal, shows the command at the top,
-	and asks for root password
-if the user is in "sudo" group and the entered password is correct,
-	it returns back to previous virtual terminal, and runs the command as root
-this means that if a malicious program steals root password (eg by faking sudo password entry),
-	it still can't run programs as root (because it can't enter the password in a virtual terminal)
+this will run a program in virtual terminal 7, that shows the command at the top, and asks for root password,
+	and when "enter" is pressed, returns back to previous virtual terminal
+press F5 (or F6 or F7 or F8) to go to virtual terminal 7, where one can give root password
+if the user is in "sudo" group and the entered password is correct, it runs the command as root
+this means that if a malicious program can't steal root password (eg by faking sudo password entry)
+and to enter root password, physical access is necessary,
+	because there is no other way to enter the password in a virtual terminal
 take a look at these:
 "https://www.reddit.com/r/linuxquestions/comments/8mlil7/whats_the_point_of_the_sudo_password_prompt_if/"
 "https://security.stackexchange.com/questions/119410/why-should-one-use-sudo"
-	
 note that it's not possible to login as root; root account is locked
-and you must never type the user's password anywhere except at the login prompt
-	and make sure the login prompt isn't fake, by pressing "F1" or "XF86Lock" for locking/unlocking
 
 to protect the computer from physical attacks, don't leave the computer with an unlocked session
 in addition you must:
