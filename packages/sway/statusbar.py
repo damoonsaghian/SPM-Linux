@@ -27,6 +27,18 @@ from gi.repository import GLib, Gio, Gdk, Gtk
 # click on status -> system
 # right click -> close window
 
+# monitor "$spm_dir/status", if it's content is "error", show package manager indicator
+
+def mkgraph(args*):
+	# https://github.com/AstraExt/astra-monitor/blob/main/src/graph.ts
+	# https://github.com/mgalgs/gnome-shell-system-monitor-applet/blob/master/system-monitor-next%40paradoxxx.zero.gmail.com/extension.js
+	# https://github.com/tpenguin/gnome-stats-pro/blob/master/extension.js
+	graph = Gtk.DrawingArea()
+	for item in args:
+		# 30 pixels wide
+		# every 2 seconds
+	return graph
+
 ''' cpu
 , 0 to 2: white
 , 2 to 50: yellow
@@ -106,6 +118,7 @@ with open('/proc/meminfo') as mem_info_file:
 # https://unix.stackexchange.com/questions/55212/how-can-i-monitor-disk-io
 # https://github.com/ultrabug/py3status/blob/master/py3status/modules/diskdata.py
 
+# gnunet
 # icon's color indicates average speed (download+upload) in the last 30 seconds:
 # , 0 to 10 kB/s: white icon
 # , 10 kbs to 100 kB/s: yellow icon
@@ -113,6 +126,7 @@ with open('/proc/meminfo') as mem_info_file:
 # , greater than 1 MB/s: blue icon
 # show upload speed, and total upload since boot, in the top index
 # show download speed, and total download since boot, in the bottom index
+# when there is upload/download make the icon green
 
 ''' internet
 icon's color indicates average speed (download+upload) in the last 30 seconds:
@@ -122,6 +136,8 @@ icon's color indicates average speed (download+upload) in the last 30 seconds:
 , greater than 1 MB/s: blue icon
 show upload speed, and total upload since boot, in the top index
 show download speed, and total download since boot, in the bottom index
+when there is upload/download make the icon green
+online status
 https://github.com/AstraExt/astra-monitor/tree/main/src/network
 https://github.com/ultrabug/py3status/blob/master/py3status/modules/netdata.py
 https://github.com/ultrabug/py3status/blob/master/py3status/modules/net_rate.py
@@ -188,7 +204,11 @@ active_net_device="$(networkctl list | grep routable | { read -r _ net_dev _; ec
 # visible only when it's active
 # https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/main/js/ui/status/camera.js
 
-# screen recorder indicator: watch for $HOME/.cache/screen-capture contains the pid of screenrec process
+# screen recorder indicator
+# watch for $HOME/.cache/swaycap/screen.mp4
+# if it's open, show red circle
+# if exists but not open, show red square
+# if does not exist, shoe nothing
 
 # time: %Y-%m-%d %a %p %I:%M
 # https://stackoverflow.com/questions/13527451/how-can-i-catch-a-system-suspend-event-in-python
@@ -197,6 +217,10 @@ active_net_device="$(networkctl list | grep routable | { read -r _ net_dev _; ec
 # 	'/org/freedesktop/UPower', None, Gio.DBusSignalFlags.NONE,
 # 	function() print "System just resumed from hibernate or suspend" end
 # )
+# other than the system timezone, show date in universal format:
+# 	UTC timezone and Persian calendar with Cyrus epoch
+# https://github.com/omid/Persian-Calendar-for-Gnome-Shell/blob/master/PersianCalendar%40oxygenws.com/PersianDate.js
 
 # click on empty space, or status area:
-# swaymsg '[app_id=swapps] focus' || python3 /usr/local/share/swapps.py
+# swaymsg '[app_id=swapps] focus' || swapps
+# if sway mode is not "switch_app", go to previous workspace

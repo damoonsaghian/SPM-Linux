@@ -9,7 +9,19 @@ if [ ! "$(id -u)" = 0 ] && [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
 fi
 ' > /etc/profile.d/zz-sway.sh
 
-# gtk-layer-shell
+# https://github.com/wmww/gtk4-layer-shell
+
+# hardlink swaycap.py to swaycap and make it executable
+
+# lock screen:
+# a window in workspace "lockscreen" that asks for password
+# when lock screen is activated, sway goes to "lock" mode with its own set of keybindings
+# if an empty password is entered, or "escape" is pressed, show a readonly view of the projects
+# 	note that external storage devices will be writable
+# when one trys to edit readonly files, or when "alt+tab" is pressed, or when "escape" is pressed in the root window,
+# 	show the password entry
+# during boot, the user will be automatically logged in, and the lock screen will be activated
+# when lock window is closed, reopen it
 
 # mono'space fonts:
 # , wide characters are forced to squeeze
@@ -48,3 +60,16 @@ echo -n '<?xml version="1.0"?>
 	</alias>
 </fontconfig>
 ' > /etc/fonts/local.conf
+
+# on'screen keyboard
+# https://github.com/jjsullivan5196/wvkbd
+
+# voice control:
+# https://kalliope-project.github.io/
+# https://gitlab.com/jezra/blather
+
+# speech to text:
+# https://github.com/openai/whisper
+# https://github.com/julius-speech/julius
+# https://github.com/alphacep/vosk-api
+# https://github.com/kaldi-asr/kaldi

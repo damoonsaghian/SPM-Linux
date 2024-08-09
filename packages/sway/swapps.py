@@ -27,6 +27,8 @@
 # https://github.com/Ulauncher/Ulauncher/blob/v6/ulauncher/modes/apps/launch_app.py
 # https://github.com/otsaloma/catapult/blob/master/catapult/plugins/apps.py
 
+# the first item is "system" that opens a vte window running "system" command
+
 import subprocess
 import re
 
@@ -169,7 +171,9 @@ class MyApp(Gtk.Application):
 			window = Gtk.ApplicationWindow(application=app)
 			window.set_child(AppLauncher().widget)
 			
-			# when window is focused, go to app view
+			# escape: swaymsg '[app_id=swayapps] move scratchpad
+			
+			# when window is unfocused: swaymsg mode default
 			
 			# when window is unfocused:
 			# swaymsg "[con_id=__focused__] focus" || python3 /usr/local/share/codev || swaymsg "[app_id=swapps] focus"
@@ -181,3 +185,5 @@ class MyApp(Gtk.Application):
 		subprocess.run(['swaymsg', "[app_id=swapps] focus"])
 
 MyApp(application_id='swapps').run(None)
+
+# an item that runs swaycap
