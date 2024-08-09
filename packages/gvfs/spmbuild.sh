@@ -1,1 +1,2 @@
-
+# gvfs without udisks and polkit
+# archive mtp afc nfs smb avahi ...
