@@ -1,1 +1,1 @@
-# btrfs-progs, dosfstools, e2fsprogs
+# btrfs-progs dosfstools exfatprogs
