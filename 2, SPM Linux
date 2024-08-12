@@ -3,9 +3,9 @@ SPM uses a simple and innovative method that unifies software building and packa
 	as will be explained in the next chapter
 
 to install SPM Linux, first we need to be in a Posix compliant system, with these programs installed:
-	fdisk mkfs.vfat mkfs.btrfs gcc g++ git gnunet
-for example you can boot into an Alpine Linux live system, then:
-; apt add btrfs-progs gcc g++ git gnunet
+	fdisk mkfs.vfat mkfs.btrfs gnunet git gcc g++
+for example you can boot into an Alpine Linux live system, and enter this at the command line:
+; apk add btrfs-progs gnunet git gcc g++
 then run this in a terminal:
 ; sudo sh install.sh
 
@@ -18,7 +18,7 @@ the first item in application launcher is "system"; it opens the system menu:
 	, timezone
 	, password
 	, packages
-press "super+backspace" or "alt+escape" to close a window
+to close focused window, press "super|alt+backspace|escape"
 
 the package management process is atomic
 nonetheless, to have a really fail'safe system, redundant backups are necessary
@@ -27,17 +27,20 @@ this can also be used to create a cross'compiled SPM Linux
 
 to run a program as root:
 ; sudo command
-this will run a program in virtual terminal 7, that shows the command at the top, and asks for root password,
+this "sudo" is not the traditional one
+it runs in a virtual terminal, shows the command at the top, and asks for sudo password,
 	and when "enter" is pressed, returns back to previous virtual terminal
-press F5 (or F6 or F7 or F8) to go to virtual terminal 7, where one can give root password
-if the user is in "sudo" group and the entered password is correct, it runs the command as root
-this means that if a malicious program can't steal root password (eg by faking sudo password entry)
-and to enter root password, physical access is necessary,
+but to actually go to this virtual terminal that is asking for sudo password,
+	one must press F5 or F6 or F7 or F8
+this means that:
+, a malicious program can't steal root password (eg by faking sudo password entry)
+, to enter root password, physical access is necessary,
 	because there is no other way to enter the password in a virtual terminal
+	and since the root account is locked, it's not possible to use programs like "su" or "sudo" or "doas",
+		to run programs as root by providing the root password
 take a look at these:
 "https://www.reddit.com/r/linuxquestions/comments/8mlil7/whats_the_point_of_the_sudo_password_prompt_if/"
 "https://security.stackexchange.com/questions/119410/why-should-one-use-sudo"
-note that it's not possible to login as root; root account is locked
 
 to protect the computer from physical attacks, don't leave the computer with an unlocked session
 in addition you must:

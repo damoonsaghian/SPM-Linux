@@ -1,30 +1,42 @@
-SPM packages are simple source code directories containing a "spmbuild.sh" file
-"spmbuild.sh" is a shell script file with special comment lines:
-	#dep <gnu-url|package-name>
+SPM packages are simple source code directories containing a file named "spmbuild.sh",
+	and possibly a file named "spmdeps"
+"spmdeps" format:
+	<gnunet-url|package-name>
+		<file-name1>
+		<file-name2>
+packages with no given files, are only needed at compile time
+
 if "spm" is run as root, "spmbuild.sh" files will be run in a namespace, using "unshare"
 	"https://en.wikipedia.org/wiki/Linux_namespaces"
 	"https://git.busybox.net/busybox/tree/util-linux/unshare.c"
 	"https://manpages.debian.org/bookworm/util-linux/unshare.1.en.html"
 	"https://github.com/containers/bubblewrap"
 
-the "spmbuild.sh" file can be in a gnunet URL
-the source can be in the same place, or in a Git URL (in which case it will git'cloned in the spmbuild file)
+the "spmbuild.sh" and "spmdeps" files can be in a gnunet URL
+the source files can be in the same place, or in a Git URL (in which case it will git'cloned in the spmbuild file)
 when a package is published:
-, the source is published to gnunet://<domain-name>/packages/src/<package-name>/
-, the files ".cache/spm/<arch>/" (not recursively) will be put into:
-	gnunet://<domain-name>/packages/<arch>/<package-name>/
+, the project's directory (minus the ".cache" directory) is published to:
+	gnunet://<domain-name>/packages/src/<package-name>/
+, the "spmdeps" file plus all files in ".cache/spm/standalone/" that are not mentioned in "spmdeps",
+	are hardlink into ".cache/spm/<arch>/"
+, the files in ".cache/spm/<arch>/" will be published to:
+	gnunet://<namespace>/packages/<arch>/<package-name>/
 
-when downloading a dep, if the a built one for the arch exist,
-	just download that (and put it in .cache/spm/<arch>/) plus the spmbuild.sh file,
-	otherwise download the whole source
+when downloading a package, if the value of "use_prebuilt" in "/$spm_dir/config" is true,
+	and the associated GNUnet URL for the current architecture is available,
+	just download that (and put it in .cache/spm/<arch>/) then hardlink the files mentioned in "spmdeps",
+	otherwise download the whole source, setup the packages mentioned in "spmdeps", then run "spmbuild.sh"
 
 "spm" program puts all output files in ".cache/spm" under the source code directory
 SPM packages do not need dependency tracking
 because all the dependencies will be hard'linked to the application's directory
 
-to build a package (including deps):
-this downloads the source code from the given URL into "$spm_dir/packages/<url-hash>",
-	then builds the package using "$spm_dir/packages/<url-hash>/spmbuild"
+to build a package (including its dependencies):
+; spm build <package-name> [<url>]
+this:
+, downloads the source code from the given URL into "$spm_dir/packages/<url-hash>"
+, builds the packages mentioned in "spmdeps" and hardlinks the mentioned files into .cache/spm/standalone
+, builds the package using "$spm_dir/packages/<url-hash>/spmbuild.sh"
 	("$spm_dir" is "/spm" when "spm" is run as root, and "~/.local/spm" otherwise)
 when instead of a URL, a package name is given,
 	it just builds a package that already exists in "$spm_dir/packages/<package-name>"
