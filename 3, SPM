@@ -1,75 +1,93 @@
 SPM packages are simple source code directories containing a file named "spmbuild.sh",
-	and possibly a file named "spmdeps"
-"spmdeps" format:
-	<gnunet-url|package-name>
-		<file-name1>
-		<file-name2>
-packages with no given files, are only needed at compile time
+	and possibly another file named "spmdeps"
 
-if "spm" is run as root, "spmbuild.sh" files will be run in a namespace, using "unshare"
-	"https://en.wikipedia.org/wiki/Linux_namespaces"
-	"https://git.busybox.net/busybox/tree/util-linux/unshare.c"
-	"https://manpages.debian.org/bookworm/util-linux/unshare.1.en.html"
-	"https://github.com/containers/bubblewrap"
+"spmdeps" file contains the URL of packages needed at run'time
 
-the "spmbuild.sh" and "spmdeps" files can be in a gnunet URL
-the source files can be in the same place, or in a Git URL (in which case it will git'cloned in the spmbuild file)
-when a package is published:
-, the project's directory (minus the ".cache" directory) is published to:
-	gnunet://<domain-name>/packages/src/<package-name>/
-, the "spmdeps" file plus all files in ".cache/spm/standalone/" that are not mentioned in "spmdeps",
-	are hardlink into ".cache/spm/<arch>/"
-, the files in ".cache/spm/<arch>/" will be published to:
-	gnunet://<namespace>/packages/<arch>/<package-name>/
-
-when downloading a package, if the value of "use_prebuilt" in "/$spm_dir/config" is true,
-	and the associated GNUnet URL for the current architecture is available,
-	just download that (and put it in .cache/spm/<arch>/) then hardlink the files mentioned in "spmdeps",
-	otherwise download the whole source, setup the packages mentioned in "spmdeps", then run "spmbuild.sh"
-
-"spm" program puts all output files in ".cache/spm" under the source code directory
-SPM packages do not need dependency tracking
-because all the dependencies will be hard'linked to the application's directory
+SPM puts all the built files in "<package-dir>/.cache/spm/built/"
+SPM packages do not need dependency tracking,
+	because for all the files needed at run'time, hard'links will be created inside the "built" directory
 
 to build a package (including its dependencies):
-; spm build <package-name> [<url>]
-this:
-, downloads the source code from the given URL into "$spm_dir/packages/<url-hash>"
-, builds the packages mentioned in "spmdeps" and hardlinks the mentioned files into .cache/spm/standalone
-, builds the package using "$spm_dir/packages/<url-hash>/spmbuild.sh"
+; spm build <gnunet-url>
+this is what happens:
+, it downloads the package from the given GNUnet URL (gnunet://) into "$spm_dir/packages/<url-hash>"
 	("$spm_dir" is "/spm" when "spm" is run as root, and "~/.local/spm" otherwise)
-when instead of a URL, a package name is given,
-	it just builds a package that already exists in "$spm_dir/packages/<package-name>"
-	this happens for builtin or customized packages
+, the packages mentioned in "spmdeps" are built, and the files in their ".cache/spm/built" directory,
+	will be (recursively) hardlinked into the ".cache/spm/built" directory of the current package
+, the package is built by running its "spmbuild.sh" script
+
+if spmbuild.sh is in working directory, this is the package to be built
+otherwise search for it in child directories
+	the first one found plus its siblings are the packages to be built
+
+if "spm" is run as root, "spmbuild.sh" files will be run in a namespace, using "unshare"
+"https://en.wikipedia.org/wiki/Linux_namespaces"
+"https://git.busybox.net/busybox/tree/util-linux/unshare.c"
+"https://manpages.debian.org/bookworm/util-linux/unshare.1.en.html"
+"https://github.com/containers/bubblewrap"
 
 to install a package:
-; spm install <package-name> [<url>]
-this command:
-, builds the package (as explained above)
-, creates hard links from files in "$spm_dir/packages/<url-hash|package-name>/.cache/spm/<arch>" directory,
-	into "$spm_dir/installed/<package-name>" directory (recursively)
-, if a URL is given, put it in "$spm_dir/installed/<package-name>/data/url" file
-	later this will be used to update the app
-, creates symlinks from files mentioned in "$spm_dir/installed/<package-name>/data/apps" file,
+; spm install <package-name> <gnunet-url>
+this is what happens:
+, the package is built (as explained above)
+, hard links from files in "$spm_dir/packages/<url-hash|package-name>/.cache/spm/build/",
+	are created (recursively) in "$spm_dir/installed/<package-name>/"
+, the URL is put in "$spm_dir/installed/<package-name>/data/url" file
+	this will be used to update the app
+, it'll create symlinks from files mentioned in "$spm_dir/installed/<package-name>/data/apps" file,
 	into "$apps_dir" directory
 	("$apps_dir" is "/apps" when "spm" is run as root, and "~/.local/bin" otherwise)
-, creates symlinks from "$spm_dir/installed/<package-name>/data/*.desktop" files into "$gui_apps_dir"
+, it'll create symlinks from "$spm_dir/installed/<package-name>/data/sv/*" directories, to "$apps_dir/sv/"
+, it'll create symlinks from "$spm_dir/installed/<package-name>/data/sv-sys/*" directories, to "$apps_dir/sv-sys/"
+	actually this is only done for packages included in "trusted_packages" list in "$spm_dir/config"
+	(the default value of "trusted_packages" is "system gnunet")
+, it'll create symlinks from "$spm_dir/installed/<package-name>/data/*.desktop" files into "$gui_apps_dir"
 	("$gui_apps_dir" is "/apps/gui" when "spm" is run as root, and "~/.local/share/applications" otherwise)
+
+in "spmbuild.sh" scripts, put the name of executable that must be installed on the system in:
+	".cache/spm/data/apps" file
+
+for packages needed during the build process, do this in the "spmbuild.sh" script:
+	$BTD pkg_<package-name> <url-or-name-of-needed-package>
+then use "$pkg_<package-name>" where ever you want to access a file in the needed package
+before running spmbuild.sh, $BTD packages will be built
+this is what $BTD does:
+	pkg_<package-name>="$spm_dir"/packages/<url-hash-or-name-of-needed-package>
 
 public keys for a package downloaded from a URL can be stored in "$spm_dir/keys/<url-hash>"
 spm uses these keys to check the signature of packages when downloading/updating them
-
-if you want to customize the configurations of an SPM package:
-, create "$spm_dir/packages/<package-name>/spmbuild.sh" containing:
-	, build command for the package we want to customize: spm build <url>
-	, commands to hard link the required files
-	, commands to apply the custom configurations
-, run "spm install <package-name>"
-this way to customize packages, without the need for "/etc"
 
 to remove an installed app:
 ; spm remove <package-name>
 this command:
 , removes the files mentioned in "$spm_dir/installed/<package-name>/data/apps" from "/apps"
-, removes files in "/apps/gui/" corresponding to "$spm_dir/installed/<package-name>/data/*.desktop"
+, removes symlinks in "/apps/sv/" corresponding to "$spm_dir/installed/<package-name>/data/sv/*"
+, removes symlinks in "/apps/sv-sys/" corresponding to "$spm_dir/installed/<package-name>/data/sv-sys/*"
+	(for trusted packages)
+, removes symlinks in "/apps/gui/" corresponding to "$spm_dir/installed/<package-name>/data/*.desktop"
 , removes "$spm_dir/installed/<package-name>" directory
+
+SPM packages can be published to a GNUnet namespace
+the "spmbuild.sh" and "spmdeps" files will be published into the GNUnet namespace
+the source files can be in the same place, or in a Git URL
+	in which case, there must be "git clone <git-url> .cache/git" line, in the "spmbuild.sh" file
+; spm publish
+when a package is published:
+, the project's directory (minus the ".cache" directory) is published to:
+	gnunet://<namespace>/packages/src/<package-name>/
+, the package will be cross'built for all architectures mentioned "/$spm_dir/config" file,
+	as the value of "arch" entry, and put inside ".cache/spm/built-<arch>/"
+	using this command: spm build <gnunet-url|package-name> <arch>
+	"$arch" variable in "spmbuild.sh" is equal to:
+	, an empty string, if not cross'building
+	, -<arch>, if cross'building
+, the "spmdeps" file plus all files in ".cache/spm/built$arch/" that are not mentioned in "spmdeps",
+	are hardlinked into ".cache/spm/<arch>/"
+, the files in ".cache/spm/<arch>/" will be published to:
+	gnunet://<namespace>/packages/<arch>/<package-name>/
+
+when downloading a package, if the value of "use_prebuilt" in "/$spm_dir/config" is true,
+	and the corresponding directory for the current architecture is available in the GNUnet namespace,
+	just download that into ".cache/spm/<arch>/",
+	then hardlink these files plus the files mentioned in "spmdeps" into ".cache/spm/built",
+	and skip running "spmbuild.sh"

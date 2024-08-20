@@ -3,10 +3,17 @@ set -e
 arch="$(uname -m)"
 
 echo "available storage devices:"
-lsblk --nodep -o NAME,SIZE,MODEL,MOUNTPOINTS | while read -r line; do echo "    $line"; done
+fdisk -l | while read -r line; do
+	printf "\t$line"
+	# /sys/blocks ignore loop*
+	# /sys/block/$device_name/device/model
+	# /sys/block/$device_name/size
+done
 
 printf "enter the name of the device to install the system on: "
 read -r target_device
+
+# exit if it's the system device
 
 # repair or install
 
@@ -30,13 +37,12 @@ read -r answer
 # https://t2sde.org/handbook/html/index.html
 # https://buildroot.org/downloads/manual/manual.html
 
-# create vfat boot partition
-#
-# if arch is ppc64el, create "syslinux.cfg"
-# only OPAL Petitboot based systems are supported
-#
-# if arch is x86 or x86_64, install syslinux
-# https://wiki.archlinux.org/title/Syslinux
+# https://github.com/limine-bootloader/limine
+# https://github.com/limine-bootloader/limine/blob/v8.x/USAGE.md
+# https://github.com/limine-bootloader/limine/blob/v8.x/CONFIG.md
+# create vfat ESP partition
+# if arch is x86 or x86_64, install BIOS support too
+# if arch is ppc64el, create "syslinux.cfg" (only OPAL Petitboot based systems are supported)
 
 # fdisk script
 # https://askubuntu.com/questions/741679/automated-shell-script-to-run-fdisk-command-with-user-input
@@ -124,6 +130,8 @@ echo 'LANG=C.UTF-8' > /mnt/etc/default/locale
 # bootstrap
 # mount /apps and /spm
 # install gcc busybox linux git gnunet fsprogs sway
+
+# grep "^$device_path " /proc/mounts | cut -d ' ' -f 2
 
 if [ -d /sys/firmware/efi ]; then
 	echo "root=UUID=$(findmnt -n -o UUID /) ro quiet" > /etc/kernel/cmdline
@@ -235,8 +243,11 @@ echo -n 'polkit.addRule(function(action, subject) {
 });
 ' > /etc/polkit-1/rules.d/49-timezone.rules
 
-cp /mnt/os/spm.sh /bin/spm
-chmod +x /bin/spm
+echo '#!doas sh
+' > /spm/spm
+cat /mnt/os/spm.sh >> /spm/spm
+chmod +x /spm/spm
+ln /spm/spm /apps/spm
 
 # /bin/spm autoupdate
 # if AC Power

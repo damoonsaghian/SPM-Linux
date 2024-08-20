@@ -1,17 +1,23 @@
-# mkdir -p /spm/packages/<url-hash|package-name>
+# mkdir -p /spm/packages/<url-hash>
 
 if [ $(id -u) = 0 ]; then
 fi
+
+# if the directory part of $0 is /spm, sudo=sudo and use namespaces wen running spmbuid.sh scripts
 
 # if package or app with the same name exist, error
 
 # if "spmbuild" file is already open, it means that there is a cyclic dependency
 # so exit to avoid an infinite loop
 
-# if linux package is installed/updated, mount boot partition, and copy the kernel to it
+# after linux package is installed/updated:
+# mount boot partition, and copy the kernel and initramfs to it
 
-# create symlinks from executables in "system" package, into /apps/system
-# sudo only runs programs in /apps/system
+# after installing/updating linux package, create initramfs
+
+
+# create symlinks from executables in "system" package, into /apps/sys
+# sudo only runs programs in /apps/sys
 
 # /apps/gui
 # /apps/services
