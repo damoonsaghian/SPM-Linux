@@ -3,6 +3,8 @@
 
 # gmp mpfr mpc1
 
+# compile linux with kernel modules for usb, ...
+
 # cross compile
 # install the target compiler; chain the compilers
 # https://en.wikipedia.org/wiki/Cross_compiler

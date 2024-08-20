@@ -1,6 +1,12 @@
 project_dir="$(dirname "$0")"
 
 # git://busybox.net/busybox/tag/?h=1_36_1
+# disable these:
+# 	who, last, FEATURE_UTMP
+# 	less, man, su, blkid
+
+# btrfs-progs
+# blkid libuuid (from util-linux)
 
 # https://git.alpinelinux.org/aports/tree/main/busybox
 # https://git.busybox.net/busybox/tree/
