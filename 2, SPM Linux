@@ -1,6 +1,9 @@
 SPM Linux is a Linux based operating system, built and maintained using SPM (simple package manager)
-SPM uses a simple and innovative method that unifies software building and package management,
-	as will be explained in the next chapter
+
+SPM uses a simple and innovative method that unifies software building and package management
+SPM packages are simple source code directories containing a file named "spmbuild.sh"
+SPM packages do not need dependency tracking, because all the files needed at run'time,
+	will be available under the same directory, using hard links
 
 to install SPM Linux, first we need to be in a Posix compliant system, with these programs installed:
 	fdisk mkfs.vfat mkfs.btrfs gnunet
@@ -9,7 +12,7 @@ for example you can boot into an Alpine Linux live system, and enter this at the
 when everything is ready, run this (as root) in a terminal:
 ; sh install.sh [<arch>]
 
-if you want the packages to be built from source, we need these additional programs:
+if you want the packages to be built from source, you need these additional programs:
 	git clang
 then run this instead:
 ; sh install.sh build [<arch>]
