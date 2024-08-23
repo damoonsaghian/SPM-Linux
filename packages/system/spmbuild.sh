@@ -79,3 +79,6 @@ chmod +x "$project_dir"/.cache/spm/bin/system
 
 # tzdata
 # during login: TZ=/spm/system/tzdata/.../...
+
+# ln spmbuild.sh .cache/spm/builds/<arch>/spm.sh
+# printf '#!doas sh\nsh $0.sh' > .cache/spm/builds/<arch>/spm
