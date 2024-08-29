@@ -1,10 +1,21 @@
 # https://kernel.org/
 
-# https://firasuke.github.io/DOTSLASHLINUX/post/booting-the-linux-kernel-without-an-initrd-initramfs/
-# https://gitlab.alpinelinux.org/alpine/mkinitfs
-
-# no initramfs
-# , compile linux with kernel modules for sata, ysb, ...
-# , kernel parameter: root=PartUUID=...
+# costume modules path: /spm/linux/modules
 
 # custom init path, using kernel parameter: init=/spm/busybox/init
+
+# create initramfs containing:
+# , the modules and firmwares needed to access the storage device where root resides
+# , libc
+# , busybox executable and two symlinks to it named "mount" and "mdev"
+# https://docs.kernel.org/admin-guide/initrd.html
+# https://gitlab.alpinelinux.org/alpine/mkinitfs
+# https://wiki.gentoo.org/wiki/Custom_Initramfs
+# https://www.linuxfromscratch.org/blfs/view/svn/postlfs/initramfs.html
+#
+# if a CPU microcode is needed, prepend it to initramfs
+# https://docs.kernel.org/arch/x86/microcode.html
+# https://wiki.archlinux.org/title/Microcode
+
+# wireless-regdb
+# https://wireless.wiki.kernel.org/en/developers/regulatory/wireless-regdb
