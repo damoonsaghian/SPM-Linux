@@ -5,7 +5,7 @@ cp /mnt/os/{sway.conf,swapps.py} /usr/local/share/
 echo -n '# run sway (if this script is not called by root or a display manager, and this is the first tty)
 if [ ! "$(id -u)" = 0 ] && [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
 	[ -f "$HOME/.profile" ] && . "$HOME/.profile"
-	exec sway -c /usr/local/share/sway.conf
+	exec dbus-run-session sway -c /usr/local/share/sway.conf
 fi
 ' > /etc/profile.d/zz-sway.sh
 
@@ -22,6 +22,15 @@ fi
 # 	show the password entry
 # during boot, the user will be automatically logged in, and the lock screen will be activated
 # when lock window is closed, reopen it
+
+# after 600 seconds idle, lock
+# idle can be monitored using a user service)
+# dim screen in several steps before locking
+
+# to prevent BadUSB, when a new input device is connected lock the session
+# a user service checks when "/spm/installed/system/new-input-added" file is created, locks the session
+# mdev rule that when an input device (ATTR{bInterfaceClass}=="03") is added:
+# 	 touch /spm/installed/system/new-input-added
 
 # mono'space fonts:
 # , wide characters are forced to squeeze
