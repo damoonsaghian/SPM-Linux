@@ -20,6 +20,10 @@ project_dir="$(dirname "$0")"
 # PATH=/apps/bb:/apps
 # run bb services
 
+# libudev-zero
+# https://wiki.alpinelinux.org/wiki/Mdev
+# https://github.com/slashbeast/mdev-like-a-boss/blob/master/mdev.conf
+
 # https://docs.voidlinux.org/config/session-management.html
 # https://git.sr.ht/~kennylevinsen/seatd
 # https://docs.voidlinux.org/config/power-management.html
@@ -29,6 +33,21 @@ project_dir="$(dirname "$0")"
 # at login run services at /apps/services as the user, supervised
 
 # https://github.com/Duncaen/OpenDoas
+
+# chkpassword.c
+# chmod +x
+
+cp $project_dir/sudo.sh $project_dir/.cache/spm/sudo
+chmod +x $project_dir/.cache/spm/sudo
+# if program is /bin/spm run it without asking for password
+# https://unix.stackexchange.com/questions/364/allow-setuid-on-shell-scripts
+# https://security.stackexchange.com/questions/194166/why-is-suid-disabled-for-shell-scripts-but-not-for-binaries
+# https://www.drdobbs.com/dangers-of-suid-shell-scripts/199101190
+# https://github.com/Lancia-Greggori/lanciautils/blob/main/C/priv.c
+# https://salsa.debian.org/debian/super/
+# "doas" allow password'less: /apps/bash /spm/installed/system/sudo.sh
+
+# console level keybinding: when "F5-8" is pressed: go to console 8
 
 # inhibit suspend/shutdown when an upgrade or a sync is in progress
 
@@ -53,11 +72,7 @@ chmod +x "$project_dir"/.cache/spm/bin/system
 # poweroff when critical battery charge is reached
 
 # https://man.archlinux.org/listing/dbus
-# https://github.com/bus1/dbus-broker?tab=readme-ov-file
-# https://github.com/bus1/dbus-broker/wiki
-# https://github.com/bus1/dbus-broker/wiki/Deviations
-# https://man.archlinux.org/man/core/dbus-broker/dbus-broker.1.en
-# https://man.archlinux.org/man/core/dbus-broker/dbus-broker-launch.1.en
+# enable dbus service
 
 # ntp sets system time based on UTC which suffers from leap seconds
 # "ntpd -w" prints the delay in this format:
@@ -67,7 +82,7 @@ chmod +x "$project_dir"/.cache/spm/bin/system
 # https://www.ucolick.org/~sla/leapsecs/right+gps.html
 # https://skarnet.org/software/skalibs/flags.html#clockistai
 #
-# clock synchronisation over Wi-Fi: https://jackhenderson.com.au/projects/time-synchronisation
+# clock synchronisation over WiFi: https://jackhenderson.com.au/projects/time-synchronisation
 
 # when networks changes, get network timezone (cell or local), then set system timezone
 # unfortunately it seems that Ofono does not have any dbus api to get network timezone
@@ -77,8 +92,16 @@ chmod +x "$project_dir"/.cache/spm/bin/system
 # https://www.freedesktop.org/software/ModemManager/doc/latest/ModemManager/gdbus-org.freedesktop.ModemManager1.Modem.Time.html
 # 	https://lazka.github.io/pgi-docs/ModemManager-1.0/classes/NetworkTimezone.html
 
-# tzdata
-# during login: TZ=/spm/system/tzdata/.../...
+# in :.cache/spm/tzdata: directory:
+# git clone https://github.com/eggert/tz
+# only produce "right" timezones
+
+# iwd
+# iwd service
+
+# doas rfkill without password
 
 # ln spmbuild.sh .cache/spm/builds/<arch>/spm.sh
 # printf '#!doas sh\nsh $0.sh' > .cache/spm/builds/<arch>/spm
+# ln spm-autoupdate.sh .cache/spm/builds/<arch>/data/sv/spm-autoupdate
+# chmod +x .cache/spm/builds/<arch>/data/sv/spm-autoupdate

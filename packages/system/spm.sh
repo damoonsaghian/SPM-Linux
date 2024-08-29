@@ -47,8 +47,8 @@ fi
 # otherwise search for it in child directories
 # 	the first one found plus its siblings are the packages to be built
 
-build() {
-	url="$1"
+if [ "$1" = build ]; then
+	url="$2"
 	
 	url_hash="$(echo -n "$url" | md5sum | cut -d ' ' -f1)"
 	
@@ -68,26 +68,26 @@ build() {
 	
 	# when there is no given URL, consider the working directory as the package to build
 	
-	# build the packages mentioned in "spmbuild.sh", in lines starting with "$DEP" and "$BDEP"
-	
-	# $DEP 
-	# , create hard links from the files in "$spm_dir/downloads/<url-hash>/.cache/spm/builds/<arch>/" (recursively),
-	# 	into the ".cache/spm/builds/<arch>/deps/" directory of the current package
-	# , append the URL to ".cache/spm/builds/spmdeps"
+	# build the packages mentioned in "spmbuild.sh", in lines starting with "$DEP and "$BDEP"
 	
 	# for packages needed during the build process, do this in the "spmbuild.sh" script:
-	# 	$BTD pkg_<package-name> <gnunet-url>
-	# then use "$pkg_<package-name>" where ever you want to access a file in the needed package
-	# before running spmbuild.sh, $BTD packages will be built
-	# this is what $BTD does:
+	# 	$DEP pkg_<package-name> <gnunet-url>
+	# this is what it does:
+	# , appends the URL to ".cache/spm/builds/spmdeps"
+	# , pkg_<package-name>="$spm_dir"/downloads/<url-hash>
+	# now we can create hard links from the needed files in "$pkg_<package-name>/.cache/spm/builds/<arch>/",
+	# 	into the ".cache/spm/builds/<arch>/deps/" directory of the current package
+	
+	# for packages needed during the build process, do this in the "spmbuild.sh" script:
+	# 	$BDEP pkg_<package-name> <gnunet-url>
+	# this is what it does:
 	# 	pkg_<package-name>="$spm_dir"/downloads/<url-hash-needed-package>
+	# now we can use "$pkg_<package-name>" where ever you want to access a file in the needed package
 	
 	$run "spmbuild.sh"
-}
-
-install() {
-	package_name="$1"
-	url="$2"
+elif [ "$1" = install ]; then
+	package_name="$2"
+	url="$3"
 	
 	build $url
 	
@@ -111,22 +111,29 @@ install() {
 	# 	actually this only happens if spm is run as root,
 	# 	and only for those packages included in "trusted_packages" list in "$spm_dir/config"
 	# 	(the default value of "trusted_packages" is "system gnunet")
-}
-
-remove() {
+elif [ "$1" == remove ]; then
+	package_name="$2"
+	
 	# removes the files mentioned in "$spm_dir/installed/<package-name>/data/apps" from "$apps_dir"
 	
-	# , removes symlinks in "$apps_dir/gui/" corresponding to "$spm_dir/installed/<package-name>/data/*.desktop"
+	# remove symlinks in "$apps_dir/gui/" corresponding to "$spm_dir/installed/<package-name>/data/*.desktop"
 	
-	# , removes symlinks in "$apps_dir/sv/" corresponding to "$spm_dir/installed/<package-name>/data/sv/*"
+	# remove symlinks in "$apps_dir/sv/" corresponding to "$spm_dir/installed/<package-name>/data/sv/*"
 	
-	# , removes symlinks in "/apps/sv-sys/" corresponding to "/spm/installed/<package-name>/data/sv-sys/*"
+	# remove symlinks in "/apps/sv-sys/" corresponding to "/spm/installed/<package-name>/data/sv-sys/*"
 	# 	(if run as root, and the package is in "trusted_packages" list)
 	
 	# , removes "$spm_dir/installed/<package-name>" directory
-}
-
-publish() {
+elif [ "$1" == update ]; then
+	# directories in $spm_dir/installed/
+	# see if "$spm_dir/installed/<package-nam>/url" file exists
+	# download
+	# if third line exists, it's a public key; use it to check the signature (in ".data/sig")
+	# run install.sh in each one
+	
+	# check in each update, if the ref count if files in .cache/spm/builds is 1, clean that package
+	# file_ref_count=$(stat -c %h filename)
+elif [ "$1" == publish ]; then
 	# make a BTRFS snapshot from the project's directory,
 	# to "~/.local/spm/published/<url-hash>"
 	
@@ -147,40 +154,11 @@ publish() {
 	# the "spmbuild.sh" file will be published into the GNUnet namespace
 	# the source files can be in the same place, or in a Git URL
 	# 	in which case, there must be a "git clone <git-url> .cache/git" line, in the "spmbuild.sh" file
-}
-
-if [ "$1" = install ]; then
-	install $2 $3
-elif [ "$1" == remove ]; then
-	remove $2
-elif [ "$1" == update ]; then
-	# directories in $spm_dir/installed/
-	# see if "$spm_dir/installed/<package-nam>/url" file exists
-	# download
-	# if third line exists, it's a public key; use it to check the signature (in ".data/sig")
-	# run install.sh in each one
-	# check in each update, if the number of hard links to files in .cache/spm/app is 2, clean that package
-	# number_of_links=$(stat -c %h filename)
-elif [ "$1" == autoupdate ]; then
-	# https://www.freedesktop.org/wiki/Software/systemd/inhibit/
-	
-	metered_connection() {
-		local active_net_device="$(ip route show default | head -1 | sed -n "s/.* dev \([^\ ]*\) .*/\1/p")"
-		local is_metered=false
-		case "$active_net_device" in
-			ww*) is_metered=true ;;
-		esac
-		# todo: DHCP option 43 ANDROID_METERED
-		$is_metered
-	}
-	metered_connection && exit 0
 else
 	# show usage guide
 	# spm build [<gnunet-url>|<project-path>]
 	# spm install <package-name> <gnunet-url>
 	# spm remove <package-name>
+	# spm update
 	# spm publish
-
 fi
-
-# do some cleaning

@@ -151,7 +151,6 @@ manage_connections() {
 set_timezone() {
 	# guess the timezone, but let the user to confirm it
 	local geoip_tz= geoip_tz_continent= geoip_tz_city= tz_continent= tz_city=
-	command -v wget > /dev/null 2>&1 || apt-get -qq install wget > /dev/null 2>&1 || true
 	geoip_tz="$(wget -q -O- 'http://ip-api.com/line/?fields=timezone')"
 	geoip_tz_continent="$(echo "$geoip_tz" | cut -d / -f1)"
 	geoip_tz_city="$(echo "$geoip_tz" | cut -d / -f2)"
@@ -159,7 +158,8 @@ set_timezone() {
 		fzy -p "select a continent: " -q "$geoip_tz_continent")"
 	tz_city="$(ls -1 /usr/share/zoneinfo/"$tz_continent"/* | cut -d / -f6 |
 		fzy -p "select a city: " -q "$geoip_tz_city")"
-	timedatectl set-timezone "${tz_continent}/${tz_city}"
+	# $HOME/.profile
+	# TZ="/spm/installed/system/tzdata/${tz_continent}/${tz_city}"; export TZ
 }
 
 change_passwords() {
