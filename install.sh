@@ -1,6 +1,7 @@
 set -e
 
 arch="$(uname -m)"
+carch="$1"
 
 echo "available storage devices:"
 fdisk -l | while read -r line; do
@@ -15,7 +16,9 @@ read -r target_device
 
 # exit if it's the system device
 
-# repair or install
+# if the disk has a uefi vfat plus a btrfs partition,
+# and the at the root of the btrfs partitions, "apps" and "spm" directories exist,
+# ask the user to use the current partitions instead of wiping the disk
 
 printf "WARNING! all the data on \"$target_device\" will be erased; continue? (y/N) "
 read -r answer
@@ -153,77 +156,38 @@ else
 	}
 fi
 
-# search for required firmwares, and install them
-# https://salsa.debian.org/debian/isenkram
-# https://salsa.debian.org/installer-team/hw-detect
-#
-# for now just install all firmwares
-apt-get -qq install live-task-non-free-firmware-pc
-#
-# this script installs required firmwares when a new hardware is added
-echo -n '#!/bin/sh
-' > /usr/local/bin/install-firmware
-chmod +x /usr/local/bin/install-firmware
-echo 'SUBSYSTEM=="firmware", ACTION=="add", RUN+="/usr/local/bin/install-firmware %k"' > \
-	/etc/udev/rules.d/80-install-firmware.rules
+mkdir -p /run/mount/spm-linux/spm/installed/system
+cp "$project_dir"/packages/system/spm.sh /run/mount/spm-linux/spm/installed/system/spm.sh
 
-apt-get -qq install pipewire-audio pipewire-v4l2
-mkdir -p /etc/wireplumber/main.lua.d
-echo 'device_defaults.properties = {
-	["default-volume"] = 1.0,
-	["default-input-volume"] = 1.0,
-}' > /etc/wireplumber/main.lua.d/51-default-volume.lua
+ls -1 "$project_dir"/packages/ | while read -r pkg_name; do
+	url="gnunet://$my_name_space/packages/spm-linux/packages/$pkg_name"
+	sh /run/mount/spm-linux/spm/installed/system/spm.sh "$url"
+done
 
-echo -n '[Match]
-Name=en*
-Name=eth*
-#Type=ether
-#Name=! veth*
-[Network]
-DHCP=yes
-[DHCPv4]
-RouteMetric=100
-[IPv6AcceptRA]
-RouteMetric=100
-' > /etc/systemd/network/20-ethernet.network
-echo -n '[Match]
-Name=wl*
-#Type=wlan
-#WLANInterfaceType=station
-[Network]
-DHCP=yes
-IgnoreCarrierLoss=3s
-[DHCPv4]
-RouteMetric=600
-[IPv6AcceptRA]
-RouteMetric=600
-' > /etc/systemd/network/20-wireless.network
-echo -n '[Match]
-Name=ww*
-#Type=wwan
-[Network]
-DHCP=yes
-IgnoreCarrierLoss=3s
-[DHCPv4]
-RouteMetric=700
-[IPv6AcceptRA]
-RouteMetric=700
-' > /etc/systemd/network/20-wwan.network
-# https://gitlab.archlinux.org/archlinux/archiso/-/blob/master/configs/releng/airootfs/etc/systemd/network/20-wwan.network
-# https://wiki.archlinux.org/title/Mobile_broadband_modem
-# https://github.com/systemd/systemd/issues/20370
-systemctl enable systemd-networkd
-apt-get -qq install systemd-resolved
+sh /run/mount/spm-linux/spm/installed/system/spm.sh "gnunet://$my_name_space/packages/codev"
 
-apt-get -qq install iwd wireless-regdb bluez rfkill
-systemctl enable iwd.service
-echo '# allow rfkill for users in the netdev group
-KERNEL=="rfkill", MODE="0664", GROUP="netdev"
-' > /etc/udev/rules.d/80-rfkill.rules
+echo; echo -n "set username: "
+read -r username
+groupadd -f netdev; groupadd -f bluetooth
+useradd --create-home --groups "$username",netdev,bluetooth,sudo --shell /bin/bash "$username" || true
+cat <<'__EOF__' >> "/home/$username/.bashrc"
+export PS1="\e[7m \u@\h \e[0m \e[7m \w \e[0m\n> "
+shopt -q login_shell &&
+	printf '\nenter "system" to configure system settings\n'
+__EOF__
+
+while ! passwd --quiet "$username"; do
+	echo "an error occured; please try again"
+done
+echo; echo "set sudo password"
+while ! passwd --quiet; do
+	echo "an error occured; please try again"
+done
+# lock root account
+passwd --lock root
 
 echo; echo "setting timezone"
 # guess the timezone, but let the user to confirm it
-command -v wget > /dev/null 2>&1 || apt-get -qq install wget > /dev/null 2>&1 || true
 geoip_tz="$(wget -q -O- 'http://ip-api.com/line/?fields=timezone')"
 geoip_tz_continent="$(echo "$geoip_tz" | cut -d / -f1)"
 geoip_tz_city="$(echo "$geoip_tz" | cut -d / -f2)"
@@ -231,41 +195,10 @@ tz_continent="$(ls -1 -d /usr/share/zoneinfo/*/ | cut -d / -f5 |
 	fzy -p "select a continent: " -q "$geoip_tz_continent")"
 tz_city="$(ls -1 /usr/share/zoneinfo/"$tz_continent"/* | cut -d / -f6 |
 	fzy -p "select a city: " -q "$geoip_tz_city")"
-ln -sf "/usr/share/zoneinfo/${tz_continent}/${tz_city}" /etc/localtime
-
-echo -n 'polkit.addRule(function(action, subject) {
-	if (
-		action.id == "org.freedesktop.timedate1.set-timezone" &&
-		subject.local && subject.active
-	) {
-		return polkit.Result.YES;
-	}
-});
-' > /etc/polkit-1/rules.d/49-timezone.rules
-
-echo '#!doas sh
-' > /spm/spm
-cat /mnt/os/spm.sh >> /spm/spm
-chmod +x /spm/spm
-ln /spm/spm /apps/spm
-
-# /bin/spm autoupdate
-# if AC Power
-# after network online
-# oneshot service
-# TimeoutStopSec=900
-# 5min after boot
-# every 24h
-# 5min randomized delay
-
-. /mnt/os/install-user.sh
-
-cp -r /mnt /var/spm/codev
-sh /var/spm/codev/install.sh
-ln /var/spm/codev/.cache/spm/0 /usr/local/bin/codev
-# store the gnunet url of Codev, so SMP can automatically update it
-# echo '' > /var/spm/url-list
+# $HOME/.profile
+# TZ="/spm/installed/system/tzdata/${tz_continent}/${tz_city}"; export TZ
 
 echo; echo -n "installation completed successfully"
-answer="$(printf "no\nyes" | fzy -p "reboot the system? ")"
-[ "$answer" = yes ] && systemctl reboot
+printf "reboot the system? (Y/n)"
+read -r answer
+[ "$answer" = n ] || reboot
