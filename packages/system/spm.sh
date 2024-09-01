@@ -23,7 +23,8 @@ fi
 # after linux package is installed/updated:
 # mount boot partition, and copy the kernel and initramfs to it
 
-# set suid of for doas in system package
+# chown root:root /spm/installed/system/doas
+# chmod +s /spm/installed/system/doas
 
 # https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
 # signing Git tags: https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work
@@ -78,11 +79,6 @@ if [ "$1" = build ]; then
 	# now we can use "${pkg_$dep_pkg_name}" where ever you want to access a file in the needed package
 	
 	sh spmbuild.sh
-	
-	if [ $(id -un) = spm_"$gnunet_namespace" ]; then
-		chown --recursive root:root "$spm_dir/downloads/$gnunet_namespace/$pkg_name/"
-		deluser spm_"$gnunet_namespace"
-	fi
 elif [ "$1" = install ]; then
 	package_name="$2"
 	url="$3"
@@ -133,6 +129,9 @@ elif [ "$1" == update ]; then
 	# check in each update, if the ref count if files in .cache/spm/builds is 1, clean that package
 	# file_ref_count=$(stat -c %h filename)
 	
+	# when the namespace directory is empty, delete it, then:
+	# deluser spm_"$gnunet_namespace"
+	
 	# fwupd
 	# boot'firmware updates need special care
 	# unless there is a read'only backup, firmware update is not a good idea
@@ -150,10 +149,13 @@ elif [ "$1" == publish ]; then
 	# "$carch" is an empty string when not cross'building
 	
 	# make hard links from "spmdeps" file, plus all files in ".cache/spm/builds/<arch>/" minus "deps" directory,
-	# and put them in ".data/spm/<arch>/"
+	# and put them in ".cache/spm/builds-published/<arch>/"
 	
 	# publish "~/.local/spm/published/$gnunet_namespace/$pkg_name" (minus the ".cache" directory) to:
 	# "gnunet://<namespace>/packages/<package-name>/"
+	
+	# publish ".cache/spm/builds-published/<arch>/" to:
+	# "gnunet://<namespace>/package_builds/<package-name>/<arch>"
 	
 	# the "spmbuild.sh" file will be published into the GNUnet namespace
 	# the source files can be in the same place, or in a Git URL
