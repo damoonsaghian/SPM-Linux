@@ -14,3 +14,6 @@ metered_connection && exit 0
 # timer
 # 5min after boot
 # every 24h
+
+# if during autoupdate an error occures:
+# ; echo error > $spm_dir/status

@@ -2,21 +2,20 @@ spm_dir="$HOME/.local/spm"
 apps_dir="$HOME/.local/bin"
 gui_apps_dir="$HOME/.local/share/applications"
 sv_dir="$HOME/.local/sv"
-run=sh
-
 if [ $(id -u) = 0 ]; then
 	spm_dir="/spm"
 	apps_dir="/apps"
 	gui_apps_dir="/apps/gui"
 	sv_dir="/apps/sv"
-	
-	run=unshare
-	# "https://en.wikipedia.org/wiki/Linux_namespaces"
-	# "https://git.busybox.net/busybox/tree/util-linux/unshare.c"
-	# "https://manpages.debian.org/bookworm/util-linux/unshare.1.en.html"
-	# "https://github.com/containers/bubblewrap"
-	# disable the ability to set suid
 fi
+# /apps/sv-sys
+# /apps/dbus (dbus configs)
+
+# if "spmbuild.sh" file is in the project directory, that is the package to be built
+# otherwise search for it in child directories
+# 	the first one found plus its siblings are the packages to be built
+
+# when mod time of .cache/spm is newer than mod time of project directory, skip
 
 # if "spmbuild.sh" file is already open, it means that there is a cyclic dependency
 # so exit to avoid an infinite loop
@@ -26,47 +25,41 @@ fi
 
 # set suid of for doas in system package
 
-# /apps/gui
-# /apps/sv
-# /apps/sv-sys
-# /apps/dbus (dbus configs)
-
 # https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
 # signing Git tags: https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work
 # https://git-scm.com/docs/partial-clone
 
-# if during auto update an error occures:
-# ; echo error > $spm_dir/status
-
 # LD_LIBRARY_PATH=".:./deps"
 # PATH=".:./deps:/apps"
 
-# when mod time of .cache/spm is newer than mod time of project directory, skip
-
-# if "spmbuild.sh" file is in the project directory, that is the package to be built
-# otherwise search for it in child directories
-# 	the first one found plus its siblings are the packages to be built
-
 if [ "$1" = build ]; then
-	url="$2"
+	gnunet_url="$2"
+	gnunet_namespace=
+	pkg_name=
 	
-	url_hash="$(echo -n "$url" | md5sum | cut -d ' ' -f1)"
+	if [ $(id -u) = 0 ]; then
+		# add a system user: spm_"$gnunet_namespace"
+		adduser --system spm_"$gnunet_namespace"
+		# su spm_"$gnunet_namespace"
+	fi
 	
-	# download the package from the given GNUnet URL to "$spm_dir/downloads/<url-hash>"
-	# ("$spm_dir" is "/spm" when "spm" is run as root, and "~/.local/spm" otherwise)
-	# $run gnunet
+	# when there is no given URL, consider the working directory as the package to build
+	# pkg_path=.
+	# skip download
 	
 	# if the value of "use_prebuilt" in "$spm_dir/config" is true,
 	# 	and the corresponding directory for the current architecture is available in the given GNUnet URL,
-	# 	just download that into ".data/spm/<arch>/"
-	# then hardlink these files plus the build directory of packages mentioned in "spmdeps",
-	# 	into ".cache/spm/built", and skip running "spmbuild.sh"
+	# 	just download that into "$spm_dir/downloads/$gnunet_namespace/$pkg_name/.data/spm/<arch>/"
+	# then hardlink these files plus the build directory of packages mentioned in the downloaded "spmdeps" file,
+	# 	into ".cache/spm/built"
+	# check
+	# and thats it, exit(0)
+	
+	# download the package from "$gnunet_url" to "$spm_dir/downloads/$gnunet_namespace/$pkg_name/"
 	
 	# after download, check the signatures in ".data/spm/sig" using the key(s) (if any) in:
-	# "$spm_dir/keys/<url-hash>" 
-	# make a hard link from ".data/spm/key" to "$spm_dir/keys/<url-hash>"
-	
-	# when there is no given URL, consider the working directory as the package to build
+	# "$spm_dir/keys/$gnunet_namespace/$pkg_name" 
+	# make a hard link from ".data/spm/key" to "$spm_dir/keys/$gnunet_namespace/$pkg_name"
 	
 	# build the packages mentioned in "spmbuild.sh", in lines starting with "$DEP and "$BDEP"
 	
@@ -74,26 +67,32 @@ if [ "$1" = build ]; then
 	# 	$DEP pkg_<package-name> <gnunet-url>
 	# this is what it does:
 	# , appends the URL to ".cache/spm/builds/spmdeps"
-	# , pkg_<package-name>="$spm_dir"/downloads/<url-hash>
+	# , pkg_<package-name>="$spm_dir"/downloads/$gnunet_namespace/$pkg_name
 	# now we can create hard links from the needed files in "$pkg_<package-name>/.cache/spm/builds/<arch>/",
 	# 	into the ".cache/spm/builds/<arch>/deps/" directory of the current package
 	
 	# for packages needed during the build process, do this in the "spmbuild.sh" script:
 	# 	$BDEP pkg_<package-name> <gnunet-url>
 	# this is what it does:
-	# 	pkg_<package-name>="$spm_dir"/downloads/<url-hash-needed-package>
-	# now we can use "$pkg_<package-name>" where ever you want to access a file in the needed package
+	# 	pkg_$dep_pkg_name="$spm_dir"/downloads/$dep_gnunet_namespace/$dep_pkg_name
+	# now we can use "${pkg_$dep_pkg_name}" where ever you want to access a file in the needed package
 	
-	$run "spmbuild.sh"
+	sh spmbuild.sh
+	
+	if [ $(id -un) = spm_"$gnunet_namespace" ]; then
+		chown --recursive root:root "$spm_dir/downloads/$gnunet_namespace/$pkg_name/"
+		deluser spm_"$gnunet_namespace"
+	fi
 elif [ "$1" = install ]; then
 	package_name="$2"
 	url="$3"
 	
-	build $url
+	spm build $url
 	
 	# if "$spm_dir/installed/<package-name>/" already exists, it exits with error
 	
-	# create hard links from files (recursively) in "$spm_dir/downloads/<url-hash>/.cache/spm/builds/<arch>/",
+	# create hard links from files (recursively) in
+	# 	"$spm_dir/downloads/$gnunet_namespace/$pkg_name/.cache/spm/builds/<arch>/",
 	# 	to "$spm_dir/installed/<package-name>/"
 	
 	# the GNUnet URL is stored in "$spm_dir/installed/<package-name>/data/url" file
@@ -129,13 +128,18 @@ elif [ "$1" == update ]; then
 	# see if "$spm_dir/installed/<package-nam>/url" file exists
 	# download
 	# if third line exists, it's a public key; use it to check the signature (in ".data/sig")
-	# run install.sh in each one
+	# run spm install for each one
 	
 	# check in each update, if the ref count if files in .cache/spm/builds is 1, clean that package
 	# file_ref_count=$(stat -c %h filename)
+	
+	# fwupd
+	# boot'firmware updates need special care
+	# unless there is a read'only backup, firmware update is not a good idea
+	# so warn and ask the user if she wants the update
 elif [ "$1" == publish ]; then
 	# make a BTRFS snapshot from the project's directory,
-	# to "~/.local/spm/published/<url-hash>"
+	# to "~/.local/spm/published/$gnunet_namespace/$pkg_name"
 	
 	# ".data/gnurl" stores the project's GNUnet URL: gnunet://<name-space>/projects/<project_name>
 	# package URL is obtained from it like this: gnunet://<name-space>/packages/<project_name>
@@ -148,7 +152,7 @@ elif [ "$1" == publish ]; then
 	# make hard links from "spmdeps" file, plus all files in ".cache/spm/builds/<arch>/" minus "deps" directory,
 	# and put them in ".data/spm/<arch>/"
 	
-	# publish "~/.local/spm/published/<url-hash>" (minus the ".cache" directory) to:
+	# publish "~/.local/spm/published/$gnunet_namespace/$pkg_name" (minus the ".cache" directory) to:
 	# "gnunet://<namespace>/packages/<package-name>/"
 	
 	# the "spmbuild.sh" file will be published into the GNUnet namespace

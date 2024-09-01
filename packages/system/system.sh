@@ -177,11 +177,7 @@ change_passwords() {
 manage_packages() {
 	local mode= package_name= answer=no
 	echo 'packages:'
-	mode="$(printf "upgrade\nadd\nremove\nmake portable SPM Linux" | fzy)"
-	# make portable SPM Linux
-	# spm-portable
-	
-	# sudo sh $spm_dir/spm.sh
+	mode="$(printf "upgrade\nadd\nremove\ninstall SPM Linux" | fzy)"
 	
 	# if the content of "$spm_dir/status" is "error", turn "packages" and the "update" item under it, red
 	
@@ -203,22 +199,10 @@ manage_packages() {
 		answer="$(printf "no\nyes" | fzy)"
 		[ "$answer" = yes ] || exit
 	}
-	ospkg-deb "$mode" "$package_name" "$package_name"
+	spm "$mode" "$package_name" "$package_name"
 	
-	[ "$mode" = "make portable SPM Linux" ] && sh "$(dirname "$0")"/system-mkportable.sh
+	[ "$mode" = "install SPM Linux" ] && sh "$(dirname "$0")"/system-install-spmlinux.sh
 }
-
-() {
-	
-}
-
-# change user name
-# usermod -l $new_user -d /home/$new_user -m $old_user
-# groupmod -n $new_user $old_user
-
-# boot'firmware updates need special care
-# unless there is a read'only backup, firmware update is not a good idea
-# fwupd
 
 if [ -z "$1" ]; then
 	selected_option="$(printf "connections\ntimezone\npasswords\npackages" | fzy)"

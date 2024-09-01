@@ -66,7 +66,7 @@ selected_option="$(printf "$list" | bemenu -p $prompt -I $default_index)"
 
 
 ln "$project_dir"/system.sh "$project_dir"/.cache/spm/bin/system
-ln "$project_dir"/system-mkportable.sh "$project_dir"/.cache/spm/bin/system-mkportabel.sh
+ln "$project_dir"/system-install-spmlinux.sh "$project_dir"/.cache/spm/bin/system-install-spmlinux.sh
 chmod +x "$project_dir"/.cache/spm/bin/system
 
 # poweroff when critical battery charge is reached
