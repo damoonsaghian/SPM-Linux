@@ -159,12 +159,15 @@ fi
 mkdir -p /run/mount/spm-linux/spm/installed/system
 cp "$project_dir"/packages/system/spm.sh /run/mount/spm-linux/spm/installed/system/spm.sh
 
+mkdir -p /run/mount/spm-linux/spm/downloads
+cp -r "$project_dir"/packages /run/mount/spm-linux/spm/downloads/"$my_name_space"
+
 ls -1 "$project_dir"/packages/ | while read -r pkg_name; do
 	url="gnunet://$my_name_space/packages/spm-linux/packages/$pkg_name"
-	sh /run/mount/spm-linux/spm/installed/system/spm.sh "$url"
+	sh /run/mount/spm-linux/spm/installed/system/spm.sh install "$pkg_name" "$url"
 done
 
-sh /run/mount/spm-linux/spm/installed/system/spm.sh "gnunet://$my_name_space/packages/codev"
+sh /run/mount/spm-linux/spm/installed/system/spm.sh install "gnunet://$my_name_space/packages/codev"
 
 echo; echo -n "set username: "
 read -r username
