@@ -28,6 +28,10 @@ fi
 
 # https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
 # signing Git tags: https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work
+# lsh-keygen to verify and sign tags
+# 	only git tags signed using ssh keys are supported (gpg is not supported)
+# 	https://git-scm.com/docs/git-config#Documentation/git-config.txt-gpgltformatgtprogram
+# 	https://manpages.debian.org/bookworm/openssh-client/ssh-keygen.1.en.html
 # https://git-scm.com/docs/partial-clone
 
 # LD_LIBRARY_PATH=".:./deps"
@@ -56,27 +60,31 @@ if [ "$1" = build ]; then
 	# check
 	# and thats it, exit(0)
 	
-	# download the package from "$gnunet_url" to "$spm_dir/downloads/$gnunet_namespace/$pkg_name/"
+	# try to download the package from "$gnunet_url" to "$spm_dir/downloads/$gnunet_namespace/$pkg_name/"
 	
 	# after download, check the signatures in ".data/spm/sig" using the key(s) (if any) in:
 	# "$spm_dir/keys/$gnunet_namespace/$pkg_name" 
 	# make a hard link from ".data/spm/key" to "$spm_dir/keys/$gnunet_namespace/$pkg_name"
 	
-	# build the packages mentioned in "spmbuild.sh", in lines starting with "$DEP and "$BDEP"
+	# build the packages mentioned in "spmbuild.sh", in lines starting with "$PKG"
 	
-	# for packages needed during the build process, do this in the "spmbuild.sh" script:
-	# 	$DEP pkg_<package-name> <gnunet-url>
+	# packages needed as dependency, are mentioned in the "spmbuild.sh" script, like this:
+	# 	$PKG <package-name> <gnunet-namespace>
+	# this translates to:
+	# 	pkg_<package-name>="$spm_dir"/downloads/$gnunet_namespace/$pkg_name
+	# now we can use "${pkg_$pkg_name}" where ever you want to access a file in a package
+	# for run'time dependencies, create hard links:
+	# 	$LNK <package-name> <file-path>
 	# this is what it does:
-	# , appends the URL to ".cache/spm/builds/spmdeps"
-	# , pkg_<package-name>="$spm_dir"/downloads/$gnunet_namespace/$pkg_name
-	# now we can create hard links from the needed files in "$pkg_<package-name>/.cache/spm/builds/<arch>/",
-	# 	into the ".cache/spm/builds/<arch>/deps/" directory of the current package
+	# , appends the URL of the package to ".cache/spm/builds/spmdeps" (if not already)
+	# , creates a hard'link from "$pkg_<package-name>/.cache/spm/builds/<arch>/<file-path-pattern>",
+	# 	to ".cache/spm/builds/<arch>/deps/" directory of the current package
 	
 	# for packages needed during the build process, do this in the "spmbuild.sh" script:
 	# 	$BDEP pkg_<package-name> <gnunet-url>
 	# this is what it does:
 	# 	pkg_$dep_pkg_name="$spm_dir"/downloads/$dep_gnunet_namespace/$dep_pkg_name
-	# now we can use "${pkg_$dep_pkg_name}" where ever you want to access a file in the needed package
+	
 	
 	sh spmbuild.sh
 elif [ "$1" = install ]; then
@@ -140,8 +148,8 @@ elif [ "$1" == publish ]; then
 	# make a BTRFS snapshot from the project's directory,
 	# to "~/.local/spm/published/$gnunet_namespace/$pkg_name"
 	
-	# ".data/gnurl" stores the project's GNUnet URL: gnunet://<name-space>/projects/<project_name>
-	# package URL is obtained from it like this: gnunet://<name-space>/packages/<project_name>
+	# ".data/gnurl" stores the project's GNUnet URL: gnunet://fs/sks/<name-space>/projects/<project_name>
+	# package URL is obtained from it like this: gnunet://fs/sks/<name-space>/packages/<project_name>
 	
 	# cross'built the package for all architectures mentioned in "$spm_dir/config" (value of "arch" entry),
 	# and put the results in in ".cache/spm/builds/<arch>/"
@@ -152,10 +160,10 @@ elif [ "$1" == publish ]; then
 	# and put them in ".cache/spm/builds-published/<arch>/"
 	
 	# publish "~/.local/spm/published/$gnunet_namespace/$pkg_name" (minus the ".cache" directory) to:
-	# "gnunet://<namespace>/packages/<package-name>/"
+	# "gnunet://fs/sks/<namespace>/packages/<package-name>/"
 	
 	# publish ".cache/spm/builds-published/<arch>/" to:
-	# "gnunet://<namespace>/package_builds/<package-name>/<arch>"
+	# "gnunet://fs/sks/<namespace>/package_builds/<package-name>/<arch>"
 	
 	# the "spmbuild.sh" file will be published into the GNUnet namespace
 	# the source files can be in the same place, or in a Git URL
