@@ -6,16 +6,15 @@ SPM packages do not need dependency tracking, because all the files needed at ru
 	will be available under the same directory, using hard links
 
 to install SPM Linux, first we need to be in a Posix compliant system, with these programs installed:
-	fdisk mkfs.vfat mkfs.btrfs gnunet
+	fdisk mkfs.vfat mkfs.btrfs gnunet git clang
+"git" and "clang" are required only if for some of the packages that are going to be installed,
+	prebuilt files for the specific architecture are not available
 for example you can boot into an Alpine Linux live system, and enter this at the command line:
 ; apk add btrfs-progs gnunet
 when everything is ready, run this (as root) in a terminal:
 ; sh install.sh [<arch>]
-
-if you want the packages to be built from source, you need these additional programs:
-	git clang
-then run this instead:
-; sh install.sh build [<arch>]
+if you want to always build all packages from source, run this instead:
+; sh install.sh [<arch>] from-src
 
 the user interface of SPM Linux is very simple
 press "super" (mod+mod) or "alt+tab" to show the application launcher

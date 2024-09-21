@@ -1,9 +1,9 @@
 computers can help people to easily access and improve human knowledge,
 	and as a result do things to improve the quality of human life
 
-computers must be portable devices with a USBC (USB4 without PCIe) port,
+computers must be portable devices with a USB4 (without PCIe) port,
 	which connects to a display and also provides power
-ports on the display: USB dock, ethernet, audio jack, DP and HDMI
+extra ports placed on the display: USB dock, ethernet, audio jack, DP and HDMI
 the display also has speakers, camera, light sensor and auto brightness
 the computer itself should also include those mentioned extra ports,
 	for situation that such a display is not available
@@ -73,6 +73,6 @@ also the read'only part checks the signature of the updatable part, to make sure
 programs usually do not run directly on computer hardware
 instead they run on a more sophisticated software machine (a virtual machine) called the kernel
 in theory we can live without a kernel (an idea sometimes called a library operating system),
-	and it can be useful for some use cases (like IoT devices),
+	and it can be useful for some use cases (like embedded systems),
 	but a kernel based operating system makes developing and testing programs, much easier
 Linux is a highly developed, constantly evolving, open'source kernel

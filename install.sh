@@ -1,28 +1,79 @@
 set -e
 
-arch="$(uname -m)"
-carch="$1"
+arch="$1"
 
 echo "available storage devices:"
-fdisk -l | while read -r line; do
-	printf "\t$line"
-	# /sys/blocks ignore loop*
-	# /sys/block/$device_name/device/model
-	# /sys/block/$device_name/size
+ls -1 --color=never /sys/block | grep -v "^loop" | while read -r device_name; do
+	device_size="$(cat /sys/block/"$device_name"/size)"
+	device_size="$((device_size / 1000000))GB"
+	device_model="$(cat /sys/block/"$device_name"/device/model)"
+	printf "\t$device_name\t$device_size\t$device_model\n"
 done
 
-printf "enter the name of the device to install the system on: "
+printf "enter the name of the device (the first word) to install the system on: "
 read -r target_device
 
-# exit if it's the system device
+root_partition="$(df / | tail -1 | cut -d " " -f 1 | cut -d / -f 3)"
+root_device_num="$(cat /sys/class/block/"$root_partition"/dev | cut -d ":" -f 1):0"
+root_device="$(basename "$(readlink /dev/block/"$root_device_num")")"
+if [ "$target_device" = "$root_device" ]; then
+	echo "can't install on \"$target_device\", since it contains the running system"
+	exit 1
+fi
 
-# if the disk has a uefi vfat plus a btrfs partition,
-# and the at the root of the btrfs partitions, "apps" and "spm" directories exist,
-# ask the user to use the current partitions instead of wiping the disk
+# if the target device has a uefi vfat, plus a btrfs partition,
+# ask the user to use the current partitions instead of wiping them off
+target_partitions="$(echo /sys/block/"$target_device"/"$target_device"* |
+	sed -n "s/\/sys\/block\/$target_device\///p" )"
+target_partition1="$(echo "$target_partitions" | cut -d " " -f1 )"
+target_partition2="$(echo "$target_partitions" | cut -d " " -f2 )"
+fdisk -l /dev/"$target_device" | grep "$target_partition1" | {
+	grep "EFI System" &> /dev/null &&
+	target_partition1_is_efi=true
+}
+target_partition1_fstype="$(blkid /dev/"$target_partition1" | sed -rn 's/.*TYPE="(.*)".*/\1/p' )"
+target_partition2_fstype="$(blkid /dev/"$target_partition2" | sed -rn 's/.*TYPE="(.*)".*/\1/p' )"
+if [ "$target_partition1_is_efi" != true ] ||
+	[ "$target_partition1_fstype" != vfat ] ||
+	[ "$target_partition2_fstype" != btrfs ] || {
+		echo "it seems that the target device is already partitioned properly"
+		printf "do you want to keep them? (Y/n) "
+		read -r answer
+		[ "$answer" = n ]
+	}
+then
+	printf "WARNING! all the data on \"$target_device\" will be erased; continue? (y/N) "
+	read -r answer
+	[ "$answer" = y ] || exit
+	
+	# partitions label: gpt
+	# first partition's type: uefi
+	# second partition's type: linux
+	
+	(
+	echo o # clear the in memory partition table
+	echo n # new partition
+	echo p # primary partition
+	echo 1 # partition number 1
+    echo # default - start at beginning of disk 
+	echo +512M # 100 MB boot parttion
+	echo n # new partition
+	echo p # primary partition
+	echo 2 # partion number 2
+	echo # default, start immediately after preceding partition
+	echo # default, extend partition to end of disk
+	echo w # write the partition table
+	echo q # and we're done
+	) | fdisk $target_device
+	
+	# format the partitions
+	mkfs.fat -F 32 "$target_partition1" > /dev/null 2>&1
+	mkfs.btrfs -f --quiet "$target_partition2" > /dev/null 2>&1
+fi
 
-printf "WARNING! all the data on \"$target_device\" will be erased; continue? (y/N) "
-read -r answer
-[ "$answer" = y ] || exit
+mount "$target_partition2" /mnt
+mkdir -p /mnt/boot/efi
+mount "$target_partition1" /mnt/boot/efi
 
 # https://wiki.artixlinux.org/Main/Installation
 # https://gitea.artixlinux.org/artix
@@ -40,90 +91,6 @@ read -r answer
 # https://t2sde.org/handbook/html/index.html
 # https://buildroot.org/downloads/manual/manual.html
 
-# https://github.com/limine-bootloader/limine
-# https://github.com/limine-bootloader/limine/blob/v8.x/USAGE.md
-# https://github.com/limine-bootloader/limine/blob/v8.x/CONFIG.md
-# create vfat ESP partition
-# if arch is x86 or x86_64, install BIOS support too
-# if arch is ppc64el, create "syslinux.cfg" (only OPAL Petitboot based systems are supported)
-
-# fdisk script
-# https://askubuntu.com/questions/741679/automated-shell-script-to-run-fdisk-command-with-user-input
-# https://stackoverflow.com/questions/35166147/bash-script-with-fdisk
-# https://superuser.com/questions/332252/how-to-create-and-format-a-partition-using-a-bash-script
-# https://wiki.archlinux.org/title/Fdisk
-
-# create partitions
-if [ -d /sys/firmware/efi ]; then
-	first_part_type=uefi
-	first_part_size="512M"
-	part_label=gpt
-else
-	case "$arch" in
-	amd64|i386)
-		first_part_type="21686148-6449-6E6F-744E-656564454649"
-		first_part_size="1M"
-		part_label=gpt
-		;;
- 	ppc64el)
-		first_part_type="41,*"
-		first_part_size="1M"
-		part_label=dos
-		;;
-	*)
-		first_part_type="linux,*"
-		first_part_size="512M"
-		part_label=dos
-		;;
-	esac
-fi
-
-second_part_type=linux
-case "$arch" in
-amd64) second_part_type=4f68bce3-e8cd-4db1-96e7-fbcaf984b709 ;;
-i386) second_part_type=44479540-f297-41b2-9af7-d131d5f0458a ;;
-arm64) second_part_type=b921b045-1df0-41c3-af44-4c6f280d3fae ;;
-armel|armhf) second_part_type=69dad710-2ce4-4e3c-b16c-21a1d49abed3 ;;
-ppc64el) second_part_type=c31c45e6-3f39-412e-80fb-4809c4980599 ;;
-riscv64) second_part_type=72ec70a6-cf74-40e6-bd49-4bda08e8f224 ;;
-esac
-
-sfdisk --quiet --wipe always --label $part_label "/dev/$target_device" <<__EOF__
-1M,$first_part_size,$first_part_type
-,,$second_part_type
-__EOF__
-
-target_partitions="$(lsblk --list --noheadings -o PATH "/dev/$target_device")"
-target_partition1="$(echo "$target_partitions" | sed -n '2p')"
-target_partition2="$(echo "$target_partitions" | sed -n '3p')"
-
-umount --recursive --quiet /mnt || true
-
-# format and mount partitions
-mkfs.btrfs -f --quiet "$target_partition2" > /dev/null 2>&1
-mount "$target_partition2" /mnt
-if [ -d /sys/firmware/efi ]; then
-	mkfs.fat -F 32 "$target_partition1" > /dev/null 2>&1
-	mkdir -p /mnt/boot/efi
-	mount "$target_partition1" /mnt/boot/efi
-else
-	case "$arch" in
-	amd64|i386) ;;
-	ppc64el) ;;
-	*)
-		mkfs.ext2 "$target_partition1" > /dev/null 2>&1
-		mkdir /mnt/boot
-		mount "$target_partition1" /mnt/boot
-		;;
-	esac
-fi
-
-genfstab -U /mnt > /mnt/etc/fstab
-
-echo 'LANG=C.UTF-8' > /mnt/etc/default/locale
-
-# create partitions
-# format the main partition with BTRFS
 # create a directory in /tmp and mount the root
 # create these directories:
 # apps spm dev proc sys tmp
@@ -134,30 +101,20 @@ echo 'LANG=C.UTF-8' > /mnt/etc/default/locale
 # mount /apps and /spm
 # install gcc busybox linux git gnunet fsprogs sway
 
-# grep "^$device_path " /proc/mounts | cut -d ' ' -f 2
-
-if [ -d /sys/firmware/efi ]; then
-	echo "root=UUID=$(findmnt -n -o UUID /) ro quiet" > /etc/kernel/cmdline
-	apt-get -qq install systemd-boot
-	mkdir -p /boot/efi/loader
-	printf 'timeout 0\neditor no\n' > /boot/efi/loader/loader.conf
-else
-	case "$arch" in
-	amd64|i386) apt-get -qq install grub-pc ;;
-	ppc64el) apt-get -qq install grub-ieee1275 ;;
-	esac
-	# lock Grub for security
-	# recovery mode in Debian requires root password
-	# so there is no need to disable generation of recovery mode menu entries
-	# we just have to disable menu editing and other admin operations
-	[ -f /boot/grub/grub.cfg ] && {
-		printf 'set superusers=""\nset timeout=0\n' > /boot/grub/custom.cfg
-		update-grub
-	}
+# https://github.com/limine-bootloader/limine
+# https://github.com/limine-bootloader/limine/blob/v8.x/USAGE.md
+# https://github.com/limine-bootloader/limine/blob/v8.x/CONFIG.md
+if [ "$arch" = x86 ] || [ "$arch" = x86_64 ]; then
+	# install BIOS support
+elif [ "$arch" = ppc64le ]; then
+	# create "syslinux.cfg" (only OPAL Petitboot based systems are supported)
 fi
 
 mkdir -p /run/mount/spm-linux/spm/installed/system
 cp "$project_dir"/packages/system/spm.sh /run/mount/spm-linux/spm/installed/system/spm.sh
+if [ "$2" = "from-src" ]; then
+	echo "use_prebuilt = true" > /run/mount/spm-linux/spm/config
+fi
 
 mkdir -p /run/mount/spm-linux/spm/downloads
 cp -r "$project_dir"/packages /run/mount/spm-linux/spm/downloads/"$my_name_space"
