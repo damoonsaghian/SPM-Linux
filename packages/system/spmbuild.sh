@@ -5,6 +5,9 @@ project_dir="$(dirname "$0")"
 # 	who, last, FEATURE_UTMP, wget
 # 	less, man, su, blkid
 
+# create exch executable, which will be used by spm.sh to do atomic update for installed packages
+# https://github.com/util-linux/util-linux/blob/master/misc-utils/exch.c
+
 # btrfs-progs
 # blkid libuuid (from util-linux)
 

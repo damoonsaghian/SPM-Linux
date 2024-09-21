@@ -93,7 +93,11 @@ elif [ "$1" = install ]; then
 	
 	spm build $url
 	
-	# if "$spm_dir/installed/<package-name>/" already exists, it exits with error
+	# if package_name is system or linux, but the namespace (public key) does not match, exit with error
+	
+	# if "$spm_dir/installed/<package-name>/" already exists:
+	# , create "$spm_dir/installed/<namespace>-new/" directory
+	# , at the end: exch "$spm_dir/installed/<namespace>-new/" "$spm_dir/installed/<namespace>/"
 	
 	# create hard links from files (recursively) in
 	# 	"$spm_dir/downloads/$gnunet_namespace/$pkg_name/.cache/spm/builds/<arch>/",
