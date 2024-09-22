@@ -46,24 +46,21 @@ then
 	read -r answer
 	[ "$answer" = y ] || exit
 	
-	# partitions label: gpt
-	# first partition's type: uefi
-	# second partition's type: linux
-	
+	# create partitions
 	(
-	echo o # clear the in memory partition table
+	echo g # create a GPT partition table
 	echo n # new partition
-	echo p # primary partition
-	echo 1 # partition number 1
-    echo # default - start at beginning of disk 
-	echo +512M # 100 MB boot parttion
+	echo 1 # make it partition number 1
+    echo # default, start at beginning of disk 
+	echo +512M # 512 MB boot parttion
+	echo t # change partition type
+	echo EFI System
 	echo n # new partition
-	echo p # primary partition
-	echo 2 # partion number 2
+	echo 2 # make it partion number 2
 	echo # default, start immediately after preceding partition
 	echo # default, extend partition to end of disk
 	echo w # write the partition table
-	echo q # and we're done
+	echo q # quit
 	) | fdisk $target_device
 	
 	# format the partitions
@@ -72,8 +69,6 @@ then
 fi
 
 mount "$target_partition2" /mnt
-mkdir -p /mnt/boot/efi
-mount "$target_partition1" /mnt/boot/efi
 
 # https://wiki.artixlinux.org/Main/Installation
 # https://gitea.artixlinux.org/artix
