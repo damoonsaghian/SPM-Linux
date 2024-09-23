@@ -20,8 +20,14 @@ fi
 # if "spmbuild.sh" file is already open, it means that there is a cyclic dependency
 # so exit to avoid an infinite loop
 
-# after linux package is installed/updated:
-# mount boot partition, and copy the kernel and initramfs to it
+# when linux package is installed/updated:
+# mount first partition of the device where this script resides, and copy the kernel and initramfs to it
+
+# when limine package is installed/updated:
+# mount first partition of the device where this script resides, and copy efi and sys files to it
+# mkdir /boot
+# mount "$root_device_partition1" /boot
+# mkdir -p /boot/EFI/BOOT
 
 # chown root:root /spm/installed/system/doas
 # chmod +s /spm/installed/system/doas
@@ -148,6 +154,8 @@ elif [ "$1" == update ]; then
 	# boot'firmware updates need special care
 	# unless there is a read'only backup, firmware update is not a good idea
 	# so warn and ask the user if she wants the update
+	#
+	# limine bios-install "$device"
 elif [ "$1" == publish ]; then
 	# make a BTRFS snapshot from the project's directory,
 	# to "~/.local/spm/published/$gnunet_namespace/$pkg_name"
