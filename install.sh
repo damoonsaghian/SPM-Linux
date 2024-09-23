@@ -61,7 +61,7 @@ then
 	echo # default, extend partition to end of disk
 	echo w # write the partition table
 	echo q # quit
-	) | fdisk $target_device
+	) | fdisk "$target_device"
 	
 	# format the partitions
 	mkfs.fat -F 32 "$target_partition1" > /dev/null 2>&1
@@ -69,6 +69,11 @@ then
 fi
 
 mount "$target_partition2" /mnt
+# create a directory in /tmp and mount the root
+# create these directories:
+# apps spm dev proc sys tmp
+# copy builtin packages to $mount_dir/spm/packages
+# add $mount_dir/apps/bb and $mount_dir/apps to the begining of $PATH
 
 # https://wiki.artixlinux.org/Main/Installation
 # https://gitea.artixlinux.org/artix
@@ -86,25 +91,6 @@ mount "$target_partition2" /mnt
 # https://t2sde.org/handbook/html/index.html
 # https://buildroot.org/downloads/manual/manual.html
 
-# create a directory in /tmp and mount the root
-# create these directories:
-# apps spm dev proc sys tmp
-# copy builtin packages to $mount_dir/spm/packages
-# add $mount_dir/apps/bb and $mount_dir/apps to the begining of $PATH
-
-# bootstrap
-# mount /apps and /spm
-# install gcc busybox linux git gnunet fsprogs sway
-
-# https://github.com/limine-bootloader/limine
-# https://github.com/limine-bootloader/limine/blob/v8.x/USAGE.md
-# https://github.com/limine-bootloader/limine/blob/v8.x/CONFIG.md
-if [ "$arch" = x86 ] || [ "$arch" = x86_64 ]; then
-	# install BIOS support
-elif [ "$arch" = ppc64le ]; then
-	# create "syslinux.cfg" (only OPAL Petitboot based systems are supported)
-fi
-
 mkdir -p /run/mount/spm-linux/spm/installed/system
 cp "$project_dir"/packages/system/spm.sh /run/mount/spm-linux/spm/installed/system/spm.sh
 if [ "$2" = "from-src" ]; then
@@ -118,6 +104,12 @@ ls -1 "$project_dir"/packages/ | while read -r pkg_name; do
 	url="gnunet://$my_name_space/packages/spm-linux/packages/$pkg_name"
 	sh /run/mount/spm-linux/spm/installed/system/spm.sh install "$pkg_name" "$url"
 done
+
+if [ "$arch" = x86 ] || [ "$arch" = x86_64 ]; then
+	limine bios-install "$target_device"
+elif [ "$arch" = ppc64le ]; then
+	# create "syslinux.cfg" (only OPAL Petitboot based systems are supported)
+fi
 
 sh /run/mount/spm-linux/spm/installed/system/spm.sh install "gnunet://$my_name_space/packages/codev"
 
