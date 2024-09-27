@@ -58,7 +58,7 @@ if [ "$1" = build ]; then
 	# pkg_path=.
 	# skip download
 	
-	# if the value of "use_prebuilt" in "$spm_dir/config" is true,
+	# if the value of "use_prebuilt" in "$script_dir/spm.conf" is true,
 	# 	and the corresponding directory for the current architecture is available in the given GNUnet URL,
 	# 	just download that into "$spm_dir/downloads/$gnunet_namespace/$pkg_name/.data/spm/<arch>/"
 	# then hardlink these files plus the build directory of packages mentioned in the downloaded "spmdeps" file,
@@ -122,7 +122,7 @@ elif [ "$1" = install ]; then
 	
 	# , it'll create symlinks from "/spm/installed/<package-name>/data/sv-sys/*" directories, to "/apps/sv-sys/"
 	# 	actually this only happens if spm is run as root,
-	# 	and only for those packages included in "trusted_packages" list in "$spm_dir/config"
+	# 	and only for those packages included in "trusted_packages" list in "$script_dir/spm.conf"
 	# 	(the default value of "trusted_packages" is "system gnunet")
 elif [ "$1" == remove ]; then
 	package_name="$2"
@@ -163,7 +163,7 @@ elif [ "$1" == publish ]; then
 	# ".data/gnurl" stores the project's GNUnet URL: gnunet://fs/sks/<name-space>/projects/<project_name>
 	# package URL is obtained from it like this: gnunet://fs/sks/<name-space>/packages/<project_name>
 	
-	# cross'built the package for all architectures mentioned in "$spm_dir/config" (value of "arch" entry),
+	# cross'built the package for all architectures mentioned in "$script_dir/spm.conf" (value of "arch" entry),
 	# and put the results in in ".cache/spm/builds/<arch>/"
 	# in "spmbuild.sh" scripts we can use "$carch" variable when cross'building
 	# "$carch" is an empty string when not cross'building

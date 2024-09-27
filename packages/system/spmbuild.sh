@@ -32,8 +32,43 @@ project_dir="$(dirname "$0")"
 # https://docs.voidlinux.org/config/power-management.html
 # https://pkgs.alpinelinux.org/package/edge/main/x86_64/acpid
 
+# https://wiki.artixlinux.org/Main/Installation
+# https://gitea.artixlinux.org/artix
+# https://packages.artixlinux.org/
+#
+# https://docs.alpinelinux.org/user-handbook/0.1a/Installing/setup_alpine.html
+# https://gitlab.alpinelinux.org/alpine
+# https://gitlab.alpinelinux.org/alpine/alpine-conf
+# https://pkgs.alpinelinux.org/package/edge/main/x86_64/alpine-base
+#
+# https://kisslinux.org/ https://github.com/kisslinux/
+# https://www.linuxfromscratch.org/ https://www.linuxfromscratch.org/lfs/view/stable/
+# https://github.com/gobolinux
+# https://sta.li/
+# https://t2sde.org/handbook/html/index.html
+# https://buildroot.org/downloads/manual/manual.html
+
+tz="$(echo "$TZ")"
+[ -z "$tz" ] && [ -L /etc/localtime ] && tz="$(realpath /etc/localtime)"
+# if $tz starts with slash or dot, cut */zoneinfo/ prefix
+[ -z "$tz" ] || {
+	echo; echo "setting timezone"
+	# guess the timezone, but ask the user to confirm it
+	geoip_tz="$(wget -q -O- 'http://ip-api.com/line/?fields=timezone')"
+	geoip_tz_continent="$(echo "$geoip_tz" | cut -d / -f1)"
+	geoip_tz_city="$(echo "$geoip_tz" | cut -d / -f2)"
+	tz_continent="$(ls -1 -d /usr/share/zoneinfo/*/ | cut -d / -f5 |
+		fzy -p "select a continent: " -q "$geoip_tz_continent")"
+	tz_city="$(ls -1 /usr/share/zoneinfo/"$tz_continent"/* | cut -d / -f6 |
+		fzy -p "select a city: " -q "$geoip_tz_city")"
+	tz="${tz_continent}/${tz_city}"
+}
+# if it's different:
+echo "$tz" > $script_dir/timezone
+
 # login service
 # at login run services at /apps/services as the user, supervised
+# copy "loginit.sh" to "login" in the build dir
 
 # https://github.com/Duncaen/OpenDoas
 
@@ -101,6 +136,7 @@ chmod +x "$project_dir"/.cache/spm/bin/system
 
 # iwd
 # iwd service
+# doas rule
 
 # doas rfkill without password
 

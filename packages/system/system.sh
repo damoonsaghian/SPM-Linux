@@ -35,7 +35,7 @@ manage_wifi() {
 		answer="$(printf "no\nyes" | fzy)"
 		[ "$answer" = yes ] || exit
 		
-		iwctl known-networks "$ssid" forget
+		doas iwctl known-networks "$ssid" forget
 	fi
 }
 
@@ -76,8 +76,8 @@ manage_bluetooth() {
 	if [ "$mode" = remove ]; then
 		echo "select a device:"
 		device="$(bluetoothctl devices | fzy | { read -r _first mac_address; echo "$mac_address"; })"
-		bluetoothctl disconnect "$device"
-		bluetoothctl untrust "$device"
+		doas bluetoothctl disconnect "$device"
+		doas bluetoothctl untrust "$device"
 	fi
 }
 
@@ -91,7 +91,7 @@ manage_radio_devices() {
 	device="$(echo "$lines" | fzy | cut -d " " -f1)"
 
 	action="$(printf "block\nunblock" | fzy)"
-	rfkill "$action" "$device"
+	doas rfkill "$action" "$device"
 }
 
 manage_router() {
