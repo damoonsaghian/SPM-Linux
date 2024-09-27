@@ -14,7 +14,7 @@ for example you can boot into an Alpine Linux live system, and enter this at the
 when everything is ready, run this (as root) in a terminal:
 ; sh install.sh [<arch>]
 if you want to always build all packages from source, run this instead:
-; sh install.sh [<arch>] from-src
+; sh install.sh build [<arch>]
 
 the user interface of SPM Linux is very simple
 press "super" (mod+mod) or "alt+tab" to show the application launcher
