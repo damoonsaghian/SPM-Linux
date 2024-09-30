@@ -2,7 +2,7 @@ project_dir="$(dirname "$0")"
 
 # git://busybox.net/busybox/tag/?h=1_36_1
 # disable these:
-# 	who, last, FEATURE_UTMP, wget
+# 	who, last, FEATURE_UTMP, wget, diff and cmp
 # 	less, man, su, blkid
 
 # create exch executable, which will be used by spm.sh to do atomic update for installed packages
@@ -41,9 +41,11 @@ project_dir="$(dirname "$0")"
 # https://gitlab.alpinelinux.org/alpine/alpine-conf
 # https://pkgs.alpinelinux.org/package/edge/main/x86_64/alpine-base
 #
-# https://kisslinux.org/ https://github.com/kisslinux/
+# https://github.com/glasnostlinux/glasnost
 # https://www.linuxfromscratch.org/ https://www.linuxfromscratch.org/lfs/view/stable/
+# https://github.com/iglunix
 # https://github.com/gobolinux
+# https://github.com/oasislinux/oasis
 # https://sta.li/
 # https://t2sde.org/handbook/html/index.html
 # https://buildroot.org/downloads/manual/manual.html

@@ -1,15 +1,18 @@
-spm_dir="$HOME/.local/spm"
-apps_dir="$HOME/.local/bin"
-gui_apps_dir="$HOME/.local/share/applications"
-sv_dir="$HOME/.local/sv"
 if [ $(id -u) = 0 ]; then
-	spm_dir="/spm"
-	apps_dir="/apps"
-	gui_apps_dir="/apps/gui"
-	sv_dir="/apps/sv"
+	spm_dir="$(dirname "$0")/../../.."
+	apps_dir="$spm_dir/../apps"
+	gui_apps_dir="$apps_dir/gui"
+	sv_dir="$apps_dir/sv"
+	sv_sys_dir="$apps_dir/sv-sys"
+	dbus_dir="$apps_dir/dbus"
+	dbus_sys_dir="$apps_dir/dbus-sys"
+else
+	spm_dir="$HOME/.local/spm"
+	apps_dir="$HOME/.local/bin"
+	gui_apps_dir="$HOME/.local/share/applications"
+	sv_dir="$HOME/.local/sv"
+	dbus_dir="$HOME/.local/share/dbus-1"
 fi
-# /apps/sv-sys
-# /apps/dbus (dbus configs)
 
 # if "spmbuild.sh" file is in the project directory, that is the package to be built
 # otherwise search for it in child directories
@@ -115,7 +118,6 @@ elif [ "$1" = install ]; then
 	# create symlinks from files that their name has no extension, and are executable, into "$apps_dir"
 	
 	# , it'll create symlinks from "$spm_dir/installed/<package-name>/data/*.desktop" files into "$gui_apps_dir"
-	# 	("$gui_apps_dir" is "/apps/gui" when "spm" is run as root, and "~/.local/share/applications" otherwise)
 	
 	# , it'll create symlinks from "$spm_dir/installed/<package-name>/data/sv/*" directories, to "$sv_dir"
 	# 	("$sv_dir" is "/apps/sv" when "spm" is run as root, and "~/.local/sv" otherwise)
@@ -124,6 +126,11 @@ elif [ "$1" = install ]; then
 	# 	actually this only happens if spm is run as root,
 	# 	and only for those packages included in "trusted_packages" list in "$script_dir/spm.conf"
 	# 	(the default value of "trusted_packages" is "system gnunet")
+	
+	# $dbus_dir/session.conf
+	# $dbus_dir/session.d/
+	# $dbus_dir/services/
+	# $dbus_sys_dir for trusted packages
 elif [ "$1" == remove ]; then
 	package_name="$2"
 	
@@ -170,6 +177,8 @@ elif [ "$1" == publish ]; then
 	
 	# make hard links from "spmdeps" file, plus all files in ".cache/spm/builds/<arch>/" minus "deps" directory,
 	# and put them in ".cache/spm/builds-published/<arch>/"
+	
+	# gnunet-unindex the old published files
 	
 	# publish "~/.local/spm/published/$gnunet_namespace/$pkg_name" (minus the ".cache" directory) to:
 	# "gnunet://fs/sks/<namespace>/packages/<package-name>/"
