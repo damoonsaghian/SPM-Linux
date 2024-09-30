@@ -14,27 +14,6 @@ else
 	dbus_dir="$HOME/.local/share/dbus-1"
 fi
 
-# if "spmbuild.sh" file is in the project directory, that is the package to be built
-# otherwise search for it in child directories
-# 	the first one found plus its siblings are the packages to be built
-
-# when mod time of .cache/spm is newer than mod time of project directory, skip
-
-# if "spmbuild.sh" file is already open, it means that there is a cyclic dependency
-# so exit to avoid an infinite loop
-
-# when linux package is installed/updated:
-# mount first partition of the device where this script resides, and copy the kernel and initramfs to it
-
-# when limine package is installed/updated:
-# mount first partition of the device where this script resides, and copy efi and sys files to it
-# mkdir /boot
-# mount "$root_device_partition1" /boot
-# mkdir -p /boot/EFI/BOOT
-
-# chown root:root /spm/installed/system/doas
-# chmod +s /spm/installed/system/doas
-
 # https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
 # signing Git tags: https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work
 # lsh-keygen to verify and sign tags
@@ -56,6 +35,15 @@ if [ "$1" = build ]; then
 		adduser --system spm_"$gnunet_namespace"
 		# su spm_"$gnunet_namespace"
 	fi
+	
+	# when mod time of .cache/spm is newer than mod time of project directory, skip
+	
+	# if "spmbuild.sh" file is in the project directory, that is the package to be built
+	# otherwise search for it in child directories
+	# 	the first one found plus its siblings are the packages to be built
+	
+	# if "spmbuild.sh" file is already open, it means that there is a cyclic dependency
+	# so exit to avoid an infinite loop
 	
 	# when there is no given URL, consider the working directory as the package to build
 	# pkg_path=.
@@ -125,12 +113,24 @@ elif [ "$1" = install ]; then
 	# , it'll create symlinks from "/spm/installed/<package-name>/data/sv-sys/*" directories, to "/apps/sv-sys/"
 	# 	actually this only happens if spm is run as root,
 	# 	and only for those packages included in "trusted_packages" list in "$script_dir/spm.conf"
-	# 	(the default value of "trusted_packages" is "system gnunet")
+	# 	(the default value of "trusted_packages" is "$gnunet_namespace/{system,dbus,gnunet}")
 	
 	# $dbus_dir/session.conf
 	# $dbus_dir/session.d/
 	# $dbus_dir/services/
 	# $dbus_sys_dir for trusted packages
+	
+	# chown root:root /spm/installed/system/doas
+	# chmod +s /spm/installed/system/doas
+	
+	# when package is $gnuenet_namespace/linux:
+	# mount first partition of the device where this script resides, and copy the kernel and initramfs to it
+	
+	# when package is $gnuenet_namespace/limine:
+	# mount first partition of the device where this script resides, and copy efi and sys files to it
+	# mkdir /boot
+	# mount "$root_device_partition1" /boot
+	# mkdir -p /boot/EFI/BOOT
 elif [ "$1" == remove ]; then
 	package_name="$2"
 	
