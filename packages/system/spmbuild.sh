@@ -1,24 +1,23 @@
 project_dir="$(dirname "$0")"
 
+# https://git.alpinelinux.org/aports/tree/main/busybox
+# https://git.busybox.net/busybox/tree/
+# https://www.busybox.net/downloads/BusyBox.html
 # git://busybox.net/busybox/tag/?h=1_36_1
 # disable these:
 # 	who, last, FEATURE_UTMP, wget, diff and cmp
 # 	less, man, su, blkid
 
-# create exch executable, which will be used by spm.sh to do atomic update for installed packages
-# https://github.com/util-linux/util-linux/blob/master/misc-utils/exch.c
-
 # btrfs-progs
 # blkid libuuid (from util-linux)
 
-# https://git.alpinelinux.org/aports/tree/main/busybox
-# https://git.busybox.net/busybox/tree/
-# https://www.busybox.net/downloads/BusyBox.html
+# create exch executable, which will be used by spm.sh to do atomic update for installed packages
+# https://github.com/util-linux/util-linux/blob/master/misc-utils/exch.c
 
 # https://smarden.org/runit/
 # https://man.voidlinux.org/runsvdir.8
 # https://git.alpinelinux.org/aports/tree/main/openrc
-
+#
 # init
 # PATH=/apps/bb:/apps
 # run bb services
@@ -26,11 +25,6 @@ project_dir="$(dirname "$0")"
 # libudev-zero
 # https://wiki.alpinelinux.org/wiki/Mdev
 # https://github.com/slashbeast/mdev-like-a-boss/blob/master/mdev.conf
-
-# https://docs.voidlinux.org/config/session-management.html
-# https://git.sr.ht/~kennylevinsen/seatd
-# https://docs.voidlinux.org/config/power-management.html
-# https://pkgs.alpinelinux.org/package/edge/main/x86_64/acpid
 
 # https://wiki.artixlinux.org/Main/Installation
 # https://gitea.artixlinux.org/artix
