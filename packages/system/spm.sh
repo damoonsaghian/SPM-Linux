@@ -16,7 +16,7 @@ fi
 
 # https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
 # signing Git tags: https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work
-# lsh-keygen to verify and sign tags
+# lsh-keygen/ssh-keygen to verify and sign tags
 # 	only git tags signed using ssh keys are supported (gpg is not supported)
 # 	https://git-scm.com/docs/git-config#Documentation/git-config.txt-gpgltformatgtprogram
 # 	https://manpages.debian.org/bookworm/openssh-client/ssh-keygen.1.en.html
@@ -113,7 +113,7 @@ elif [ "$1" = install ]; then
 	# , it'll create symlinks from "/spm/installed/<package-name>/data/sv-sys/*" directories, to "/apps/sv-sys/"
 	# 	actually this only happens if spm is run as root,
 	# 	and only for those packages included in "trusted_packages" list in "$script_dir/spm.conf"
-	# 	(the default value of "trusted_packages" is "$gnunet_namespace/{system,dbus,gnunet}")
+	# 	(the default value of "trusted_packages" is "$gnunet_namespace/{system,dbus,acpid,seatd,gnunet}")
 	
 	# $dbus_dir/session.conf
 	# $dbus_dir/session.d/

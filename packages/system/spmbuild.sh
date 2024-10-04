@@ -21,11 +21,14 @@ project_dir="$(dirname "$0")"
 # init
 # PATH=/apps/bb:/apps
 # run bb services
+# mount a tmpfs in /run and /tmp
 
 # libudev-zero
 # https://wiki.alpinelinux.org/wiki/Mdev
 # https://github.com/slashbeast/mdev-like-a-boss/blob/master/mdev.conf
 
+# https://docs.voidlinux.org/
+#
 # https://wiki.artixlinux.org/Main/Installation
 # https://gitea.artixlinux.org/artix
 # https://packages.artixlinux.org/
@@ -63,8 +66,12 @@ tz="$(echo "$TZ")"
 echo "$tz" > $script_dir/timezone
 
 # login service
-# at login run services at /apps/services as the user, supervised
-# copy "loginit.sh" to "login" in the build dir
+# at login:
+# , mkdir -p /run/user/$user_id
+# , chmod 700 /run/user/$user_id
+# , export XDG_RUNTIME_DIR=/run/user/$user_id
+# , run services at /apps/sv as the user, supervised
+# copy "loginit.sh" to "login" in the build dir, under sv dir
 
 # https://github.com/Duncaen/OpenDoas
 
