@@ -12,16 +12,22 @@ project_dir="$(dirname "$0")"
 gnunet_namespace=
 
 echo; echo "available storage devices:"
-ls -1 --color=never /sys/block | grep -v "^loop" | while read -r device_name; do
+printf "\tname\tsize\tmodel\n"
+printf "\t----\t----\t-----\n"
+ls -1 --color=never /sys/block/ | grep -v "^loop" | while read -r device_name; do
 	device_size="$(cat /sys/block/"$device_name"/size)"
 	device_size="$((device_size / 1000000))GB"
 	device_model="$(cat /sys/block/"$device_name"/device/model)"
 	printf "\t$device_name\t$device_size\t$device_model\n"
 done
-printf "enter the name of the device (the first word) to install SPM Linux on it: "
+printf "enter the name of the device to install SPM Linux on it: "
 read -r target_device
+test -e /sys/block/"$target_device" || {
+	echo "there is no storage device named \"$target_device\""
+	exit 1
+}
 
-root_partition="$(df / | tail -1 | cut -d " " -f 1 | cut -d / -f 3)"
+root_partition="$(df / | tail -n 1 | cut -d " " -f 1 | cut -d / -f 3)"
 root_device_num="$(cat /sys/class/block/"$root_partition"/dev | cut -d ":" -f 1):0"
 root_device="$(basename "$(readlink /dev/block/"$root_device_num")")"
 if [ "$target_device" = "$root_device" ]; then
@@ -32,15 +38,15 @@ fi
 # if the target device has a uefi vfat, plus a btrfs partition,
 # ask the user to use the current partitions instead of wiping them off
 target_partitions="$(echo /sys/block/"$target_device"/"$target_device"* |
-	sed -n "s/\/sys\/block\/$target_device\///p" )"
-target_partition1="$(echo "$target_partitions" | cut -d " " -f1 )"
-target_partition2="$(echo "$target_partitions" | cut -d " " -f2 )"
+	sed -n "s/\/sys\/block\/$target_device\///pg")"
+target_partition1="$(echo "$target_partitions" | cut -d " " -f1)"
+target_partition2="$(echo "$target_partitions" | cut -d " " -f2)"
 fdisk -l /dev/"$target_device" | grep "$target_partition1" | {
 	grep "EFI System" &> /dev/null &&
 	target_partition1_is_efi=true
 }
-target_partition1_fstype="$(blkid /dev/"$target_partition1" | sed -rn 's/.*TYPE="(.*)".*/\1/p' )"
-target_partition2_fstype="$(blkid /dev/"$target_partition2" | sed -rn 's/.*TYPE="(.*)".*/\1/p' )"
+target_partition1_fstype="$(blkid /dev/"$target_partition1" | sed -rn 's/.*TYPE="(.*)".*/\1/p')"
+target_partition2_fstype="$(blkid /dev/"$target_partition2" | sed -rn 's/.*TYPE="(.*)".*/\1/p')"
 if [ "$target_partition1_is_efi" != true ] ||
 	[ "$target_partition1_fstype" != vfat ] ||
 	[ "$target_partition2_fstype" != btrfs ] || {
@@ -71,14 +77,19 @@ then
 	echo q # quit
 	) | fdisk "$target_device"
 	
+	target_partitions="$(echo /sys/block/"$target_device"/"$target_device"* |
+		sed -n "s/\/sys\/block\/$target_device\///pg")"
+	target_partition1="$(echo "$target_partitions" | cut -d " " -f1)"
+	target_partition2="$(echo "$target_partitions" | cut -d " " -f2)"
+	
 	# format the partitions
-	mkfs.fat -F 32 "$target_partition1" > /dev/null 2>&1
-	mkfs.btrfs -f --quiet "$target_partition2" > /dev/null 2>&1
+	mkfs.vfat -F 32 "$target_partition1"
+	mkfs.btrfs -f --quiet "$target_partition2"
 fi
 
-mkdir -p /tmp/spm-linux
+mkdir /tmp/spm-linux
 mount "$target_partition2" /tmp/spm-linux
-mkdir -p /tmp/spm-linux/{apps,spm,dev,proc,sys,tmp}
+mkdir -p /tmp/spm-linux/{apps,spm,dev,proc,sys,tmp,run}
 
 mkdir -p /tmp/spm-linux/spm/installed/$gnunet_namespace/system
 cp "$project_dir"/packages/system/spm.sh /tmp/spm-linux/spm/installed/$gnunet_namespace/system/spm.sh
