@@ -92,20 +92,19 @@ mount "$target_partition2" "$project_dir"/.cache/spm-linux
 mkdir -p "$project_dir"/.cache/spm-linux/{apps,spm,tmp,run,proc,sys,dev}
 
 mkdir -p "$project_dir"/.cache/spm-linux/spm/installed/$gnunet_namespace/system
-cp "$project_dir"/packages/system/spm.sh "$project_dir"/.cache/spm-linux/spm/installed/$gnunet_namespace/system/spm.sh
+cp "$project_dir"/packages/system/spm.sh \
+	"$project_dir"/.cache/spm-linux/spm/installed/$gnunet_namespace/system/spm.sh
 if [ "$build_from_src" = true ]; then
 	echo "use_prebuilt = true" > "$project_dir"/.cache/spm-linux/installed/$gnunet_namespace/system/spm.conf
 fi
 
-echo "WLAN_QUOTA_IN = unlimited
-WLAN_QUOTA_OUT = unlimited
-WAN_QUOTA_IN = unlimited
-WAN_QUOTA_OUT = unlimited
-" > ~/.config/gnunet.conf
-gnunet-arm --restart
+gnunet-config --section=ats --option=WAN_QUOTA_IN --value=unlimited
+gnunet-config --section=ats --option=WAN_QUOTA_OUT --value=unlimited
+gnunet-config --section=ats --option=LAN_QUOTA_IN --value=unlimited
+gnunet-config --section=ats --option=LAN_QUOTA_OUT --value=unlimited
 
 ls -1 "$project_dir"/packages/ | while read -r pkg_name; do
-	url="gnunet://$gnunet_namespace/packages/spm-linux/packages/$pkg_name"
+	url="gnunet://$gnunet_namespace/packages/$pkg_name"
 	sh "$project_dir"/.cache/spm-linux/spm/installed/system/spm.sh install "$pkg_name" "$url"
 done
 
