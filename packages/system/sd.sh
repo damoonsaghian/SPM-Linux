@@ -7,6 +7,7 @@
 # exit if it's the system device
 
 # mount with suid bits disabled
+# mount in ~/.local/mounts
 
 # format devices
 # type: fat

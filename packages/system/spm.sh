@@ -25,6 +25,9 @@ fi
 # LD_LIBRARY_PATH=".:./deps"
 # PATH=".:./deps:/apps"
 
+# programs are run in the mount namespace corresponding to their installed path
+# they have their own /etc and /var/{cache,lib,log,tmp}
+
 if [ "$1" = build ]; then
 	gnunet_url="$2"
 	gnunet_namespace=
