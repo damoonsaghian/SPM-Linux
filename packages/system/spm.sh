@@ -26,7 +26,7 @@ fi
 # PATH=".:./deps:/apps"
 
 # programs are run in the mount namespace corresponding to their installed path
-# they have their own /etc and /var/{cache,lib,log,tmp}
+# they have their own /var/{cache,lib,log,tmp}
 
 if [ "$1" = build ]; then
 	gnunet_url="$2"
@@ -79,12 +79,6 @@ if [ "$1" = build ]; then
 	# , appends the URL of the package to ".cache/spm/builds/spmdeps" (if not already)
 	# , creates a hard'link from "$pkg_<package-name>/.cache/spm/builds/<arch>/<file-path-pattern>",
 	# 	to ".cache/spm/builds/<arch>/deps/" directory of the current package
-	
-	# for packages needed during the build process, do this in the "spmbuild.sh" script:
-	# 	$BDEP pkg_<package-name> <gnunet-url>
-	# this is what it does:
-	# 	pkg_$dep_pkg_name="$spm_dir"/downloads/$dep_gnunet_namespace/$dep_pkg_name
-	
 	
 	sh spmbuild.sh
 elif [ "$1" = install ]; then
