@@ -103,7 +103,22 @@ gnunet-config --section=ats --option=WAN_QUOTA_OUT --value=unlimited
 gnunet-config --section=ats --option=LAN_QUOTA_IN --value=unlimited
 gnunet-config --section=ats --option=LAN_QUOTA_OUT --value=unlimited
 
-ls -1 "$project_dir"/packages/ | while read -r pkg_name; do
+echo 'acpid
+bash
+bluez
+curl-http
+dbus
+fsprogs
+fwupd
+gnunet
+limine
+linux
+lsh
+pipewire
+seatd
+sway
+system
+termulator' | while read -r pkg_name; do
 	url="gnunet://$gnunet_namespace/packages/$pkg_name"
 	sh "$project_dir"/.cache/spm-linux/spm/installed/system/spm.sh install "$pkg_name" "$url"
 done
