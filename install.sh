@@ -87,15 +87,16 @@ then
 	mkfs.btrfs -f --quiet "$target_partition2"
 fi
 
-mkdir -p "$project_dir"/.cache/spm-linux
-mount "$target_partition2" "$project_dir"/.cache/spm-linux
-mkdir -p "$project_dir"/.cache/spm-linux/{apps,spm,tmp,run,proc,sys,dev}
+spm_linux_dir="$project_dir"/.cache/spm-linux
+mkdir -p "$spm_linux_dir"
+mount "$target_partition2" "$spm_linux_dir"
+mkdir -p "$spm_linux_dir"/{apps,spm,tmp,run,proc,sys,dev,boot}
 
-mkdir -p "$project_dir"/.cache/spm-linux/spm/installed/$gnunet_namespace/system
+mkdir -p "$spm_linux_dir"/spm/installed/$gnunet_namespace/system
 cp "$project_dir"/packages/system/spm.sh \
-	"$project_dir"/.cache/spm-linux/spm/installed/$gnunet_namespace/system/spm.sh
+	"$spm_linux_dir"/spm/installed/$gnunet_namespace/system/spm.sh
 if [ "$build_from_src" = true ]; then
-	echo "use_prebuilt = true" > "$project_dir"/.cache/spm-linux/installed/$gnunet_namespace/system/spm.conf
+	echo "use_prebuilt = true" > "$spm_linux_dir"/installed/$gnunet_namespace/system/spm.conf
 fi
 
 gnunet-config --section=ats --option=WAN_QUOTA_IN --value=unlimited
@@ -118,38 +119,47 @@ pipewire
 seatd
 sway
 system
-termulator' | while read -r pkg_name; do
+termulator
+codev' | while read -r pkg_name; do
 	url="gnunet://$gnunet_namespace/packages/$pkg_name"
-	sh "$project_dir"/.cache/spm-linux/spm/installed/system/spm.sh install "$pkg_name" "$url"
+	sh "$spm_linux_dir"/spm/installed/system/spm.sh install "$pkg_name" "$url"
 done
 
 if [ "$arch" = x86 ] || [ "$arch" = x86_64 ]; then
 	limine bios-install "$target_device"
 elif [ "$arch" = ppc64le ]; then
-	# create "syslinux.cfg" (only OPAL Petitboot based systems are supported)
+	# only OPAL Petitboot based systems are supported
+	mount "$target_partition1" "$spm_linux_dir"/boot
+	cat <<-__EOF__ > "$spm_linux_dir"/boot/syslinux.cfg
+	PROMPT 0
+	LABEL SPM Linux
+		LINUX vmlinuz
+		APPEND root=UUID=$(blkid /dev/"$target_partition2" | sed -rn 's/.*UUID="(.*)".*/\1/p') rw
+		INITRD initramfs.img
+	__EOF__
+	umount "$spm_linux_dir"/boot
 fi
-
-sh "$project_dir"/.cache/spm-linux/spm/installed/system/spm.sh install "gnunet://$gnunet_namespace/packages/codev"
 
 echo; printf "set username: "
 read -r username
-"$project_dir"/.cache/spm-linux/apps/adduser --shell /bin/bash "$username"
-"$project_dir"/.cache/spm-linux/apps/addgroup --system sudo
-"$project_dir"/.cache/spm-linux/apps/adduser "$username" sudo
-while ! "$project_dir"/.cache/spm-linux/apps/passwd "$username"; do
-	echo "an error occured; please try again"
+while ! "$spm_linux_dir"/apps/adduser --shell /bin/bash "$username"; do
+	read -r username
 done
-echo; echo "set sudo password"
-while ! "$project_dir"/.cache/spm-linux/apps/passwd; do
-	echo "an error occured; please try again"
+"$spm_linux_dir"/apps/addgroup --system sudo
+"$spm_linux_dir"/apps/addgroup "$username" sudo
+while ! "$spm_linux_dir"/apps/passwd "$username"; do
+	true
+done
+while ! "$spm_linux_dir"/apps/passwd; do
+	true
 done
 # lock root account
-"$project_dir"/.cache/spm-linux/apps/passwd --lock root
+"$spm_linux_dir"/apps/passwd --lock root
 
-umount "$project_dir"/.cache/spm-linux
-rmdir "$project_dir"/.cache/spm-linux
+umount "$spm_linux_dir"
+rmdir "$spm_linux_dir"
 
 echo; echo -n "installation completed successfully"
-printf "reboot the system? (y/N)"
+printf "do want to reboot the system? (y/N)"
 read -r answer
 [ "$answer" = y ] && reboot
