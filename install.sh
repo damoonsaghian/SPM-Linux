@@ -96,7 +96,7 @@ mkdir -p "$spm_linux_dir"/spm/installed/$gnunet_namespace/system
 cp "$project_dir"/packages/system/spm.sh \
 	"$spm_linux_dir"/spm/installed/$gnunet_namespace/system/spm.sh
 if [ "$build_from_src" = true ]; then
-	echo "use_prebuilt = true" > "$spm_linux_dir"/installed/$gnunet_namespace/system/spm.conf
+	echo "use_prebuilt = true" > "$spm_linux_dir"/installed/$gnunet_namespace/system/var/config/spm.conf
 fi
 
 gnunet-config --section=ats --option=WAN_QUOTA_IN --value=unlimited
