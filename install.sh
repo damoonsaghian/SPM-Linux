@@ -109,6 +109,7 @@ bash
 bluez
 curl-http
 dbus
+eudev
 fsprogs
 fwupd
 gnunet
