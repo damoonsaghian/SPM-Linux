@@ -5,9 +5,10 @@ default_index="$(printf "$list" | sed -n "/^$default_option$/=" | head -n1)"
 default_index="$((default_index-1))"
 selected_option="$(printf "$list" | bemenu -p $prompt -I $default_index)"
 
-ln "$project_dir"/system.sh "$project_dir"/.cache/spm/bin/system
-ln "$project_dir"/system-install-spmlinux.sh "$project_dir"/.cache/spm/bin/system-install-spmlinux.sh
-chmod +x "$project_dir"/.cache/spm/bin/system
+
+ln "$project_dir"/system.sh "$project_dir"/.cache/spm/apps/
+
+ln "$project_dir"/system-install-spmlinux.sh "$project_dir"/.cache/spm/
 
 # create exch executable, which will be used by spm.sh to do atomic update for installed packages
 # https://github.com/util-linux/util-linux/blob/master/misc-utils/exch.c

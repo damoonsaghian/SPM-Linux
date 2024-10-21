@@ -5,20 +5,24 @@ script_dir="$(dirname "$0")"
 if [ $(id -u) = 0 ]; then
 	spm_dir="$(dirname "$0")/../../.."
 	apps_dir="$spm_dir/../apps"
-	gui_apps_dir="$apps_dir/gui"
+	apps_sys_dir="$spm_dir/../apps_sys"
+	apps_gui_dir="$apps_dir/gui"
 	sv_dir="$apps_dir/sv"
-	sv_sys_dir="$apps_dir/sv-sys"
+	sv_sys_dir="$apps_sys_dir/sv"
 	dbus_dir="$apps_dir/dbus"
-	dbus_sys_dir="$apps_dir/dbus-sys"
+	dbus_sys_dir="$apps_sys_dir/dbus"
 else
 	spm_dir="$HOME/.local/spm"
 	apps_dir="$HOME/.local/bin"
-	gui_apps_dir="$HOME/.local/share/applications"
+	appsys_dir="$HOME/.local/bin"
+	apps_gui_dir="$HOME/.local/share/applications"
 	sv_dir="$HOME/.local/sv"
+	sv_sys_dir="$HOME/.local/sv"
 	dbus_dir="$HOME/.local/share/dbus-1"
+	dbus_sys_dir="$HOME/.local/share/dbus-1"
 fi
 
-trusted_packages="$trusted_packages $(echo \
+sys_packages="$sys_packages $(echo \
 	"$gnunet_namespace/{limine,linux,busybox,system,dbus,acpid,seatd,gnunet,sd}")"
 
 # https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
@@ -30,7 +34,7 @@ trusted_packages="$trusted_packages $(echo \
 # https://git-scm.com/docs/partial-clone
 
 # LD_LIBRARY_PATH=".:./deps"
-# PATH=".:./deps:/apps"
+# PATH=".:./deps:/apps-sys:/apps"
 
 # programs are run in the mount namespace corresponding to their installed path
 # they have their own /var/{cache,lib,log,tmp}
@@ -82,11 +86,11 @@ if [ "$1" = build ]; then
 	# , creates a hard'link from "$pkg_<package-name>/.cache/spm/builds/<arch>/<file-path-pattern>",
 	# 	to ".cache/spm/builds/<arch>/deps/" directory of the current package
 	
-	case "$trusted_packages" in
-		*"$gnunet_namespace/$pkg_name"*) is_a_trusted_package=true ;;
+	case "$sys_packages" in
+		*"$gnunet_namespace/$pkg_name"*) is_a_sys_package=true ;;
 	esac
 	
-	if [ $(id -u) = 0 ] && [ is_a_trusted_package != true ] ; then
+	if [ $(id -u) = 0 ] && [ is_a_sys_package != true ] ; then
 		adduser --system spm_"$gnunet_namespace-$pkg_name"
 		su -c "sh spmbuild.sh \"$arch\"" spm_"$gnunet_namespace-$pkg_name"
 	else
@@ -108,23 +112,38 @@ elif [ "$1" = install ]; then
 	# 	"$spm_dir/downloads/$gnunet_namespace/$pkg_name/.cache/spm/builds/<arch>/",
 	# 	to "$spm_dir/installed/<package-name>/"
 	
-	# the GNUnet URL is stored in "$spm_dir/installed/<package-name>/data/url" file
+	# the GNUnet URL is stored in "$spm_dir/installed/<package-name>/pkg_url" file
 	# this will be used to update the app
 	
-	# create symlinks from files that their name has no extension, and are executable, into "$apps_dir"
+	# for files in "$spm_dir/installed/<package-name>/apps/*":
+	# chmod +x file
+	# if the file name has no extention, symlink into "$apps_dir"
+	# if the file name has an extention:
+	# , if [ $(id -u) != 0 ]; then in the first line replace #!/apps/env with #!/usr/bin/env  
+	# , symlink it into "$apps_dir" (without extention)
 	
-	# , it'll create symlinks from "$spm_dir/installed/<package-name>/data/*.desktop" files into "$gui_apps_dir"
+	# if $is_a_sys_packages, for files in "$spm_dir/installed/<package-name>/apps-sys/*":
+	# chmod +x file
+	# if the file name has no extention, symlink it into "$apps_sys_dir"
+	# if the file name has .suid extension, set SUID bit, and symlink it into "$apps_sys_dir" (without extention)
+	# if they have other extentions:
+	# , if [ $(id -u) != 0 ]; then in the first line replace #!/apps/env with #!/usr/bin/env  
+	# , symlink it into "$apps_sys_dir" (without extention)
 	
-	# , it'll create symlinks from "$spm_dir/installed/<package-name>/data/sv/*" directories, to "$sv_dir"
-	# 	("$sv_dir" is "/apps/sv" when "spm" is run as root, and "~/.local/sv" otherwise)
+	# create symlinks from "$spm_dir/installed/<package-name>/apps/gui/*" files into "$apps_gui_dir"
 	
-	# , it'll create symlinks from "/spm/installed/<package-name>/data/sv-sys/*" directories, to "/apps/sv-sys/"
-	# 	actually this only happens if spm is run as root, and only for trusted packages
+	# create symlinks from "$spm_dir/installed/<package-name>/apps/sv/*" directories, to "$sv_dir"
+	# if $is_a_sys_package:
+	# create symlinks from "$spm_dir/installed/<package-name>/apps-sys/sv/*" directories, to "$sv_sys_dir"
+	
+	# create symlinks from "$spm_dir/installed/<package-name>/apps/dbus/*" directories, to "$dbus_dir"
+	# if $is_a_sys_package:
+	# create symlinks from "$spm_dir/installed/<package-name>/apps-sys/dbus/*" directories, to "$dbus_sys_dir"
 	
 	# $dbus_dir/session.conf
 	# $dbus_dir/session.d/
 	# $dbus_dir/services/
-	# $dbus_sys_dir for trusted packages
+	# $dbus_sys_dir for sys packages
 	
 	# when package is $gnunet_namespace/limine
 	# mount first partition of the device where this script resides, and copy efi and sys files to it
@@ -146,7 +165,7 @@ elif [ "$1" = remove ]; then
 	# remove symlinks in "$apps_dir/sv/" corresponding to "$spm_dir/installed/<package-name>/data/sv/*"
 	
 	# remove symlinks in "/apps/sv-sys/" corresponding to "/spm/installed/<package-name>/data/sv-sys/*"
-	# 	(if run as root, and the package is in "trusted_packages" list)
+	# (if package is in "$sys_packages")
 	
 	# , removes "$spm_dir/installed/<package-name>" directory
 elif [ "$1" = update ]; then

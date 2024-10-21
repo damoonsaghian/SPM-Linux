@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/apps/env sh
 set -e
 
 # bemenu
