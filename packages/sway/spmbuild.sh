@@ -1,13 +1,12 @@
 apt-get -qq install sway swayidle xwayland lua5.3 lua-lgi gir1.2-gtk-4.0 gnome-console
 cp /mnt/os/{sway.conf,swapps.py} /usr/local/share/
-# the following is to prevent normal users from changing Sway's config
+
+# bin/sway:
+# #!sh
+# $script_dir/sway -c $script_dir/sway.conf
+#
+# this is to prevent normal users from changing Sway's config
 # this means that, swayidle can't be disabled by a normal user (see sway.conf)
-echo -n '# run sway (if this script is not called by root or a display manager, and this is the first tty)
-if [ ! "$(id -u)" = 0 ] && [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
-	[ -f "$HOME/.profile" ] && . "$HOME/.profile"
-	exec dbus-run-session sway -c /usr/local/share/sway.conf
-fi
-' > /etc/profile.d/zz-sway.sh
 
 # https://github.com/wmww/gtk4-layer-shell
 
