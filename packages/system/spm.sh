@@ -1,3 +1,7 @@
+set -e
+
+script_dir="$(dirname "$0")"
+
 if [ $(id -u) = 0 ]; then
 	spm_dir="$(dirname "$0")/../../.."
 	apps_dir="$spm_dir/../apps"
@@ -13,6 +17,9 @@ else
 	sv_dir="$HOME/.local/sv"
 	dbus_dir="$HOME/.local/share/dbus-1"
 fi
+
+trusted_packages="$trusted_packages $(echo \
+	"$gnunet_namespace/{limine,linux,busybox,system,dbus,acpid,seatd,gnunet,sd}")"
 
 # https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
 # signing Git tags: https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work
@@ -30,14 +37,9 @@ fi
 
 if [ "$1" = build ]; then
 	gnunet_url="$2"
+	arch="$3"
 	gnunet_namespace=
 	pkg_name=
-	
-	if [ $(id -u) = 0 ]; then
-		# add a system user: spm_"$gnunet_namespace"
-		adduser --system spm_"$gnunet_namespace"
-		# su spm_"$gnunet_namespace"
-	fi
 	
 	# when mod time of .cache/spm is newer than mod time of project directory, skip
 	
@@ -52,13 +54,13 @@ if [ "$1" = build ]; then
 	# pkg_path=.
 	# skip download
 	
-	# if the value of "use_prebuilt" in "$script_dir/spm.conf" is true,
+	# if the value of "use_prebuilt" in "$script_dir/var/config/spm.conf" is true,
 	# 	and the corresponding directory for the current architecture is available in the given GNUnet URL,
 	# 	just download that into "$spm_dir/downloads/$gnunet_namespace/$pkg_name/.data/spm/<arch>/"
 	# then hardlink these files plus the build directory of packages mentioned in the downloaded "spmdeps" file,
 	# 	into ".cache/spm/built"
 	# check
-	# and thats it, exit(0)
+	# and thats it, exit
 	
 	# try to download the package from "$gnunet_url" to "$spm_dir/downloads/$gnunet_namespace/$pkg_name/"
 	
@@ -80,7 +82,16 @@ if [ "$1" = build ]; then
 	# , creates a hard'link from "$pkg_<package-name>/.cache/spm/builds/<arch>/<file-path-pattern>",
 	# 	to ".cache/spm/builds/<arch>/deps/" directory of the current package
 	
-	sh spmbuild.sh
+	case "$trusted_packages" in
+		*"$gnunet_namespace/$pkg_name"*) is_a_trusted_package=true ;;
+	esac
+	
+	if [ $(id -u) = 0 ] && [ is_a_trusted_package != true ] ; then
+		adduser --system spm_"$gnunet_namespace-$pkg_name"
+		su -c "sh spmbuild.sh \"$arch\"" spm_"$gnunet_namespace-$pkg_name"
+	else
+		sh spmbuild.sh $arch
+	fi
 elif [ "$1" = install ]; then
 	package_name="$2"
 	url="$3"
@@ -108,27 +119,24 @@ elif [ "$1" = install ]; then
 	# 	("$sv_dir" is "/apps/sv" when "spm" is run as root, and "~/.local/sv" otherwise)
 	
 	# , it'll create symlinks from "/spm/installed/<package-name>/data/sv-sys/*" directories, to "/apps/sv-sys/"
-	# 	actually this only happens if spm is run as root,
-	# 	and only for those packages included in "trusted_packages" list in "$script_dir/spm.conf"
-	# 	(the default value of "trusted_packages" is "$gnunet_namespace/{system,dbus,acpid,seatd,gnunet}")
+	# 	actually this only happens if spm is run as root, and only for trusted packages
 	
 	# $dbus_dir/session.conf
 	# $dbus_dir/session.d/
 	# $dbus_dir/services/
 	# $dbus_sys_dir for trusted packages
 	
-	# chown root:root /spm/installed/system/doas
-	# chmod +s /spm/installed/system/doas
-	
-	# when package is $gnuenet_namespace/linux:
-	# mount first partition of the device where this script resides, and copy the kernel and initramfs to it
-	
-	# when package is $gnuenet_namespace/limine:
+	# when package is $gnunet_namespace/limine
 	# mount first partition of the device where this script resides, and copy efi and sys files to it
 	# mkdir /boot
 	# mount "$root_device_partition1" /boot
 	# mkdir -p /boot/EFI/BOOT
-elif [ "$1" == remove ]; then
+	# umount
+	
+	# when package is $gnunet_namespace/linux
+	# mount first partition of the device where this script resides, and copy the kernel and initramfs to it
+	# umount
+elif [ "$1" = remove ]; then
 	package_name="$2"
 	
 	# removes the files mentioned in "$spm_dir/installed/<package-name>/data/apps" from "$apps_dir"
@@ -141,7 +149,7 @@ elif [ "$1" == remove ]; then
 	# 	(if run as root, and the package is in "trusted_packages" list)
 	
 	# , removes "$spm_dir/installed/<package-name>" directory
-elif [ "$1" == update ]; then
+elif [ "$1" = update ]; then
 	# directories in $spm_dir/installed/
 	# see if "$spm_dir/installed/<package-nam>/url" file exists
 	# download
@@ -160,7 +168,7 @@ elif [ "$1" == update ]; then
 	# so warn and ask the user if she wants the update
 	#
 	# limine bios-install "$device"
-elif [ "$1" == publish ]; then
+elif [ "$1" = publish ]; then
 	# make a BTRFS snapshot from the project's directory,
 	# to "~/.local/spm/published/$gnunet_namespace/$pkg_name"
 	

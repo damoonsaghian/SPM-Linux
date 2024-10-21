@@ -1,11 +1,6 @@
 metered_connection() {
-	local active_net_device="$(ip route show default | head -1 | sed -n "s/.* dev \([^\ ]*\) .*/\1/p")"
-	local is_metered=false
-	case "$active_net_device" in
-		ww*) is_metered=true ;;
-	esac
-	# todo: DHCP option 43 ANDROID_METERED
-	$is_metered
+	#nmcli --terse --fields GENERAL.METERED dev show | grep --quiet "yes"
+	#dbus: org.freedesktop.NetworkManager Metered
 }
 
 metered_connection && exit 0

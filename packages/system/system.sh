@@ -11,6 +11,11 @@ manage_session() {
 	# poweroff
 }
 
+#WIFI using nmcli:
+#; nmcli dev wifi
+#; nmcli --ask dev wifi con <ssid>
+#to disconnect from a WIFI network:
+#; nmcli con down id <ssid>
 manage_wifi() {
 	local mode="$(printf "connect\nremove" | fzy)" device= ssid= answer=
 	
@@ -202,6 +207,17 @@ manage_packages() {
 	spm "$mode" "$package_name" "$package_name"
 	
 	[ "$mode" = "install SPM Linux" ] && sh "$(dirname "$0")"/system-install-spmlinux.sh
+}
+
+update_boot_firmware() {
+	doas fwupdmgr get-devices
+	doas fwupdmgr refresh
+	doas fwupdmgr get-updates
+	doas fwupdmgr update
+	
+	if [ "$arch" = x86 ] || [ "$arch" = x86_64 ]; then
+		limine bios-install "$target_device"
+	fi
 }
 
 if [ -z "$1" ]; then
