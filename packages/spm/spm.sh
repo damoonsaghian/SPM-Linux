@@ -1,9 +1,11 @@
 set -e
 
-script_dir="$(dirname "$0")"
+project_dir="$(dirname "$(realpath "$0")")"
+
+# create a lock in $script_dir/lock which will be removed after exit, and at the system startup
 
 if [ $(id -u) = 0 ]; then
-	spm_dir="$(dirname "$0")/../../.."
+	spm_dir="$script_dir/../../.."
 	apps_dir="$spm_dir/../apps"
 	apps_sys_dir="$spm_dir/../apps_sys"
 	apps_gui_dir="$apps_dir/gui"
@@ -12,15 +14,17 @@ if [ $(id -u) = 0 ]; then
 	dbus_dir="$apps_dir/dbus"
 	dbus_sys_dir="$apps_sys_dir/dbus"
 else
-	spm_dir="$HOME/.local/spm"
+	spm_dir="$HOME/.local/spm/packages"
 	apps_dir="$HOME/.local/bin"
-	appsys_dir="$HOME/.local/bin"
+	apps_sys_dir="$HOME/.local/bin"
 	apps_gui_dir="$HOME/.local/share/applications"
-	sv_dir="$HOME/.local/sv"
-	sv_sys_dir="$HOME/.local/sv"
+	sv_dir="$HOME/.local/spm/sv"
+	sv_sys_dir="$HOME/.local/spm/sv"
 	dbus_dir="$HOME/.local/share/dbus-1"
 	dbus_sys_dir="$HOME/.local/share/dbus-1"
 fi
+
+mkdir -p "$apps_dir" "$apps_sys_dir" "$apps_gui_dir" "$sv_dir" "$sv_sys_dir" "$dbus_dir" "$dbus_sys_dir"
 
 sys_packages="$sys_packages $(echo \
 	"$gnunet_namespace/{limine,linux,busybox,system,dbus,acpid,seatd,gnunet,sd}")"
@@ -132,6 +136,11 @@ elif [ "$1" = install ]; then
 	
 	# create symlinks from "$spm_dir/installed/<package-name>/apps/gui/*" files into "$apps_gui_dir"
 	
+	if [ $(id -u) != 0 ]; then
+		mkdir -p "$apps_dir/settings"
+		ln "$spm_dir/installed/<package-name>/apps/settings/*" "$apps_dir/settings/"
+	fi
+	
 	# create symlinks from "$spm_dir/installed/<package-name>/apps/sv/*" directories, to "$sv_dir"
 	# if $is_a_sys_package:
 	# create symlinks from "$spm_dir/installed/<package-name>/apps-sys/sv/*" directories, to "$sv_sys_dir"
@@ -185,8 +194,14 @@ elif [ "$1" = update ]; then
 	# boot'firmware updates need special care
 	# unless there is a read'only backup, firmware update is not a good idea
 	# so warn and ask the user if she wants the update
-	#
-	# limine bios-install "$device"
+	# doas fwupdmgr get-devices
+	# doas fwupdmgr refresh
+	# doas fwupdmgr get-updates
+	# doas fwupdmgr update
+	
+	if [ "$arch" = x86 ] || [ "$arch" = x86_64 ]; then
+		limine bios-install "$target_device"
+	fi
 elif [ "$1" = publish ]; then
 	# make a BTRFS snapshot from the project's directory,
 	# to "~/.local/spm/published/$gnunet_namespace/$pkg_name"
