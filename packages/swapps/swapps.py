@@ -27,7 +27,11 @@
 # https://github.com/Ulauncher/Ulauncher/blob/v6/ulauncher/modes/apps/launch_app.py
 # https://github.com/otsaloma/catapult/blob/master/catapult/plugins/apps.py
 
-# the first item is "system" that opens a vte window running "system" command
+# the first item is "settings" that opens a vte window running "settings" command
+
+# an item for screenshot
+# grim wl-clipboard
+# grim -o "$$HOME/.cache/screen.png" | wl-copy --type text/uri-list "file://$$HOME/.cache/screen.png"
 
 import subprocess
 import re
@@ -132,8 +136,8 @@ class AppLauncher:
 			if app.should_show():
 				self.apps_list.insert_sorted(app, self.compare_apps)
 		
-		system_app = Gio.AppInfo.create_from_commandline("system")
-		self.apps_list.insert(0, system_app)
+		settings_app = Gio.AppInfo.create_from_commandline("settings")
+		self.apps_list.insert(0, settings_app)
 		
 	def create_widget(self, app_item :Gio.AppInfo):
 		app_name = app_item.get_name()
@@ -146,7 +150,7 @@ class AppLauncher:
 		
 		icon = app_item.get_icon()
 		if not icon:
-			if app_name = "system":
+			if app_name = "settings":
 				icon = Gio.ThemedIcon("applications-system-symbolic")
 			else:
 				icon = Gio.ThemedIcon("")
