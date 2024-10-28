@@ -1,3 +1,5 @@
+project_dir="$(dirname "$(realpath "$0")")"
+
 apt-get -qq install sway swayidle xwayland lua5.3 lua-lgi gir1.2-gtk-4.0 gnome-console
 cp /mnt/os/{sway.conf,swapps.py} /usr/local/share/
 
@@ -8,27 +10,13 @@ cp /mnt/os/{sway.conf,swapps.py} /usr/local/share/
 # this is to prevent normal users from changing Sway's config
 # this means that, swayidle can't be disabled by a normal user (see sway.conf)
 
-# https://github.com/wmww/gtk4-layer-shell
+# after 600 seconds idle: swapps lock, turn screen off
+# idle can be monitored using a user service
+# dim screen in several steps before turning screen off
 
-# hardlink swaycap.py to swaycap and make it executable
-
-# lock screen:
-# a window in workspace "lockscreen" that asks for password
-# when lock screen is activated, sway goes to "lock" mode with its own set of keybindings
-# if an empty password is entered, or "escape" is pressed, show a readonly view of the projects
-# 	note that external storage devices will be writable
-# when one trys to edit readonly files, or when "alt+tab" is pressed, or when "escape" is pressed in the root window,
-# 	show the password entry
-# during boot, the user will be automatically logged in, and the lock screen will be activated
-# when lock window is closed, reopen it
-
-# after 600 seconds idle, lock
-# idle can be monitored using a user service)
-# dim screen in several steps before locking
-
-# to prevent BadUSB, when a new input device is connected lock the session
+# to prevent BadUSB, when a new input device is connected: swapps lock
 # a user service checks when "/spm/installed/system/new-input-added" file is created, locks the session
-# mdev rule that when an input device (ATTR{bInterfaceClass}=="03") is added:
+# udev rule that when an input device (ATTR{bInterfaceClass}=="03") is added:
 # 	 touch /spm/installed/system/new-input-added
 
 # mono'space fonts:
