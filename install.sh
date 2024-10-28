@@ -90,13 +90,13 @@ fi
 spm_linux_dir="$project_dir"/.cache/spm-linux
 mkdir -p "$spm_linux_dir"
 mount "$target_partition2" "$spm_linux_dir"
-mkdir -p "$spm_linux_dir"/{apps,spm,tmp,run,proc,sys,dev,boot}
+mkdir -p "$spm_linux_dir"/{apps,packages,tmp,run,proc,sys,dev,boot}
 
-mkdir -p "$spm_linux_dir"/spm/installed/$gnunet_namespace/system
-cp "$project_dir"/packages/system/spm.sh \
-	"$spm_linux_dir"/spm/installed/$gnunet_namespace/system/spm.sh
+mkdir -p "$spm_linux_dir"/packages/installed/$gnunet_namespace/spm
+cp "$project_dir"/packages/spm/spm.sh \
+	"$spm_linux_dir"/packages/installed/$gnunet_namespace/spm/spm.sh
 if [ "$build_from_src" = true ]; then
-	echo "use_prebuilt = true" > "$spm_linux_dir"/installed/$gnunet_namespace/system/var/config/spm.conf
+	echo "use_prebuilt = true" > "$spm_linux_dir"/packages/installed/$gnunet_namespace/spm/var/config/spm.conf
 fi
 
 gnunet-config --section=ats --option=WAN_QUOTA_IN --value=unlimited
@@ -107,6 +107,7 @@ gnunet-config --section=ats --option=LAN_QUOTA_OUT --value=unlimited
 echo 'acpid
 bash
 bluez
+busybox
 curl-http
 dbus
 eudev
@@ -116,14 +117,15 @@ gnunet
 limine
 linux
 lsh
-pipewire
+netman
 seatd
+spm
 sway
 system
 termulator
 codev' | while read -r pkg_name; do
 	url="gnunet://$gnunet_namespace/packages/$pkg_name"
-	sh "$spm_linux_dir"/spm/installed/system/spm.sh install "$pkg_name" "$url"
+	sh "$spm_linux_dir"/packages/installed/spm/spm.sh install "$pkg_name" "$url"
 done
 
 if [ "$arch" = x86 ] || [ "$arch" = x86_64 ]; then
@@ -140,6 +142,16 @@ elif [ "$arch" = ppc64le ]; then
 	__EOF__
 	umount "$spm_linux_dir"/boot
 fi
+
+tz="$(echo "$TZ")"
+[ -z "$tz" ] && [ -L /etc/localtime ] && tz="$(realpath /etc/localtime)"
+# if $tz starts with slash or dot, cut */zoneinfo/ prefix
+[ -z "$tz" ] || {
+	# https://www.freedesktop.org/software/ModemManager/doc/latest/ModemManager/gdbus-org.freedesktop.ModemManager1.Modem.Time.html
+	# https://lazka.github.io/pgi-docs/ModemManager-1.0/classes/NetworkTimezone.html
+}
+# if it's different:
+echo "$tz" > $busybox_dir/var/config/timezone
 
 echo; printf "set username: "
 read -r username
