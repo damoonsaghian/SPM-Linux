@@ -9,5 +9,3 @@
 # actually i don't know if there is any standalone gps device with this ability
 
 # https://wiki.archlinux.org/title/GPS
-
-# also get help from available sensors to calculate location even when the gps signal is lost
