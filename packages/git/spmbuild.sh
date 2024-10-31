@@ -2,7 +2,3 @@
 # https://github.com/git/git/blob/master/Makefile
 # configure git to use lsh instead of openssh:
 # 	https://github.com/git/git/blob/master/Documentation/config/ssh.txt
-
-# curl
-# gnutls backend
-# only build http/https protocols
