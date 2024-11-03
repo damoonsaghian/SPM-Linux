@@ -1,6 +1,6 @@
 # https://gitlab.freedesktop.org/gstreamer/gstreamer
 # gst-plugins-base: don't provide xlib
-# gst-plugins-good: don't provide xlib gtk3
+# gst-plugins-good: don't provide xlib gtk3 libsoup3
 # gst-plugins-ugly: don't provide sidplay
 # gst-plugins-bad: av1(aom-libs), h264(openh264), h265(libde265), and aac(fdk-aac)
 # 	don't provide xlib gtk3 directfb dc1394 libopenni openssl curl libneon microdns
