@@ -108,21 +108,21 @@ echo 'acpid
 bash
 bluez
 busybox
-curl-http
+chrony
 dbus
 eudev
-fsprogs
 fwupd
-gnunet
 limine
 linux
-lsh
 netman
+sd
 seatd
 spm
+sudo
+swapps
 sway
-system
 termulator
+tz
 codev' | while read -r pkg_name; do
 	url="gnunet://$gnunet_namespace/packages/$pkg_name"
 	sh "$spm_linux_dir"/packages/installed/spm/spm.sh install "$pkg_name" "$url"
@@ -146,12 +146,7 @@ fi
 tz="$(echo "$TZ")"
 [ -z "$tz" ] && [ -L /etc/localtime ] && tz="$(realpath /etc/localtime)"
 # if $tz starts with slash or dot, cut */zoneinfo/ prefix
-[ -z "$tz" ] || {
-	# https://www.freedesktop.org/software/ModemManager/doc/latest/ModemManager/gdbus-org.freedesktop.ModemManager1.Modem.Time.html
-	# https://lazka.github.io/pgi-docs/ModemManager-1.0/classes/NetworkTimezone.html
-}
-# if it's different:
-echo "$tz" > $busybox_dir/var/config/timezone
+[ -z "$tz" ] || echo "$tz" > "$spm_linux_dir"/packages/installed/tz/var/config/timezone
 
 echo; printf "set username: "
 read -r username

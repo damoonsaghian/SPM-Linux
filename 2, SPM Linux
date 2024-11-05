@@ -11,10 +11,13 @@ to build packages from source, these extra programs are required too:
 	git lsh-keygen (or ssh-keygen) clang
 for example you can boot into an Alpine Linux live system, and enter this at the command line:
 ; apk add btrfs-progs gnunet
-when everything is ready, run this (as root) in a terminal:
-; sh install.sh [<arch>]
+to build packages from source, add these too: git openssh-keygen clang
+
+now, SPM Linux can be installed just by running this (as root) in a terminal:
+; sh install.sh <arch>
+if no architecture is provided, current system's architecture will be used
 to build packages from source, run this instead:
-; sh install.sh build [<arch>]
+; sh install.sh build <arch>
 
 the user interface of SPM Linux is very simple
 press "super" (mod+mod) or "alt+tab" to show the application launcher
@@ -25,11 +28,12 @@ the first item in application launcher is "system"; it opens the system menu:
 , timezone
 , password
 , packages
-to close focused window, press "super|alt" + "backspace|escape"
+to switch between windows, press "super+space" or "alt+space" 
+to close focused window, press "super+backspace" or "alt+escape"
 
 the package management process is atomic
 nonetheless, to have a really fail'safe system, redundant backups are necessary
-so make sure to install SPM Linux on a removable storage device, and keep it somewhere safe
+so make sure to have an extra SPM Linux on a removable storage device
 
 to run a program as root:
 ; sudo command
@@ -37,14 +41,13 @@ this "sudo" is not the traditional one
 it runs in a virtual terminal, shows the command at the top, and asks for sudo password,
 	and when "enter" is pressed, returns back to previous virtual terminal
 but to actually go to this virtual terminal, and enter the sudo password,
-	one must press F5 or F6 or F7 or F8
+	one must press F8 (or F7, F6, F5)
 this means that:
 , a malicious program can't steal root password (eg by faking sudo password entry)
 , to enter root password, physical access is necessary,
 	because there is no other way to enter the password in a virtual terminal
-	and since the root account is locked, it's not possible to use programs like "su" or "sudo" or "doas",
-		to run programs as root by providing the root password
-take a look at these:
+	also in SPM Linux, there are no programs like "su", that can get root password at command line
+for further explanation:
 "https://www.reddit.com/r/linuxquestions/comments/8mlil7/whats_the_point_of_the_sudo_password_prompt_if/"
 "https://security.stackexchange.com/questions/119410/why-should-one-use-sudo"
 
