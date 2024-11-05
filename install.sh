@@ -90,7 +90,7 @@ fi
 spm_linux_dir="$project_dir"/.cache/spm-linux
 mkdir -p "$spm_linux_dir"
 mount "$target_partition2" "$spm_linux_dir"
-mkdir -p "$spm_linux_dir"/{apps,packages,tmp,run,proc,sys,dev,boot}
+mkdir -p "$spm_linux_dir"/{apps,packages,etc,var/{cache,lib,log,tmp},tmp,run,proc,sys,dev,boot}
 
 mkdir -p "$spm_linux_dir"/packages/installed/$gnunet_namespace/spm
 cp "$project_dir"/packages/spm/spm.sh \
@@ -142,11 +142,6 @@ elif [ "$arch" = ppc64le ]; then
 	__EOF__
 	umount "$spm_linux_dir"/boot
 fi
-
-tz="$(echo "$TZ")"
-[ -z "$tz" ] && [ -L /etc/localtime ] && tz="$(realpath /etc/localtime)"
-# if $tz starts with slash or dot, cut */zoneinfo/ prefix
-[ -z "$tz" ] || echo "$tz" > "$spm_linux_dir"/packages/installed/tz/var/config/timezone
 
 echo; printf "set username: "
 read -r username
