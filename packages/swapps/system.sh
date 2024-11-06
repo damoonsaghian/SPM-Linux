@@ -153,22 +153,26 @@ radio) manage_radio_devices ;;
 router) manage_router ;;
 esac
 
-set_timezone()
-	echo; echo "setting timezone"
-	# guess the timezone, but ask the user to confirm it
-	geoip_tz="$(wget -q -O- 'http://ip-api.com/line/?fields=timezone')"
-	geoip_tz_continent="$(echo "$geoip_tz" | cut -d / -f1)"
-	geoip_tz_city="$(echo "$geoip_tz" | cut -d / -f2)"
-	tz_continent="$(ls -1 -d /usr/share/zoneinfo/*/ | cut -d / -f5 |
-		fzy -p "select a continent: " -q "$geoip_tz_continent")"
-	tz_city="$(ls -1 /usr/share/zoneinfo/"$tz_continent"/* | cut -d / -f6 |
-		fzy -p "select a city: " -q "$geoip_tz_city")"
-	tz="${tz_continent}/${tz_city}"
+set_timezone() {
+	# if there is a modem
+	if []; then
+		# https://www.freedesktop.org/software/ModemManager/doc/latest/ModemManager/gdbus-org.freedesktop.ModemManager1.Modem.Time.html
+		# https://lazka.github.io/pgi-docs/ModemManager-1.0/classes/NetworkTimezone.html
+		net_tz_offset=
+		net_tz="$(tz "$offset")"
+	else
+		net_tz="$(curl --silent 'http://ip-api.com/line/?fields=timezone')"
+	fi
 	
-	# https://www.freedesktop.org/software/ModemManager/doc/latest/ModemManager/gdbus-org.freedesktop.ModemManager1.Modem.Time.html
-	# https://lazka.github.io/pgi-docs/ModemManager-1.0/classes/NetworkTimezone.html
+	net_tz_continent="$(echo "$net_tz" | cut -d / -f1)"
+	net_tz_city="$(echo "$net_tz" | cut -d / -f2)"
 	
-	echo "$tz" > $script_dir/var/config/timezone
+	# show the list produced by "tz continents"; select $tz_net_continent as default
+	continet=
+	# show the list produced by "tz city $continent"; select $net_tz_city as default
+	city=
+	tz set "$continent/$city""
+}
 
 manage_passwords() {
 	local answer="$(printf "user password\nsudo password" | fzy)"

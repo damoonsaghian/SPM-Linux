@@ -175,12 +175,16 @@ class MyApp(Gtk.Application):
 			window = Gtk.ApplicationWindow(application=app)
 			window.set_child(AppLauncher().widget)
 			
-			# escape: swaymsg '[app_id=swayapps] move scratchpad
+			subprocess.run(['swaymsg', 'mode swapps'])
 			
-			# when window is unfocused: swaymsg mode default
+			# escape: swaymsg "[app_id=swayapps] move scratchpad"
+			
+			# super or alt+tab: swaymsg workspace back_and_forth
 			
 			# when window is unfocused:
-			# swaymsg "[con_id=__focused__] focus" || python3 /usr/local/share/codev || swaymsg "[app_id=swapps] focus"
+			# swaymsg mode default
+			# swaymsg "[con_id=__focused__] focus" || codev || swaymsg "[app_id=swapps] focus"
+			subprocess.run(['swaymsg', 'mode default'])
 			subprocess.run(['swaymsg', "[con_id=__focused__] focus"]) or
 				subprocess.run(['codev']) or
 				subprocess.run(['swaymsg', "[app_id=swapps] focus"])
