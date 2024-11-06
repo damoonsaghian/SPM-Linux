@@ -35,7 +35,13 @@ project_dir="$(dirname "$0")"
 # , chmod 700 /run/user/$user_id
 # , export XDG_RUNTIME_DIR=/run/user/$user_id
 # , run services at /apps/sv as the user, supervised
-# copy "loginit.sh" to "login" in the build dir, under sv dir
+echo '#!/apps/env sh
+[ "$(tty)" = "/dev/tty1" ] && dbus-run-session sway || bash || sh
+' > "$project_dir"/.cache/spm/apps/sv/bash
+
+# poweroff when critical battery charge is reached
+
+# doas rule for /apps/sh /apps/systemctl, for users in sudo group
 
 # https://docs.voidlinux.org/
 #
