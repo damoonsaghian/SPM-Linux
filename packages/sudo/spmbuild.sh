@@ -9,4 +9,4 @@ chmod +x $project_dir/.cache/spm/sudo
 # chkpassword.c
 # chmod +x
 
-# console level keybinding: when "F5-8" is pressed: go to console 8
+# console level keybinding: when "F5-8" is pressed, switch fo virtual terminal 8, if a programming is running there

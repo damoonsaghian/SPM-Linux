@@ -13,8 +13,14 @@ fi
 # https://salsa.debian.org/debian/super/
 # "doas" allow password'less: /apps/bash /spm/installed/system/sudo.sh
 
-# switch to virtual terminal 12 and ask for root password
-# and if successful, run the given command
+# show this message:
+# press F8 (or F7, F6, F5) to access the prompt asking for root password
+#
+# in virtual terminal 8, show the command at the top, and asks for sudo password
+# when "enter" is pressed, returns back to previous virtual terminal
+#
+# if the entered password is correct, run the given command
+
 prompt_command="\\e[92m$(printf "%q " "$@")\\e[0m"
 prompt="$prompt_command\nPWD: $PWD\nsudo password:"
 if openvt -sw --console=12 -- /usr/local/bin/chkpasswd root "$prompt"; then
