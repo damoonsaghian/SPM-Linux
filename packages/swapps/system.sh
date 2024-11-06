@@ -171,7 +171,7 @@ set_timezone() {
 	continet=
 	# show the list produced by "tz city $continent"; select $net_tz_city as default
 	city=
-	tz set "$continent/$city""
+	tz set "$continent/$city"
 }
 
 manage_passwords() {
@@ -211,7 +211,7 @@ mode="$(printf "upgrade\nadd\nremove\ninstall SPM Linux" | fzy)"
 }
 spm "$mode" "$package_name" "$package_name"
 
-[ "$mode" = "install SPM Linux" ] && sh "$(dirname "$0")"/system-install-spmlinux.sh
+[ "$mode" = "install SPM Linux" ] && sh "$(dirname "$0")"/install-spmlinux.sh
 
 
 # session
