@@ -14,10 +14,10 @@ for example you can boot into an Alpine Linux live system, and enter this at the
 to build packages from source, add these too: git openssh-keygen clang
 
 now, SPM Linux can be installed just by running this (as root) in a terminal:
-; sh install.sh <arch>
+; sh spm/spmlinux.sh <arch>
 if no architecture is provided, current system's architecture will be used
 to build packages from source, run this instead:
-; sh install.sh build <arch>
+; sh spm/spmlinux.sh build <arch>
 
 the user interface of SPM Linux is very simple
 press "super" (mod+mod) or "alt+tab" to show the application launcher
