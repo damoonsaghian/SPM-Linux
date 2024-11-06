@@ -1,5 +1,7 @@
 project_dir="$(dirname "$(realpath "$0")")"
 
+$PKG gnunet
+
 mkdir -p "$project_dir"/.cache/spm/apps/system/
 ln "$project_dir"/sysman-packages.sh "$project_dir"/.cache/spm/apps/system/packages
 

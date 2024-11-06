@@ -5,7 +5,7 @@ metered_connection() {
 
 metered_connection && exit 0
 
-# if AC Power
+# if plugged
 # timer
 # 5min after boot
 # every 24h

@@ -13,6 +13,8 @@ if [ $(id -u) = 0 ]; then
 	sv_sys_dir="$apps_sys_dir/sv"
 	dbus_dir="$apps_dir/dbus"
 	dbus_sys_dir="$apps_sys_dir/dbus"
+	config_dir="$spm_dir/../etc"
+	var_dir="$spm_dir/../var"
 else
 	spm_dir="$HOME/.local/spm/packages"
 	apps_dir="$HOME/.local/bin"
@@ -22,6 +24,8 @@ else
 	sv_sys_dir="$HOME/.local/spm/sv"
 	dbus_dir="$HOME/.local/share/dbus-1"
 	dbus_sys_dir="$HOME/.local/share/dbus-1"
+	config_dir="$HOME/.config"
+	var_dir="$HOME/.local/state"
 fi
 
 mkdir -p "$apps_dir" "$apps_sys_dir" "$apps_gui_dir" "$sv_dir" "$sv_sys_dir" "$dbus_dir" "$dbus_sys_dir"
@@ -39,9 +43,6 @@ sys_packages="$sys_packages $(echo \
 
 # LD_LIBRARY_PATH=".:./deps"
 # PATH=".:./deps:/apps-sys:/apps"
-
-# programs are run in the mount namespace corresponding to their installed path
-# they have their own /var/{cache,lib,log,tmp}
 
 if [ "$1" = build ]; then
 	gnunet_url="$2"
@@ -62,7 +63,7 @@ if [ "$1" = build ]; then
 	# pkg_path=.
 	# skip download
 	
-	# if the value of "use_prebuilt" in "$script_dir/var/config/spm.conf" is true,
+	# if the value of "use_prebuilt" in "/etc/spm/spm.conf" is true,
 	# 	and the corresponding directory for the current architecture is available in the given GNUnet URL,
 	# 	just download that into "$spm_dir/downloads/$gnunet_namespace/$pkg_name/.data/spm/<arch>/"
 	# then hardlink these files plus the build directory of packages mentioned in the downloaded "spmdeps" file,
@@ -154,6 +155,8 @@ elif [ "$1" = install ]; then
 	# $dbus_dir/services/
 	# $dbus_sys_dir for sys packages
 	
+	# create symlinks in $config_dir and $var_dir
+	
 	# when package is $gnunet_namespace/limine
 	# mount first partition of the device where this script resides, and copy efi and sys files to it
 	# mkdir /boot
@@ -175,6 +178,8 @@ elif [ "$1" = remove ]; then
 	
 	# remove symlinks in "/apps/sv-sys/" corresponding to "/spm/installed/<package-name>/data/sv-sys/*"
 	# (if package is in "$sys_packages")
+	
+	# remove symlinks in $config_dir and $var_dir
 	
 	# , removes "$spm_dir/installed/<package-name>" directory
 elif [ "$1" = update ]; then
