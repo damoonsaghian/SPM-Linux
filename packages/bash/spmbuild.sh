@@ -1,3 +1,5 @@
+project_dir="$(dirname "$0")"
+
 # https://savannah.gnu.org/git/?group=bash
 
 # bin/bash
