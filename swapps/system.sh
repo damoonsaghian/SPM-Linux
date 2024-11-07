@@ -211,8 +211,7 @@ mode="$(printf "upgrade\nadd\nremove\ninstall SPM Linux" | fzy)"
 }
 spm "$mode" "$package_name" "$package_name"
 
-[ "$mode" = "install SPM Linux" ] && sh "$(dirname "$0")"/install-spmlinux.sh
-
+[ "$mode" = "install SPM Linux" ] && # if not already running, create a gtkvte and run: spm spmlinux
 
 # session
 # connections
