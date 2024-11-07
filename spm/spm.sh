@@ -233,6 +233,8 @@ elif [ "$1" = publish ]; then
 	# the "spmbuild.sh" file will be published into the GNUnet namespace
 	# the source files can be in the same place, or in a Git URL
 	# 	in which case, there must be a "git clone <git-url> .cache/git" line, in the "spmbuild.sh" file
+elif [ "$1" = spmlinux ]; then
+	. "$(dirname "$0")"/spmlinux.sh
 else
 	# show usage guide
 	# spm build [<gnunet-url>|<project-path>]

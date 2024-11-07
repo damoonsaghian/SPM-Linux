@@ -19,4 +19,6 @@ ln "$project_dir"/install-spmlinux.sh "$project_dir"/.cache/spm/
 # 	echo '\n#runit on ~/.local/sv\n' >> "$HOME/.bash_profile"
 # fi
 
+# doas rules for spm and spmlinux.sh
+
 # inhibit suspend/shutdown when an upgrade is in progress
