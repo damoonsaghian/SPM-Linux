@@ -87,14 +87,13 @@ then
 fi
 
 spm_linux_dir="$(mktemp -d)"
-trap "trap - EXIT; umount \"$spm_linux_dir\"; rmdir \"$spm_linux_dir\"" EXIT INT TERM QUIT HUP PIPE
-mkdir -p "$spm_linux_dir"
 mount "$target_partition2" "$spm_linux_dir"
+trap "trap - EXIT; umount \"$spm_linux_dir\"; rmdir \"$spm_linux_dir\"" EXIT INT TERM QUIT HUP PIPE
 
 mkdir -p "$spm_linux_dir"/{apps,packages,etc,var/{cache,lib,log,tmp},tmp,run,proc,sys,dev,boot}
 
-mkdir -p "$spm_linux_dir"/packages/installed/$gnunet_namespace/spm
-cp "$(dirname "$0")"/spm.sh "$spm_linux_dir"/packages/installed/$gnunet_namespace/spm/
+mkdir -p "$spm_linux_dir"/packages/installed/"$gnunet_namespace"/spm
+cp "$(dirname "$0")"/spm.sh "$spm_linux_dir"/packages/installed/"$gnunet_namespace"/spm/
 if [ "$build_from_src" = true ]; then
 	echo "use_prebuilt = true" > "$spm_linux_dir"/etc/spm/config
 fi
@@ -159,7 +158,5 @@ done
 # lock root account
 "$spm_linux_dir"/apps/passwd --lock root
 
-echo; echo -n "installation completed successfully"
-printf "do want to reboot the system? (y/N)"
-read -r answer
-[ "$answer" = y ] && reboot
+echo; echo -n "SPM Linux installed successfully; press any key to exit"
+read -rsn1
