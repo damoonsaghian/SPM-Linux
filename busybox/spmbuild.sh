@@ -34,7 +34,7 @@ project_dir="$(dirname "$0")"
 # , mkdir -p /run/user/$user_id
 # , chmod 700 /run/user/$user_id
 # , export XDG_RUNTIME_DIR=/run/user/$user_id
-# , run services at /apps/sv as the user, supervised
+# , run services at /apps/sv and ~/.local/spm/sv, as the user, supervised
 echo '#!/apps/env sh
 [ "$(tty)" = "/dev/tty1" ] && dbus-run-session sway || bash || sh
 ' > "$project_dir"/.cache/spm/apps/sv/bash
