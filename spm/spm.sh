@@ -1,8 +1,6 @@
 set -e
 
-project_dir="$(dirname "$(realpath "$0")")"
-
-# create a lock in $script_dir/lock which will be removed after exit, and at the system startup
+script_dir="$(dirname "$(realpath "$0")")"
 
 if [ $(id -u) = 0 ]; then
 	spm_dir="$script_dir/../../.."
@@ -28,7 +26,8 @@ else
 	var_dir="$HOME/.local/state"
 fi
 
-mkdir -p "$apps_dir" "$apps_sys_dir" "$apps_gui_dir" "$sv_dir" "$sv_sys_dir" "$dbus_dir" "$dbus_sys_dir"
+mkdir -p "$apps_dir" "$apps_sys_dir" "$apps_gui_dir" \
+	"$sv_dir" "$sv_sys_dir" "$dbus_dir" "$dbus_sys_dir" "$config_dir" "$var_dir"
 
 sys_packages="$sys_packages $(echo \
 	"$gnunet_namespace/{limine,linux,busybox,system,dbus,acpid,seatd,gnunet,sd}")"

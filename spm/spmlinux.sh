@@ -111,6 +111,7 @@ chrony
 dbus
 eudev
 fwupd
+gnunet
 limine
 linux
 netman
