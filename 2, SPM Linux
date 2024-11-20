@@ -13,9 +13,11 @@ for example you can boot into an Alpine Linux live system, and enter this at the
 ; apk add sfdisk btrfs-progs gnunet
 to build packages from source, add these too: git openssh-keygen clang
 
-now, SPM Linux can be installed just by running this (as root) in a terminal:
+now, SPM Linux can be installed on a storage device, just by running this (as root) in a terminal:
 ; sh spm/install.sh <arch>
 if no architecture is provided, current system's architecture will be used
+note that the above command must be run as root,
+	otherwise it just installs SPM package manager in user's home directory
 to build packages from source, run this instead:
 ; sh spm/install.sh build <arch>
 
@@ -36,24 +38,22 @@ nonetheless, to have a really fail'safe system, redundant backups are necessary
 so make sure to have an extra SPM Linux on a removable storage device
 
 to run a program as root:
-; sudo command
-this "sudo" is not the traditional one
-it runs in a virtual terminal, shows the command at the top, and asks for sudo password,
+; pi <command>
+it opens a virtual terminal, shows the command at the top, and asks for root password,
 	and when "enter" is pressed, returns back to previous virtual terminal
-but to actually go to this virtual terminal, and enter the sudo password,
+but to actually go to this virtual terminal, and enter the root password,
 	one must press F8 (or F7, F6, F5)
 this means that:
-, a malicious program can't steal root password (eg by faking sudo password entry)
-, to enter root password, physical access is necessary,
-	because there is no other way to enter the password in a virtual terminal
+, a malicious program can't steal root password (eg by faking root password entry)
+, to run a command as root, physical access is necessary,
+	because there is no other way to enter root password in a virtual terminal
 for further explanation:
 "https://www.reddit.com/r/linuxquestions/comments/8mlil7/whats_the_point_of_the_sudo_password_prompt_if/"
 "https://security.stackexchange.com/questions/119410/why-should-one-use-sudo"
 
-to protect the computer from physical attacks, don't leave the computer with an unlocked session
-in addition you must:
+to protect the computer from physical attacks, you must:
 , somehow prevent tampering with hardware
 , protect boot firmware by a password
 , disable changing the storage device used for booting
-these can make physical attacks more difficult, but keep this in mind:
+these can make physical attacks more difficult, but keep in mind that:
 	physical access to a computer is root access, given enough time and resources
