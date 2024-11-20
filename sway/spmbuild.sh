@@ -1,4 +1,4 @@
-project_dir="$(dirname "$(realpath "$0")")"
+project_dir="$(dirname "$0")"
 
 apt-get -qq install sway swayidle xwayland lua5.3 lua-lgi gir1.2-gtk-4.0 gnome-console
 cp /mnt/os/{sway.conf,swapps.py} /usr/local/share/
@@ -6,9 +6,6 @@ cp /mnt/os/{sway.conf,swapps.py} /usr/local/share/
 # bin/sway:
 # #!sh
 # $script_dir/sway -c $script_dir/sway.conf
-#
-# this is to prevent normal users from changing Sway's config
-# this means that, swayidle can't be disabled by a normal user (see sway.conf)
 
 # after 600 seconds idle: swapps lock, turn screen off
 # idle can be monitored using a user service
