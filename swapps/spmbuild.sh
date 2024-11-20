@@ -1,3 +1,5 @@
+project_dir="$(dirname "$0")"
+
 $PKG python-gobject $gnunet_namespace
 $LNK python-gobject *
 

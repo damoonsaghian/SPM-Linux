@@ -27,6 +27,9 @@
 # https://github.com/Ulauncher/Ulauncher/blob/v6/ulauncher/modes/apps/launch_app.py
 # https://github.com/otsaloma/catapult/blob/master/catapult/plugins/apps.py
 
+# start in lock mode
+# also go to codev workspace and lock it (if running)
+
 # the first item is "settings" that opens a vte window running "settings" command
 
 # an item for screenshot
@@ -176,6 +179,8 @@ class MyApp(Gtk.Application):
 			window.set_child(AppLauncher().widget)
 			
 			subprocess.run(['swaymsg', 'mode swapps'])
+			
+			# don't close swapps, if workspace is empty
 			
 			# escape: swaymsg "[app_id=swayapps] move scratchpad"
 			

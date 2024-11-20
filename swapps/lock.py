@@ -12,4 +12,3 @@
 # if an empty password is entered, or "escape" is pressed, show codev
 
 # during boot, the user will be automatically logged in, and the lock screen will be activated
-

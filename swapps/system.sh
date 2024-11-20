@@ -187,20 +187,11 @@ manage_passwords() {
 }
 
 echo 'packages:'
-mode="$(printf "upgrade\nadd\nremove\ninstall SPM Linux" | fzy)"
+mode="$(printf "upgrade\nremove\ninstall SPM Linux" | fzy)"
 
 # if the content of "$spm_dir/status" is "error", turn "packages" and the "update" item under it, red
 
-[ "$mode" = add ] && {
-	printf 'search for: '
-	read -r search_entry
-	ospkg-deb sync
-	package_name="$(apt-cache search "$search_entry" | fzy | { read -r first _rest; echo "$first"; })"
-	apt-cache show "$package_name"
-	echo "install \"$package_name\"?"
-	answer="$(printf "yes\nno" | fzy)"
-	[ "$answer" = yes ] || exit
-}
+# add section: some suggested apps like termulator
 
 [ "$mode" = remove ] && {
 	package_name="$(apt-cache search --names-only "^ospkg-$(id -u)--.*" | sed s/^.*--// |
