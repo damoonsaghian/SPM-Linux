@@ -1,3 +1,5 @@
+project_dir="$(dirname "$0")"
+
 # gnunet.conf:
 # WLAN_QUOTA_IN = unlimited
 # WLAN_QUOTA_OUT = unlimited
@@ -10,3 +12,5 @@
 # https://en.wikipedia.org/wiki/WiGig
 
 # decentralized time synchronization using DHT
+
+# encrypt the directory containing the private keys for gnunet egos
