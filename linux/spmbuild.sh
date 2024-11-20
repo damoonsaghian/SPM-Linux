@@ -1,3 +1,5 @@
+project_dir="$(dirname "$0")"
+
 # https://kernel.org/
 
 # costume modules path: /spm/linux/modules
@@ -7,7 +9,7 @@
 # create initramfs containing:
 # , the modules and firmwares needed to access the storage device where root resides
 # , libc
-# , busybox executable and two symlinks to it named "mount" and "mdev"
+# , sh mount blkid
 # https://docs.kernel.org/admin-guide/initrd.html
 # https://gitlab.alpinelinux.org/alpine/mkinitfs
 # https://wiki.gentoo.org/wiki/Custom_Initramfs
