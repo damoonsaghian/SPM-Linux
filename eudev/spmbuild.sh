@@ -1,3 +1,5 @@
+project_dir="$(dirname "$0")"
+
 # https://github.com/eudev-project/eudev
 
 # skip eudev-hwids
