@@ -5,19 +5,19 @@ SPM packages are simple source code directories containing a file named "spmbuil
 SPM packages do not need dependency tracking, because all the files needed at run'time,
 	will be available under the same directory, using hard links
 
-to install SPM Linux, first we need to be in a Posix compliant system, with these programs installed:
-	fdisk mkfs.vfat mkfs.btrfs gnunet
+to install SPM Linux, first we need to be in a Linux system with these programs installed:
+	sfdisk mkfs.vfat mkfs.btrfs gnunet sed
 to build packages from source, these extra programs are required too:
 	git lsh-keygen (or ssh-keygen) clang
 for example you can boot into an Alpine Linux live system, and enter this at the command line:
-; apk add btrfs-progs gnunet
+; apk add sfdisk btrfs-progs gnunet
 to build packages from source, add these too: git openssh-keygen clang
 
 now, SPM Linux can be installed just by running this (as root) in a terminal:
-; sh spm/spmlinux.sh <arch>
+; sh spm/install.sh <arch>
 if no architecture is provided, current system's architecture will be used
 to build packages from source, run this instead:
-; sh spm/spmlinux.sh build <arch>
+; sh spm/install.sh build <arch>
 
 the user interface of SPM Linux is very simple
 press "super" (mod+mod) or "alt+tab" to show the application launcher
@@ -46,7 +46,6 @@ this means that:
 , a malicious program can't steal root password (eg by faking sudo password entry)
 , to enter root password, physical access is necessary,
 	because there is no other way to enter the password in a virtual terminal
-	also in SPM Linux, there are no programs like "su", that can get root password at command line
 for further explanation:
 "https://www.reddit.com/r/linuxquestions/comments/8mlil7/whats_the_point_of_the_sudo_password_prompt_if/"
 "https://security.stackexchange.com/questions/119410/why-should-one-use-sudo"
