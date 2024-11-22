@@ -19,7 +19,7 @@ if no architecture is provided, current system's architecture will be used
 note that the above command must be run as root,
 	otherwise it just installs SPM package manager in user's home directory
 to build packages from source, run this instead:
-; sh spm/install.sh build <arch>
+; sh spm/install.sh src <arch>
 
 the user interface of SPM Linux is very simple
 press "super" (mod+mod) or "alt+tab" to show the application launcher
