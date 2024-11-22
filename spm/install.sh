@@ -1,16 +1,31 @@
 set -e
 
-# if uid is not 0, install spm to home directory
+gnunet_namespace=
 
-if [ "$1" = build ]; then
-	build_from_src=true
+if [ "$1" = src ]; then
 	arch="$2"
 else
 	arch="$1"
 fi
 [ -z "$arch" ] && arch="$(uname --machine)"
 
-gnunet_namespace=
+# if this script is run by any user other than root, just install "spm" to user's home directory, and exit
+# this needs to be done in a Posix compliant system with these programs installed:
+# 	gnunet sed
+# to build packages from source, these extra programs are required too:
+# 	git lsh-keygen (or ssh-keygen) clang
+if [ $(id -u) != 0 ]; then
+	[ "$1" = src ] && echo "always_build_from_src = true" > ~/.config/spm.conf
+	
+	gnunet-config --section=ats --option=WAN_QUOTA_IN --value=unlimited
+	gnunet-config --section=ats --option=WAN_QUOTA_OUT --value=unlimited
+	gnunet-config --section=ats --option=LAN_QUOTA_IN --value=unlimited
+	gnunet-config --section=ats --option=LAN_QUOTA_OUT --value=unlimited
+	
+	sh "$(dirname "$0")"/spm.sh install "$gnunet_namespace"/packages/spm
+	
+	exit
+fi
 
 echo; echo "available storage devices:"
 printf "\tname\tsize\tmodel\n"
@@ -85,8 +100,11 @@ mkdir -p "$spm_linux_dir"/{packages,boot,home,var/{cache,lib,log,tmp},tmp,run,pr
 
 mkdir -p "$spm_linux_dir"/packages/installed/"$gnunet_namespace"/spm
 cp "$(dirname "$0")"/spm.sh "$spm_linux_dir"/packages/installed/"$gnunet_namespace"/spm/
-if [ "$build_from_src" = true ]; then
-	echo "always_build = true" > "$spm_linux_dir"/var/lib/spm/config
+if [ "$1" = src ]; then
+	mkdir -p "$spm_linux_dir"/var/lib/spm
+	echo "always_build_from_src = true" > "$spm_linux_dir"/var/lib/spm/config
+	mkdir -p "$spm_linux_dir"/home/.config
+	echo "always_build_from_src = true" > "$spm_linux_dir"/home/.config/spm.conf
 fi
 
 gnunet-config --section=ats --option=WAN_QUOTA_IN --value=unlimited
@@ -117,7 +135,7 @@ sudo
 tz
 util-linux' | while read -r pkg_name; do
 	url="gnunet://$gnunet_namespace/packages/$pkg_name"
-	sh "$spm_linux_dir"/packages/installed/spm/spm.sh install "$pkg_name" "$url"
+	sh "$spm_linux_dir"/packages/installed/"$gnunet_namespace"/spm/spm.sh install "$pkg_name" "$url"
 done
 
 if [ "$arch" = x86 ] || [ "$arch" = x86_64 ]; then

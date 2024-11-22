@@ -10,12 +10,14 @@ if [ $(id -u) = 0 ]; then
 	apps_gui_dir="$pkgs_dir/../usr/share/applications"
 	sv_dir="$pkgs_dir/../usr/share/sv"
 	dbus_dir="$apps_dir/../usr/share/dbus-1"
+	config_dir=
 else
 	pkgs_dir="$HOME/.spm-packages"
 	apps_dir="$HOME/.local/bin"
 	apps_gui_dir="$HOME/.local/share/applications"
 	sv_dir="$HOME/.local/share/sv"
 	dbus_dir="$HOME/.local/share/dbus-1"
+	config_dir=
 fi
 mkdir -p "$apps_dir" "$sv_dir" "$dbus_dir"
 
@@ -52,7 +54,7 @@ if [ "$1" = build ]; then
 	# pkg_path=.
 	# skip download
 	
-	# if there is no "always_build" line in "/var/lib/spm/config",
+	# if there is no "always_build_from_src" line in "$config_dir/spm/config",
 	# 	and the corresponding directory for the current architecture is available in the given GNUnet URL,
 	# 	just download that into "$pkgs_dir/downloads/$gnunet_namespace/$pkg_name/.data/spm/<arch>/"
 	# then hardlink these files plus the build directory of packages mentioned in the downloaded "spmdeps" file,
