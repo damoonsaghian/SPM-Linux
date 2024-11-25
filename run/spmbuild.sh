@@ -1,5 +1,6 @@
 project_dir="$(dirname "$0")"
 
-cp "$project_dir"/.cache/compiled/"$arch"/sudo.sh "$project_dir"/.cache/spm/"$arch"/sv/sudo
+# exas service: listen to dbus messages
+# exas client: send dbus messages
 
 # console level keybinding: when "F5-8" is pressed, switch fo virtual terminal 8, if a programming is running there
