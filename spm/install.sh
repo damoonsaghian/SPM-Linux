@@ -15,15 +15,22 @@ fi
 # to build packages from source, these extra programs are required too:
 # 	git lsh-keygen (or ssh-keygen) clang
 if [ $(id -u) != 0 ]; then
-	[ "$1" = src ] && echo "always_build_from_src = true" > ~/.config/spm.conf
+	if [ "$1" = src ]; then
+		state_dir="$XDG_STATE_HOME"
+		[ -z "$state_dir" ] && state_dir="$HOME/.local/state"
+		mkdir -p "$state_dir"/spm
+		echo "always_build_from_src = true" > "$state_dir"/spm/config
+	fi
 	
 	gnunet-config --section=ats --option=WAN_QUOTA_IN --value=unlimited
 	gnunet-config --section=ats --option=WAN_QUOTA_OUT --value=unlimited
 	gnunet-config --section=ats --option=LAN_QUOTA_IN --value=unlimited
 	gnunet-config --section=ats --option=LAN_QUOTA_OUT --value=unlimited
 	
-	sh "$(dirname "$0")"/spm.sh install "$gnunet_namespace"/packages/spm
-	
+	spm_dir="$HOME/.spm/packages/$gnunet_namespace/spm"
+	mkdir -p "$spm_dir"
+	cp "$(dirname "$0")"/spm.sh "$spm_dir"/
+	sh "$spm_dir"/spm.sh install "$gnunet_namespace"/packages/spm
 	exit
 fi
 
@@ -96,15 +103,15 @@ spm_linux_dir="$(mktemp -d)"
 mount "$target_partition2" "$spm_linux_dir"
 trap "trap - EXIT; umount \"$spm_linux_dir\"; rmdir \"$spm_linux_dir\"" EXIT INT TERM QUIT HUP PIPE
 
-mkdir -p "$spm_linux_dir"/{packages,boot,home,var/{cache,lib,log,tmp},tmp,run,proc,sys,dev}
+mkdir -p "$spm_linux_dir"/{packages,var/{cache,state},home,tmp,run,proc,sys,dev}
+chmod a+w "$spm_linux_dir"/tmp
+chown 1000:1000 "$spm_linux_dir"/home
 
-mkdir -p "$spm_linux_dir"/packages/installed/"$gnunet_namespace"/spm
-cp "$(dirname "$0")"/spm.sh "$spm_linux_dir"/packages/installed/"$gnunet_namespace"/spm/
+mkdir -p "$spm_linux_dir"/packages/"$gnunet_namespace"/spm
+cp "$(dirname "$0")"/spm.sh "$spm_linux_dir"/packages/"$gnunet_namespace"/spm/
 if [ "$1" = src ]; then
-	mkdir -p "$spm_linux_dir"/var/lib/spm
-	echo "always_build_from_src = true" > "$spm_linux_dir"/var/lib/spm/config
-	mkdir -p "$spm_linux_dir"/home/.config
-	echo "always_build_from_src = true" > "$spm_linux_dir"/home/.config/spm.conf
+	mkdir -p "$spm_linux_dir"/var/state/spm
+	echo "always_build_from_src = true" > "$spm_linux_dir"/var/state/spm/config
 fi
 
 gnunet-config --section=ats --option=WAN_QUOTA_IN --value=unlimited
@@ -116,7 +123,6 @@ echo 'acpid
 bash
 bluez
 chrony
-coreutils
 dash
 dbus
 dte
@@ -127,15 +133,15 @@ limine
 linux
 netman
 runit
+sbase
 sd
-sed
 seatd
 spm
 sudo
 tz
 util-linux' | while read -r pkg_name; do
 	url="gnunet://$gnunet_namespace/packages/$pkg_name"
-	sh "$spm_linux_dir"/packages/installed/"$gnunet_namespace"/spm/spm.sh install "$pkg_name" "$url"
+	sh "$spm_linux_dir"/packages/"$gnunet_namespace"/spm/spm.sh install "$pkg_name" "$url"
 done
 
 if [ "$arch" = x86 ] || [ "$arch" = x86_64 ]; then
