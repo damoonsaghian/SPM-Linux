@@ -38,7 +38,8 @@ nonetheless, to have a really fail'safe system, redundant backups are necessary
 so make sure to have an extra SPM Linux on a removable storage device
 
 to run a program as root:
-; run <command>
+; sudo <command>
+note that, this is not the traditional "sudo"
 it opens a virtual terminal, shows the command at the top, and asks for root password,
 	and when "enter" is pressed, returns back to previous virtual terminal
 but to actually go to this virtual terminal, and enter the root password,
