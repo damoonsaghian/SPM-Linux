@@ -3,11 +3,11 @@ set -e
 gnunet_namespace=
 
 if [ "$1" = src ]; then
-	arch="$2"
+	export ARCH="$2"
 else
-	arch="$1"
+	export ARCH="$1"
 fi
-[ -z "$arch" ] && arch="$(uname --machine)"
+[ -z "$ARCH" ] && ARCH="$(uname --machine)"
 
 # if this script is run by any user other than root, just install "spm" to user's home directory, and exit
 # this needs to be done in a Posix compliant system with these programs installed:
@@ -103,12 +103,10 @@ spm_linux_dir="$(mktemp -d)"
 mount "$target_partition2" "$spm_linux_dir"
 trap "trap - EXIT; umount \"$spm_linux_dir\"; rmdir \"$spm_linux_dir\"" EXIT INT TERM QUIT HUP PIPE
 
-mkdir -p "$spm_linux_dir"/{packages,var/{cache,state},home,tmp,run,proc,sys,dev}
-chmod a+w "$spm_linux_dir"/tmp
+mkdir -p "$spm_linux_dir"/{packages,home,tmp,run,proc,sys,dev}
 chown 1000:1000 "$spm_linux_dir"/home
+chmod a+w "$spm_linux_dir"/tmp
 
-mkdir -p "$spm_linux_dir"/packages/"$gnunet_namespace"/spm
-cp "$(dirname "$0")"/spm.sh "$spm_linux_dir"/packages/"$gnunet_namespace"/spm/
 if [ "$1" = src ]; then
 	mkdir -p "$spm_linux_dir"/var/state/spm
 	echo "always_build_from_src = true" > "$spm_linux_dir"/var/state/spm/config
@@ -118,6 +116,10 @@ gnunet-config --section=ats --option=WAN_QUOTA_IN --value=unlimited
 gnunet-config --section=ats --option=WAN_QUOTA_OUT --value=unlimited
 gnunet-config --section=ats --option=LAN_QUOTA_IN --value=unlimited
 gnunet-config --section=ats --option=LAN_QUOTA_OUT --value=unlimited
+
+spm_dir="$spm_linux_dir"/packages/"$gnunet_namespace"/spm
+mkdir -p "$spm_dir"
+cp "$(dirname "$0")"/spm.sh "$spm_dir"/
 
 echo 'acpid
 bash
@@ -140,24 +142,8 @@ spm
 sudo
 tz
 util-linux' | while read -r pkg_name; do
-	url="gnunet://$gnunet_namespace/packages/$pkg_name"
-	sh "$spm_linux_dir"/packages/"$gnunet_namespace"/spm/spm.sh install "$pkg_name" "$url"
+	sh "$spm_dir"/spm.sh install "$gnunet_namespace/packages/$pkg_name"
 done
-
-if [ "$arch" = x86 ] || [ "$arch" = x86_64 ]; then
-	"$spm_linux_dir"/usr/bin/limine bios-install "$target_device"
-elif [ "$arch" = ppc64le ]; then
-	# only OPAL Petitboot based systems are supported
-	mount "$target_partition1" "$spm_linux_dir"/boot
-	cat <<-EOF > "$spm_linux_dir"/boot/syslinux.cfg
-	PROMPT 0
-	LABEL SPM Linux
-		LINUX vmlinuz
-		APPEND root=UUID=$(blkid /dev/"$target_partition2" | sed -rn 's/.*UUID="(.*)".*/\1/p') rw
-		INITRD initramfs.img
-	EOF
-	umount "$spm_linux_dir"/boot
-fi
 
 echo; printf "set root password: "
 while true; do
@@ -169,8 +155,8 @@ while true; do
 	printf "set root password: "
 done
 root_password_hashed=
-mkdir -p "$spm_linux_dir"/var/lib/pi/passwd
-echo "$root_password_hashed" > "$spm_linux_dir"/var/lib/pi/passwd
+mkdir -p "$spm_linux_dir"/var/state/sudo/passwd
+echo "$root_password_hashed" > "$spm_linux_dir"/var/state/sudo/passwd
 
 echo; printf "set lock'screen password: "
 while true; do
@@ -182,7 +168,7 @@ while true; do
 	printf "set lock'screen password: "
 done
 lock_password_hashed=
-echo "$lock_password_hashed" >> "$spm_linux_dir"/var/lib/pi/passwd
+echo "$lock_password_hashed" >> "$spm_linux_dir"/var/state/sudo/passwd
 
 echo; echo -n "SPM Linux installed successfully; press any key to exit"
 read -rsn1

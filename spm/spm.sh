@@ -1,23 +1,25 @@
 set -e
 
+[ -z "$ARCH" ] && ARCH="$(uname --machine)"
+
 script_dir="$(dirname "$(realpath "$0")")"
 
 gnunet_namespace=
 
-spm_dir="$script_dir/../../../.."
-if [ $(id -u) = 0 ] && [ -z "$EXAS" ]; then
-	cmd_dir="$spm_dir/exps/cmd"
-	sv_dir="$spm_dir/exps/sv"
-	dbus_dir="$spm_dir/exps/dbus"
-	state_dir="$spm_dir/var/state"
-	cache_dir="$spm_dir/var/cache"
-elif [ $(id -u) = 0 ] && [ -n "$EXAS" ]; then
-	cmd_dir="$spm_dir/exp/cmd"
-	sv_dir="$spm_dir/exp/sv"
-	dbus_dir="$spm_dir/exp/dbus"
-	apps_dir="$spm_dir/exp/applications"
-	state_dir="$spm_dir/var/state"
-	cache_dir="$spm_dir/var/cache"
+root_dir="$script_dir/../../../.."
+if [ $(id -u) = 0 ] && [ -z "$SUDO" ]; then
+	cmd_dir="$root_dir/exps/cmd"
+	sv_dir="$root_dir/exps/sv"
+	dbus_dir="$root_dir/exps/dbus"
+	state_dir="$root_dir/var/state"
+	cache_dir="$root_dir/var/cache"
+elif [ $(id -u) = 0 ] && [ -n "$SUDO" ]; then
+	cmd_dir="$root_dir/exp/cmd"
+	sv_dir="$root_dir/exp/sv"
+	dbus_dir="$root_dir/exp/dbus"
+	apps_dir="$root_dir/exp/applications"
+	state_dir="$root_dir/var/state"
+	cache_dir="$root_dir/var/cache"
 else
 	cmd_dir="$HOME/.local/bin"
 	sv_dir="$HOME/.spm/exp/sv"
@@ -30,7 +32,7 @@ else
 	[ -z "$cache_dir" ] &&
 		cache_dir="$HOME/.cache"
 fi
-mkdir -p "$cmd_dir" "$apps_dir" "$sv_dir" "$dbus_dir"
+mkdir -p "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
 
 # https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
 # signing Git tags: https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work
@@ -116,19 +118,19 @@ elif [ "$1" = install ]; then
 	# the GNUnet URL is stored in "$pkgs_dir/<gnunet-namespace>/<package-name>/pkg_url" file
 	# this will be used to update the app
 	
-	# for files in "$spm_dir/packages/<gnunet-namespace>/<package-name>/exp/cmd/*":
+	# for files in "$root_dir/packages/<gnunet-namespace>/<package-name>/exp/cmd/*":
 	# chmod +x file
 	# if the file name has no extention, symlink into "$cmd_dir"
 	# if the file name has an extention:
 	# , if [ $(id -u) != 0 ]; then in the first line replace #!/exp/cmd/env with #!/usr/bin/env  
 	# , symlink it into "$cmd_dir" (without extention)
 	
-	# create symlinks from "$spm_dir/packages/<gnunet-namespace>/<package-name>/exp/cmd/*"
+	# create symlinks from "$root_dir/packages/<gnunet-namespace>/<package-name>/exp/cmd/*"
 	# files into "$apps_dir"
 	
-	# create symlinks from "$spm_dir/packages/<gnunet-namespace>/<package-name>/exp/sv/*" directories, to "$sv_dir"
+	# create symlinks from "$root_dir/packages/<gnunet-namespace>/<package-name>/exp/sv/*" directories, to "$sv_dir"
 	
-	# create symlinks from "$spm_dir/packages/<gnunet-namespace>/<package-name>/exp/dbus/*" directories
+	# create symlinks from "$root_dir/packages/<gnunet-namespace>/<package-name>/exp/dbus/*" directories
 	# to "$dbus_dir"
 	
 	# when package is $gnunet_namespace/limine
@@ -140,21 +142,34 @@ elif [ "$1" = install ]; then
 	# copy efi file to "$boot_dir"/EFI/BOOT/
 	umount "$boot_dir"; rmdir "$boot_dir"
 	
+	if [ "$ARCH" = x86 ] || [ "$ARCH" = x86_64 ]; then
+		"$root_dir"/exps/cmd/limine bios-install "$target_device"
+	elif [ "$ARCH" = ppc64le ]; then
+		# only OPAL Petitboot based systems are supported
+		cat <<-EOF > "$boot_dir"/syslinux.cfg
+		PROMPT 0
+		LABEL SPM Linux
+			LINUX vmlinuz
+			APPEND root=UUID=$(blkid /dev/"$root_device_partition2" | sed -rn 's/.*UUID="(.*)".*/\1/p') rw
+			INITRD initramfs.img
+		EOF
+	fi
+	
 	# when package is $gnunet_namespace/linux
 	# mount first partition of the device where this script resides, and copy the kernel and initramfs to it
 	# umount
 elif [ "$1" = remove ]; then
 	package_name="$2"
 	
-	# removes the files mentioned in "$spm_dir/packages/<gnunet-namespace>/<package-name>/exp/cmd" from "$cmd_dir"
+	# removes the files mentioned in "$root_dir/packages/<gnunet-namespace>/<package-name>/exp/cmd" from "$cmd_dir"
 	
-	# remove symlinks in "$spm_dir/exp/apps/" corresponding to
-	# "$spm_dir/packages/<gnunet-namespace>/<package-name>/exp/apps/*.desktop"
+	# remove symlinks in "$root_dir/exp/apps/" corresponding to
+	# "$root_dir/packages/<gnunet-namespace>/<package-name>/exp/apps/*.desktop"
 	
-	# remove symlinks in "$spm_dir/exp/sv/" corresponding to
-	# "$spm_dir/packages/<gnunet-namespace>/<package-name>/exp/sv/*"
+	# remove symlinks in "$root_dir/exp/sv/" corresponding to
+	# "$root_dir/packages/<gnunet-namespace>/<package-name>/exp/sv/*"
 	
-	# , removes "$spm_dir/packages/<gnunet-namespace>/<package-name>" directory
+	# , removes "$root_dir/packages/<gnunet-namespace>/<package-name>" directory
 elif [ "$1" = update ]; then
 	# directories in $pkgs_dir
 	# see if "$pkgs_dir/<gnunet-namespace>/<package-nam>/url" file exists
