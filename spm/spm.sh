@@ -4,26 +4,24 @@ set -e
 
 script_dir="$(dirname "$(realpath "$0")")"
 
-gnunet_namespace=
-
-root_dir="$script_dir/../../../.."
+root_dir="$script_dir/../../.."
+state_dir="$root_dir/var/state"
+cache_dir="$root_dir/var/cache"
 if [ $(id -u) = 0 ] && [ -z "$SUDO" ]; then
-	cmd_dir="$root_dir/exps/cmd"
-	sv_dir="$root_dir/exps/sv"
-	dbus_dir="$root_dir/exps/dbus"
-	state_dir="$root_dir/var/state"
-	cache_dir="$root_dir/var/cache"
-elif [ $(id -u) = 0 ] && [ -n "$SUDO" ]; then
-	cmd_dir="$root_dir/exp/cmd"
+	packages="$root_dir/packages"
+	cmd_dir="$root_dir/exp/cmd" # "exp" directory contains package exports
 	sv_dir="$root_dir/exp/sv"
 	dbus_dir="$root_dir/exp/dbus"
-	apps_dir="$root_dir/exp/applications"
-	state_dir="$root_dir/var/state"
-	cache_dir="$root_dir/var/cache"
+elif [ $(id -u) = 0 ] && [ -n "$SUDO" ]; then
+	packages="$root_dir/packages+" # "pkg+" directory contains non'essential packages
+	cmd_dir="$root_dir/exp+/cmd"
+	sv_dir="$root_dir/exp+/sv"
+	dbus_dir="$root_dir/exp+/dbus"
+	apps_dir="$root_dir/exp+/apps"
 else
+	packages="$HOME/.packages"
 	cmd_dir="$HOME/.local/bin"
-	sv_dir="$HOME/.spm/exp/sv"
-	dbus_dir="$HOME/.spm/exp/dbus"
+	dbus_dir="$HOME/.local/share/dbus-1"
 	apps_dir="$HOME/.local/share/applications"
 	state_dir="$XDG_STATE_HOME"
 	[ -z "$state_dir" ] &&
@@ -32,7 +30,7 @@ else
 	[ -z "$cache_dir" ] &&
 		cache_dir="$HOME/.cache"
 fi
-mkdir -p "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
+mkdir -p "$packages" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
 
 # https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
 # signing Git tags: https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work
@@ -49,14 +47,15 @@ mkdir -p "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
 # PATH=".:./deps:$PATH"
 
 if [ "$1" = build ]; then
-	gnunet_url="$2"
-	arch="$3"
+	gnunet_url="gnunet://$2"
 	gnunet_namespace=
 	pkg_name=
 	
-	# when mod time of .cache/spm is newer than mod time of project directory, skip
+	pkg_dir="$cache_dir/spm/$gnunet_namespace/$pkg_name"
 	
-	# if "spmbuild.sh" file is in the project directory, that is the package to be built
+	# when mod time of "$pkg_dir/.cache/spm" is newer than mod time of project directory, skip
+	
+	# if "spmbuild.sh" file is in the project directory, that dir is the package to be built
 	# otherwise search for it in child directories
 	# 	the first one found plus its siblings are the packages to be built
 	
@@ -64,22 +63,22 @@ if [ "$1" = build ]; then
 	# so exit to avoid an infinite loop
 	
 	# when there is no given URL, consider the working directory as the package to build
-	# pkg_path=.
+	# pkg_dir=.
 	# skip download
 	
 	# if there is no "always_build_from_src" line in "$state_dir/spm/config",
 	# 	and the corresponding directory for the current architecture is available in the given GNUnet URL,
-	# 	just download that into "$cache_dir/spm/downloads/$gnunet_namespace/$pkg_name/.data/spm/<arch>/"
+	# 	just download that into "$pkg_dir/.data/spm/<arch>/"
 	# then hardlink these files plus the build directory of packages mentioned in the downloaded "spmdeps" file,
-	# 	into ".cache/spm/built"
+	# 	into "$pkg_dir/.cache/spm/built"
 	# check the signature
 	# and thats it, exit
 	
-	# try to download the package from "$gnunet_url" to "$cache_dir/spm/downloads/$gnunet_namespace/$pkg_name/"
+	# try to download the package from "$gnunet_url" to "$pkg_dir/"
 	
-	# after download, check the signatures in ".data/spm/sig" using the key(s) (if any) in:
-	# "$pkgs_dir/keys/$gnunet_namespace/$pkg_name" 
-	# make a hard link from ".data/spm/key" to "$pkgs_dir/keys/$gnunet_namespace/$pkg_name"
+	# after download, check the signatures in "$pkg_dir/.data/spm/sig" using the key(s) (if any) in:
+	# "$state_dir/spm/keys/$gnunet_namespace/$pkg_name" 
+	# make a hard link from ".data/spm/key" to "$state_dir/spm/keys/$gnunet_namespace/$pkg_name"
 	
 	# build the packages mentioned in "spmbuild.sh", in lines starting with "$PKG"
 	
@@ -161,6 +160,8 @@ elif [ "$1" = install ]; then
 elif [ "$1" = remove ]; then
 	package_name="$2"
 	
+	# warn if package_name is sway, swapps, termulator, or codev
+	
 	# removes the files mentioned in "$root_dir/packages/<gnunet-namespace>/<package-name>/exp/cmd" from "$cmd_dir"
 	
 	# remove symlinks in "$root_dir/exp/apps/" corresponding to
@@ -177,7 +178,7 @@ elif [ "$1" = update ]; then
 	# if third line exists, it's a public key; use it to check the signature (in ".data/sig")
 	# run spm install for each one
 	
-	# check in each update, if the ref count if files in .cache/spm/builds is 1, clean that package
+	# check in each update, if the ref count of files in .cache/spm/builds is 1, clean that package
 	# file_ref_count=$(stat -c %h filename)
 	
 	# when the namespace directory is empty, delete it, then:

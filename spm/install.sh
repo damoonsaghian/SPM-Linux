@@ -3,11 +3,12 @@ set -e
 gnunet_namespace=
 
 if [ "$1" = src ]; then
-	export ARCH="$2"
+	ARCH="$2"
 else
-	export ARCH="$1"
+	ARCH="$1"
 fi
 [ -z "$ARCH" ] && ARCH="$(uname --machine)"
+export ARCH
 
 # if this script is run by any user other than root, just install "spm" to user's home directory, and exit
 # this needs to be done in a Posix compliant system with these programs installed:
@@ -121,6 +122,7 @@ spm_dir="$spm_linux_dir"/packages/"$gnunet_namespace"/spm
 mkdir -p "$spm_dir"
 cp "$(dirname "$0")"/spm.sh "$spm_dir"/
 
+# essential (non'removable) packages
 echo 'acpid
 bash
 bluez
@@ -145,30 +147,15 @@ util-linux' | while read -r pkg_name; do
 	sh "$spm_dir"/spm.sh install "$gnunet_namespace/packages/$pkg_name"
 done
 
-echo; printf "set root password: "
-while true; do
-	read -rs root_password
-	printf "enter password again: "
-	read -rs root_password_again
-	[ "$root_password" = "$root_password_again" ] && break
-	echo "the entered passwords were not the same; try again"
-	printf "set root password: "
+echo 'sway
+swapps
+termulator
+codev' | while read -r pkg_name; do
+	SUDO=1 sh "$spm_dir"/spm.sh install "$gnunet_namespace/packages/$pkg_name"
 done
-root_password_hashed=
-mkdir -p "$spm_linux_dir"/var/state/sudo/passwd
-echo "$root_password_hashed" > "$spm_linux_dir"/var/state/sudo/passwd
 
-echo; printf "set lock'screen password: "
-while true; do
-	read -rs lock_password
-	printf "enter password again: "
-	read -rs lock_password_again
-	[ "$lock_password" = "$lock_password_again" ] && break
-	echo "the entered passwords were not the same; try again"
-	printf "set lock'screen password: "
-done
-lock_password_hashed=
-echo "$lock_password_hashed" >> "$spm_linux_dir"/var/state/sudo/passwd
+"$spm_linux_dir"/exp/cmd/sudo passwd
+"$spm_linux_dir"/exp/cmd/sudo passwd lockscreen
 
 echo; echo -n "SPM Linux installed successfully; press any key to exit"
 read -rsn1
