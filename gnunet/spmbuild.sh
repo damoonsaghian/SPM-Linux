@@ -1,10 +1,19 @@
 project_dir="$(dirname "$0")"
 
-# gnunet.conf:
-# WLAN_QUOTA_IN = unlimited
-# WLAN_QUOTA_OUT = unlimited
-# WAN_QUOTA_IN = unlimited
-# WAN_QUOTA_OUT = unlimited
+echo '[ats]
+WLAN_QUOTA_IN = unlimited
+WLAN_QUOTA_OUT = unlimited
+WAN_QUOTA_IN = unlimited
+WAN_QUOTA_OUT = unlimited
+
+[hostlist]
+# Options:
+# -p : provide a hostlist as a hostlist servers
+# -b : bootstrap using configured hostlist servers
+# -e : enable learning advertised hostlists
+# -a : advertise hostlist to other servers
+OPTIONS = -b -e -a -p
+' > "$project_dir/.cache/spm/gnunet.conf"
 
 # inhibit suspend/shutdown when a publish is in progress
 
