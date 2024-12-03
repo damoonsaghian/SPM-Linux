@@ -2,6 +2,8 @@
 
 // if "--term <term>" is given: export TERM=<term>
 
+// -n --normal: normal user with user id 1000
+
 export SUDO=1
 
 /*
@@ -53,8 +55,8 @@ fi
 */
 
 /*
+sudo passwd root
 sudo passwd
-sudo passwd lockscreen
 
 if argv[0] begin with "/", find the realpath of argv[0], then the dirname, then ../../../var/state/sudo/passwd
 otherwise just use /var/state/sudo/passwd
