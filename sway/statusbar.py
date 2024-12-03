@@ -218,7 +218,7 @@ active_net_device="$(networkctl list | grep routable | { read -r _ net_dev _; ec
 # 	function() print "System just resumed from hibernate or suspend" end
 # )
 # other than the system timezone, show date in universal format:
-# 	UTC timezone and Persian calendar with Cyrus epoch
+# 	UTC timezone and Persian calendar with Deioces epoch
 # https://github.com/omid/Persian-Calendar-for-Gnome-Shell/blob/master/PersianCalendar%40oxygenws.com/PersianDate.js
 
 # click on empty space, or status area:
