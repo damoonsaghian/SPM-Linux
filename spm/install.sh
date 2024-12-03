@@ -155,7 +155,7 @@ codev' | while read -r pkg_name; do
 done
 
 "$spm_linux_dir"/exp/cmd/sudo passwd
-"$spm_linux_dir"/exp/cmd/sudo passwd lockscreen
+"$spm_linux_dir"/exp/cmd/sudo passwd root
 
 echo; echo -n "SPM Linux installed successfully; press any key to exit"
 read -rsn1

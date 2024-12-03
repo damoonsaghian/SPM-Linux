@@ -1,3 +1,4 @@
+#!/exp/env sh
 set -e
 
 [ -z "$ARCH" ] && ARCH="$(uname --machine)"
@@ -5,40 +6,48 @@ set -e
 script_dir="$(dirname "$(realpath "$0")")"
 
 root_dir="$script_dir/../../.."
-state_dir="$root_dir/var/state"
-cache_dir="$root_dir/var/cache"
-if [ $(id -u) = 0 ] && [ -z "$SUDO" ]; then
+if [ $(id -u) = 0 ]; then
 	packages="$root_dir/packages"
 	cmd_dir="$root_dir/exp/cmd" # "exp" directory contains package exports
 	sv_dir="$root_dir/exp/sv"
 	dbus_dir="$root_dir/exp/dbus"
-elif [ $(id -u) = 0 ] && [ -n "$SUDO" ]; then
-	packages="$root_dir/packages+" # "pkg+" directory contains non'essential packages
-	cmd_dir="$root_dir/exp+/cmd"
-	sv_dir="$root_dir/exp+/sv"
-	dbus_dir="$root_dir/exp+/dbus"
-	apps_dir="$root_dir/exp+/apps"
+	apps_dir="$root_dir/exp/apps"
+	state_dir="$root_dir/var/state"
+	cache_dir="$root_dir/var/cache"
 else
 	packages="$HOME/.packages"
 	cmd_dir="$HOME/.local/bin"
-	dbus_dir="$HOME/.local/share/dbus-1"
-	apps_dir="$HOME/.local/share/applications"
+	
+	data_dir="$XDG_DATA_HOME"
+	[ -z "$data_dir" ] && data_dir="$HOME/.local/share"
+	dbus_dir="$data_dir/dbus-1"
+	apps_dir="$data_dir/applications"
+	
 	state_dir="$XDG_STATE_HOME"
-	[ -z "$state_dir" ] &&
-		state_dir="$HOME/.local/state"
+	[ -z "$state_dir" ] && state_dir="$HOME/.local/state"
 	cache_dir="$XDG_CACHE_HOME"
-	[ -z "$cache_dir" ] &&
-		cache_dir="$HOME/.cache"
+	[ -z "$cache_dir" ] && cache_dir="$HOME/.cache"
 fi
+
 mkdir -p "$packages" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
 
-# https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
-# signing Git tags: https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work
-# lsh-keygen/ssh-keygen to verify and sign tags
-# 	only git tags signed using ssh keys are supported (gpg is not supported)
-# 	https://git-scm.com/docs/git-config#Documentation/git-config.txt-gpgltformatgtprogram
-# 	https://manpages.debian.org/bookworm/openssh-client/ssh-keygen.1.en.html
-# https://git-scm.com/docs/partial-clone
+# usual build tools mentioned in Build.sh 
+# git clang gpg
+
+git_clone_last_tag() {
+	# https://man.archlinux.org/listing/git
+	
+	# https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
+	
+	# https://git-scm.com/docs/partial-clone
+	
+	# lsh-keygen/ssh-keygen to verify git tags
+	# https://git-scm.com/docs/git-verify-tag
+	# https://git-scm.com/docs/git-config#Documentation/git-config.txt-gpgltformatgtprogram
+	# https://manpages.debian.org/bookworm/lsh-utils/lsh-keygen.1.en.html
+	# https://manpages.debian.org/bookworm/openssh-client/ssh-keygen.1.en.html
+	
+}
 
 # to build a package with alternative parameters:
 # create a new package, add the original package as build dependency, and symlink the source directory
@@ -46,8 +55,8 @@ mkdir -p "$packages" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "
 # LD_LIBRARY_PATH=".:./deps"
 # PATH=".:./deps:$PATH"
 
-if [ "$1" = build ]; then
-	gnunet_url="gnunet://$2"
+spm_build() {
+	gnunet_url="gnunet://fs/sks/$1"
 	gnunet_namespace=
 	pkg_name=
 	
@@ -60,7 +69,7 @@ if [ "$1" = build ]; then
 	# 	the first one found plus its siblings are the packages to be built
 	
 	# if "spmbuild.sh" file is already open, it means that there is a cyclic dependency
-	# so exit to avoid an infinite loop
+	# so warn and exit to avoid an infinite loop
 	
 	# when there is no given URL, consider the working directory as the package to build
 	# pkg_dir=.
@@ -71,22 +80,19 @@ if [ "$1" = build ]; then
 	# 	just download that into "$pkg_dir/.data/spm/<arch>/"
 	# then hardlink these files plus the build directory of packages mentioned in the downloaded "spmdeps" file,
 	# 	into "$pkg_dir/.cache/spm/built"
-	# check the signature
 	# and thats it, exit
 	
 	# try to download the package from "$gnunet_url" to "$pkg_dir/"
+	# if not root, before downloading a package first see if it already exists in /var/cache/spm/
+	# if so, sudo spm update <package-url>, then make hard links in ~/.cache/spm/
 	
-	# after download, check the signatures in "$pkg_dir/.data/spm/sig" using the key(s) (if any) in:
-	# "$state_dir/spm/keys/$gnunet_namespace/$pkg_name" 
-	# make a hard link from ".data/spm/key" to "$state_dir/spm/keys/$gnunet_namespace/$pkg_name"
-	
-	# build the packages mentioned in "spmbuild.sh", in lines starting with "$PKG"
+	# build the packages mentioned in "Build.sh", in lines starting with "$PKG"
 	
 	# packages needed as dependency, are mentioned in the "spmbuild.sh" script, like this:
 	# 	$PKG <package-name> <gnunet-namespace>
 	# this translates to:
 	# 	pkg_<package-name>="$cache_dir/spm/downloads/$gnunet_namespace/$pkg_name"
-	# now we can use "${pkg_$pkg_name}" where ever you want to access a file in a package
+	# now we can use "$pkg_<package-name>" where ever you want to access a file in a package
 	# for run'time dependencies, create hard links:
 	# 	$LNK <package-name> <file-path>
 	# this is what it does:
@@ -94,17 +100,14 @@ if [ "$1" = build ]; then
 	# , creates a hard'link from "$pkg_<package-name>/.cache/spm/builds/<arch>/<file-path-pattern>",
 	# 	to ".cache/spm/builds/<arch>/deps/" directory of the current package
 	
-	if [ $(id -u) = 0 ] && [ is_a_sys_package != true ] ; then
-		adduser --system spm_"$gnunet_namespace-$pkg_name"
-		su -c "sh spmbuild.sh \"$arch\"" spm_"$gnunet_namespace-$pkg_name"
-	else
-		sh spmbuild.sh $arch
-	fi
-elif [ "$1" = install ]; then
+	. "$pkg_dir"/build.sh
+}
+
+spm_install() {
+	url="$1"
 	package_name="$2"
-	url="$3"
 	
-	spm build $url
+	sudo --builder "$script_dir"/spm-build.sh "$url"
 	
 	# if "$pkgs_dir/<gnunet-namespace>/<package-name>/" already exists:
 	# , create "$pkgs_dir/<gnunet-namespace>/<namespace>-new/" directory
@@ -157,6 +160,15 @@ elif [ "$1" = install ]; then
 	# when package is $gnunet_namespace/linux
 	# mount first partition of the device where this script resides, and copy the kernel and initramfs to it
 	# umount
+}
+
+if [ "$1" = build ]; then
+	url="$2"
+	sudo --builder "$script_dir"/spm-build.sh "$url"
+elif [ "$1" = install ]; then
+	url="$2"
+	package_name="$3"
+	spm_install "$url" "$package_name"
 elif [ "$1" = remove ]; then
 	package_name="$2"
 	
@@ -172,17 +184,13 @@ elif [ "$1" = remove ]; then
 	
 	# , removes "$root_dir/packages/<gnunet-namespace>/<package-name>" directory
 elif [ "$1" = update ]; then
-	# directories in $pkgs_dir
-	# see if "$pkgs_dir/<gnunet-namespace>/<package-nam>/url" file exists
-	# download
-	# if third line exists, it's a public key; use it to check the signature (in ".data/sig")
-	# run spm install for each one
+	# for each gnunet_namespace/package_name directory in $packages
+	# spm_install "$url" "$package_name"
 	
 	# check in each update, if the ref count of files in .cache/spm/builds is 1, clean that package
 	# file_ref_count=$(stat -c %h filename)
 	
-	# when the namespace directory is empty, delete it, then:
-	# deluser spm_"$gnunet_namespace"
+	# when the namespace directory is empty, delete it
 	
 	# fwupd
 	# boot'firmware updates need special care
@@ -203,7 +211,10 @@ elif [ "$1" = publish ]; then
 	# ".data/gnurl" stores the project's GNUnet URL: gnunet://fs/sks/<name-space>/projects/<project_name>
 	# package URL is obtained from it like this: gnunet://fs/sks/<name-space>/packages/<project_name>
 	
-	# cross'built the package for all architectures mentioned in "$script_dir/spm.conf" (value of "arch" entry),
+	# publish "~/.local/spm/published/$gnunet_namespace/$pkg_name" (minus the ".cache" directory) to:
+	# "gnunet://fs/sks/<namespace>/packages/<package-name>/"
+	
+	# cross'built the package for all architectures mentioned in "$state_dir/spm.conf" (value of "arch" entry),
 	# and put the results in in ".cache/spm/builds/<arch>/"
 	# in "spmbuild.sh" scripts we can use "$carch" variable when cross'building
 	# "$carch" is an empty string when not cross'building
@@ -211,24 +222,20 @@ elif [ "$1" = publish ]; then
 	# make hard links from "spmdeps" file, plus all files in ".cache/spm/builds/<arch>/" minus "deps" directory,
 	# and put them in ".cache/spm/builds-published/<arch>/"
 	
-	# gnunet-unindex the old published files
-	
-	# publish "~/.local/spm/published/$gnunet_namespace/$pkg_name" (minus the ".cache" directory) to:
-	# "gnunet://fs/sks/<namespace>/packages/<package-name>/"
-	
 	# publish ".cache/spm/builds-published/<arch>/" to:
-	# "gnunet://fs/sks/<namespace>/package_builds/<package-name>/<arch>"
+	# "gnunet://fs/sks/<namespace>/packages_build/<package-name>/<arch>"
 	
 	# the "spmbuild.sh" file will be published into the GNUnet namespace
 	# the source files can be in the same place, or in a Git URL
 	# 	in which case, there must be a "git clone <git-url> .cache/git" line, in the "spmbuild.sh" file
-elif [ "$1" = spmlinux ]; then
-	. "$(dirname "$0")"/spmlinux.sh
+elif [ "$1" = install-spmlinux ]; then
+	. "$script_dir"/install.sh
 else
-	# show usage guide
-	# spm build [<gnunet-url>|<project-path>]
-	# spm install <package-name> <gnunet-url>
-	# spm remove <package-name>
-	# spm update
-	# spm publish
+	echo "usage guide:"
+	echo "	spm build [<gnunet-url>|<project-path>]"
+	echo "	spm install [<gnunet-url>] [<package-name>]"
+	echo "	spm remove <package-name>"
+	echo "	spm update"
+	echo "	spm publish"
+	echo "	spm install-spmlinux"
 fi
