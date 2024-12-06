@@ -6,16 +6,16 @@ set -e
 script_dir="$(dirname "$(realpath "$0")")"
 
 root_dir="$script_dir/../../.."
-if [ $(id -u) = 0 ]; then
-	packages="$root_dir/packages"
+if [ "$(id -u)" = 0 ]; then
+	packages_dir="$root_dir/packages"
 	cmd_dir="$root_dir/exp/cmd" # "exp" directory contains package exports
 	sv_dir="$root_dir/exp/sv"
 	dbus_dir="$root_dir/exp/dbus"
 	apps_dir="$root_dir/exp/apps"
-	state_dir="$root_dir/var/state"
+	state_dir="$root_dir/var/lib"
 	cache_dir="$root_dir/var/cache"
 else
-	packages="$HOME/.packages"
+	packages_dir="$HOME/.packages"
 	cmd_dir="$HOME/.local/bin"
 	
 	data_dir="$XDG_DATA_HOME"
@@ -29,10 +29,20 @@ else
 	[ -z "$cache_dir" ] && cache_dir="$HOME/.cache"
 fi
 
-mkdir -p "$packages" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
+mkdir -p "$packages_dir" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
 
-# usual build tools mentioned in Build.sh 
-# git clang gpg
+make_commands() {
+	for executable in "$@"; do
+		# executable script in .cache/spm/exp/cmd:
+		# LD_LIBRARY_PATH=".:./deps"
+		# PATH=".:./deps:$PATH"
+	done
+}
+
+make_apps() {
+	for executable in "$@"; do
+	done
+}
 
 git_clone_last_tag() {
 	# https://man.archlinux.org/listing/git
@@ -47,33 +57,25 @@ git_clone_last_tag() {
 	# https://manpages.debian.org/bookworm/lsh-utils/lsh-keygen.1.en.html
 	# https://manpages.debian.org/bookworm/openssh-client/ssh-keygen.1.en.html
 	
+	# if a gpg key is given, download and/or build gpg package
 }
 
-# to build a package with alternative parameters:
-# create a new package, add the original package as build dependency, and symlink the source directory
-
-# LD_LIBRARY_PATH=".:./deps"
-# PATH=".:./deps:$PATH"
-
 spm_build() {
-	gnunet_url="gnunet://fs/sks/$1"
-	gnunet_namespace=
-	pkg_name=
+	if [ "$1" = "^gnunet://" ]; then
+		gn_url="$1"
+		gn_namespace="$(echo "$gn_url" | cut -d / -f 1)"
+		pkg_name="$(echo "$pkg_id" | cut -d / -f 2)"
+		
+		# download directory
+		pkg_dir="$cache_dir/spm/$pkg_name"
+	else
+		pkg_dir="$1"
+	fi
 	
-	pkg_dir="$cache_dir/spm/$gnunet_namespace/$pkg_name"
+	# if "$pkg_dir/.cache/build" dir exists, and its mod time is newer compared to "$pkg_dir", return
 	
-	# when mod time of "$pkg_dir/.cache/spm" is newer than mod time of project directory, skip
-	
-	# if "spmbuild.sh" file is in the project directory, that dir is the package to be built
-	# otherwise search for it in child directories
-	# 	the first one found plus its siblings are the packages to be built
-	
-	# if "spmbuild.sh" file is already open, it means that there is a cyclic dependency
+	# if "Build.sh" file is already open, it means that there is a cyclic dependency
 	# so warn and exit to avoid an infinite loop
-	
-	# when there is no given URL, consider the working directory as the package to build
-	# pkg_dir=.
-	# skip download
 	
 	# if there is no "always_build_from_src" line in "$state_dir/spm/config",
 	# 	and the corresponding directory for the current architecture is available in the given GNUnet URL,
@@ -104,10 +106,14 @@ spm_build() {
 }
 
 spm_install() {
-	url="$1"
-	package_name="$2"
+	pkg_id="$1"
 	
-	sudo --builder "$script_dir"/spm-build.sh "$url"
+	pkg_name="$2"
+	[ -z "$2" ] && pkg_name="$(echo "$pkg_id" | cut -d / -f 2)"
+	
+	pkg_dir="$packages_dir/$pkg_name"
+	
+	spm_build "$pkg_id"
 	
 	# if "$pkgs_dir/<gnunet-namespace>/<package-name>/" already exists:
 	# , create "$pkgs_dir/<gnunet-namespace>/<namespace>-new/" directory
@@ -117,23 +123,25 @@ spm_install() {
 	# 	"$cache_dir/spm/downloads/$gnunet_namespace/$pkg_name/.cache/spm/builds/<arch>/",
 	# 	to "$pkgs_dir/<gnunet-namespace>/<package-name>/"
 	
-	# the GNUnet URL is stored in "$pkgs_dir/<gnunet-namespace>/<package-name>/pkg_url" file
+	# the GNUnet URL is stored in "$pkg_dir/pkg_url" file
 	# this will be used to update the app
 	
-	# for files in "$root_dir/packages/<gnunet-namespace>/<package-name>/exp/cmd/*":
+	# for files in "$pkg_dir/exp/cmd/*":
 	# chmod +x file
 	# if the file name has no extention, symlink into "$cmd_dir"
 	# if the file name has an extention:
 	# , if [ $(id -u) != 0 ]; then in the first line replace #!/exp/cmd/env with #!/usr/bin/env  
 	# , symlink it into "$cmd_dir" (without extention)
 	
-	# create symlinks from "$root_dir/packages/<gnunet-namespace>/<package-name>/exp/cmd/*"
+	# create symlinks from "$pkg_dir/exp/cmd/*"
 	# files into "$apps_dir"
 	
-	# create symlinks from "$root_dir/packages/<gnunet-namespace>/<package-name>/exp/sv/*" directories, to "$sv_dir"
-	
-	# create symlinks from "$root_dir/packages/<gnunet-namespace>/<package-name>/exp/dbus/*" directories
+	# create symlinks from "$pkg_dir/exp/dbus/*" directories
 	# to "$dbus_dir"
+	
+	[ "$(id -u)" = 0 ] || return 0
+	
+	# create symlinks from "$pkg_dir/exp/sv/*" directories, to "$sv_dir"
 	
 	# when package is $gnunet_namespace/limine
 	# mount first partition of the device where this script resides, and copy efi and sys files to it
@@ -145,7 +153,7 @@ spm_install() {
 	umount "$boot_dir"; rmdir "$boot_dir"
 	
 	if [ "$ARCH" = x86 ] || [ "$ARCH" = x86_64 ]; then
-		"$root_dir"/exps/cmd/limine bios-install "$target_device"
+		"$cmd_dir"/limine bios-install "$target_device"
 	elif [ "$ARCH" = ppc64le ]; then
 		# only OPAL Petitboot based systems are supported
 		cat <<-EOF > "$boot_dir"/syslinux.cfg
@@ -163,18 +171,29 @@ spm_install() {
 }
 
 if [ "$1" = build ]; then
-	url="$2"
-	sudo --builder "$script_dir"/spm-build.sh "$url"
+	if [ -z "$2" ]; then
+		spm_build .
+	elif [ "$2" != "^gnunet://" ] && [ -nf "$2/Build.sh" ]; then
+		# search for "Build.sh" in child directories of "$2"
+		# the first one found plus its siblings are the packages to be built
+		# run spm_build for each
+	else
+		spm_build "$2"
+	fi
 elif [ "$1" = install ]; then
-	url="$2"
-	package_name="$3"
-	spm_install "$url" "$package_name"
+	spm_install "$2" "$3"
 elif [ "$1" = remove ]; then
-	package_name="$2"
+	pkg_name="$2"
+	pkg_dir="$packages_dir/$pkg_name"
+	url="$(cat "$pkg_dir/pkg_url")"
 	
-	# warn if package_name is sway, swapps, termulator, or codev
+	if [ "$(id -u)" = 0 ]; then
+		# exit if package_name is: acpid bash bluez chrony dash dbus dte eudev fwupd gnunet limine linux netman runit
+		# 	sbase sd seatd spm sudo tz util-linux
+		# warn if package_name is sway, swapps, termulator, or codev
+	fi
 	
-	# removes the files mentioned in "$root_dir/packages/<gnunet-namespace>/<package-name>/exp/cmd" from "$cmd_dir"
+	# removes the files mentioned in "$pkg_dir/exp/cmd" from "$cmd_dir"
 	
 	# remove symlinks in "$root_dir/exp/apps/" corresponding to
 	# "$root_dir/packages/<gnunet-namespace>/<package-name>/exp/apps/*.desktop"
@@ -184,7 +203,7 @@ elif [ "$1" = remove ]; then
 	
 	# , removes "$root_dir/packages/<gnunet-namespace>/<package-name>" directory
 elif [ "$1" = update ]; then
-	# for each gnunet_namespace/package_name directory in $packages
+	# for each gnunet_namespace/package_name directory in $packages_dir
 	# spm_install "$url" "$package_name"
 	
 	# check in each update, if the ref count of files in .cache/spm/builds is 1, clean that package
@@ -233,7 +252,7 @@ elif [ "$1" = install-spmlinux ]; then
 else
 	echo "usage guide:"
 	echo "	spm build [<gnunet-url>|<project-path>]"
-	echo "	spm install [<gnunet-url>] [<package-name>]"
+	echo "	spm install <gnunet-url> [<package-name>]"
 	echo "	spm remove <package-name>"
 	echo "	spm update"
 	echo "	spm publish"
