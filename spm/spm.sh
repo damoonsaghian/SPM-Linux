@@ -44,10 +44,8 @@ make_apps() {
 	done
 }
 
-git_clone_last_tag() {
+git_clone_tag() {
 	# https://man.archlinux.org/listing/git
-	
-	# https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
 	
 	# https://git-scm.com/docs/partial-clone
 	
@@ -61,18 +59,21 @@ git_clone_last_tag() {
 }
 
 spm_build() {
-	if [ "$1" = "^gnunet://" ]; then
+	case "$1" in
+	gnunet://*)
 		gn_url="$1"
 		gn_namespace="$(echo "$gn_url" | cut -d / -f 1)"
 		pkg_name="$(echo "$pkg_id" | cut -d / -f 2)"
 		
 		# download directory
 		pkg_dir="$cache_dir/spm/$pkg_name"
-	else
-		pkg_dir="$1"
-	fi
+		;;
+	*)
+		pkg_dir="$1" ;;
+	esac
 	
-	# if "$pkg_dir/.cache/build" dir exists, and its mod time is newer compared to "$pkg_dir", return
+	# if "$cache_dir/spm/builds/$pkg_group/$pkg_name" dir exists
+	# and its mod time is newer compared to "$pkg_dir", return
 	
 	# if "Build.sh" file is already open, it means that there is a cyclic dependency
 	# so warn and exit to avoid an infinite loop
@@ -173,12 +174,12 @@ spm_install() {
 if [ "$1" = build ]; then
 	if [ -z "$2" ]; then
 		spm_build .
-	elif [ "$2" != "^gnunet://" ] && [ -nf "$2/Build.sh" ]; then
+	elif [ -f "$2/Build.sh" ]; then
+		spm_build "$2"
+	else
 		# search for "Build.sh" in child directories of "$2"
 		# the first one found plus its siblings are the packages to be built
-		# run spm_build for each
-	else
-		spm_build "$2"
+		# run spm_build and spm_test for each
 	fi
 elif [ "$1" = install ]; then
 	spm_install "$2" "$3"
@@ -251,7 +252,7 @@ elif [ "$1" = install-spmlinux ]; then
 	. "$script_dir"/install.sh
 else
 	echo "usage guide:"
-	echo "	spm build [<gnunet-url>|<project-path>]"
+	echo "	spm build [<project-path>]"
 	echo "	spm install <gnunet-url> [<package-name>]"
 	echo "	spm remove <package-name>"
 	echo "	spm update"
