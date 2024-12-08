@@ -59,58 +59,56 @@ git_clone_tag() {
 }
 
 spm_build() {
+	local pkg_name=
+	local pkg_dir="$1"
 	case "$1" in
 	gnunet://*)
-		gn_url="$1"
-		gn_namespace="$(echo "$gn_url" | cut -d / -f 1)"
-		pkg_name="$(echo "$pkg_id" | cut -d / -f 2)"
-		
-		# download directory
-		pkg_dir="$cache_dir/spm/$pkg_name"
-		;;
+		build_dir="$cache_dir/spm/builds/$gn_namespace/$pkg_name"
 	*)
-		pkg_dir="$1" ;;
+		build_dir="$cache_dir/spm/builds/$pkg_group/$pkg_name"
+		;;
 	esac
 	
-	# if "$cache_dir/spm/builds/$pkg_group/$pkg_name" dir exists
-	# and its mod time is newer compared to "$pkg_dir", return
+	# if there is no "always_build_from_src" line in "$state_dir/spm/config",
+	# 	and "$always_build_from_src" is not set,
+	# 	and the corresponding directory for the current architecture is available in $build_url,
+	# 	just download that into "$cache_dir/spm/builds-dl/$gn_namespace/$pkg_name"
+	# then spm_build all the packages mentioned in the included "spmdeps" file
+	# then hardlink the downloaded files plus the the packages mentioned in "spmdeps" file, into "$build_dir"
+	# and thats it, return
+	
+	# try to download the package from "$pkg_url" to "$pkg_dir/"
+	# if not root, before downloading a package first see if it already exists in /var/cache/spm/builds-dl/
+	# if so, sudo spm update <package-url>, then make hard links in ~/.cache/spm/builds-dl/
+	
+	# if "$build_dir" dir exists and its mod time is newer compared to "$pkg_dir", return
 	
 	# if "Build.sh" file is already open, it means that there is a cyclic dependency
 	# so warn and exit to avoid an infinite loop
 	
-	# if there is no "always_build_from_src" line in "$state_dir/spm/config",
-	# 	and the corresponding directory for the current architecture is available in the given GNUnet URL,
-	# 	just download that into "$pkg_dir/.data/spm/<arch>/"
-	# then hardlink these files plus the build directory of packages mentioned in the downloaded "spmdeps" file,
-	# 	into "$pkg_dir/.cache/spm/built"
-	# and thats it, exit
-	
-	# try to download the package from "$gnunet_url" to "$pkg_dir/"
-	# if not root, before downloading a package first see if it already exists in /var/cache/spm/
-	# if so, sudo spm update <package-url>, then make hard links in ~/.cache/spm/
-	
-	# build the packages mentioned in "Build.sh", in lines starting with "$PKG"
-	
-	# packages needed as dependency, are mentioned in the "spmbuild.sh" script, like this:
-	# 	$PKG <package-name> <gnunet-namespace>
-	# this translates to:
-	# 	pkg_<package-name>="$cache_dir/spm/downloads/$gnunet_namespace/$pkg_name"
+	pkg__$pkg_name="$cache_dir/spm/downloads/$gnunet_namespace/$pkg_name"
+	# packages needed as dependency, are mentioned in the "Build.sh" script, like this:
+	# 	spm_build <gnunet-namespace> [<package-name>]
 	# now we can use "$pkg_<package-name>" where ever you want to access a file in a package
-	# for run'time dependencies, create hard links:
-	# 	$LNK <package-name> <file-path>
+	
+	# for run'time dependencies:
+	# 	spm_include <gnunet-namespace> <package-name>
 	# this is what it does:
 	# , appends the URL of the package to ".cache/spm/builds/spmdeps" (if not already)
-	# , creates a hard'link from "$pkg_<package-name>/.cache/spm/builds/<arch>/<file-path-pattern>",
-	# 	to ".cache/spm/builds/<arch>/deps/" directory of the current package
+	# , creates a hard'link from packages mentioned in spmdeps, if the mod time is newer
 	
-	. "$pkg_dir"/build.sh
+	. "$pkg_dir"/Build.sh
+}
+
+spm_include() {
+	# build then create hardlinks
 }
 
 spm_install() {
-	pkg_id="$1"
+	pkg_url="gnunet://fs/sks/$1/packages/$2"
 	
-	pkg_name="$2"
-	[ -z "$2" ] && pkg_name="$(echo "$pkg_id" | cut -d / -f 2)"
+	pkg_name="$3"
+	[ -z "$3" ] && pkg_name="$2"
 	
 	pkg_dir="$packages_dir/$pkg_name"
 	
@@ -172,6 +170,7 @@ spm_install() {
 }
 
 if [ "$1" = build ]; then
+	always_build_from_src=1
 	if [ -z "$2" ]; then
 		spm_build .
 	elif [ -f "$2/Build.sh" ]; then

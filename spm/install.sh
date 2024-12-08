@@ -31,7 +31,7 @@ if [ $(id -u) != 0 ]; then
 	spm_dir="$HOME/.spm/packages/$gnunet_namespace/spm"
 	mkdir -p "$spm_dir"
 	cp "$(dirname "$0")"/spm.sh "$spm_dir"/
-	sh "$spm_dir"/spm.sh install "gnunet://fs/sks/$gnunet_namespace"/packages/spm
+	sh "$spm_dir"/spm.sh install "$gnunet_namespace" spm
 	exit
 fi
 
@@ -144,14 +144,14 @@ spm
 sudo
 tz
 util-linux' | while read -r pkg_name; do
-	sh "$spm_dir"/spm.sh install "gnunet://fs/sks/$gnunet_namespace/packages/$pkg_name"
+	sh "$spm_dir"/spm.sh install "$gnunet_namespace" "$pkg_name"
 done
 
 echo 'sway
 swapps
 termulator
 codev' | while read -r pkg_name; do
-	SUDO=1 sh "$spm_dir"/spm.sh install "gnunet://fs/sks/$gnunet_namespace/packages/$pkg_name"
+	SUDO=1 sh "$spm_dir"/spm.sh install "$gnunet_namespace" "$pkg_name"
 done
 
 "$spm_linux_dir"/exp/cmd/sudo passwd
