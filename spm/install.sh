@@ -118,7 +118,7 @@ gnunet-config --section=ats --option=WAN_QUOTA_OUT --value=unlimited
 gnunet-config --section=ats --option=LAN_QUOTA_IN --value=unlimited
 gnunet-config --section=ats --option=LAN_QUOTA_OUT --value=unlimited
 
-spm_dir="$spm_linux_dir"/packages/"$gnunet_namespace"/spm
+spm_dir="$spm_linux_dir"/packages/spm
 mkdir -p "$spm_dir"
 cp "$(dirname "$0")"/spm.sh "$spm_dir"/
 
@@ -127,6 +127,7 @@ echo 'acpid
 bash
 bluez
 chrony
+codev
 dash
 dbus
 dte
@@ -142,20 +143,16 @@ sd
 seatd
 spm
 sudo
+swapps
+sway
+termulator
 tz
 util-linux' | while read -r pkg_name; do
 	sh "$spm_dir"/spm.sh install "$gnunet_namespace" "$pkg_name"
 done
 
-echo 'sway
-swapps
-termulator
-codev' | while read -r pkg_name; do
-	SUDO=1 sh "$spm_dir"/spm.sh install "$gnunet_namespace" "$pkg_name"
-done
-
-"$spm_linux_dir"/exp/cmd/sudo passwd
-"$spm_linux_dir"/exp/cmd/sudo passwd root
+"$spm_linux_dir"/packages/sudo/sudo passwd
+"$spm_linux_dir"/packages/sudo/sudo passwd root
 
 echo; echo -n "SPM Linux installed successfully; press any key to exit"
 read -rsn1

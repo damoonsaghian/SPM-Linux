@@ -31,18 +31,7 @@ fi
 
 mkdir -p "$packages_dir" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
 
-make_commands() {
-	for executable in "$@"; do
-		# executable script in .cache/spm/exp/cmd:
-		# LD_LIBRARY_PATH=".:./deps"
-		# PATH=".:./deps:$PATH"
-	done
-}
-
-make_apps() {
-	for executable in "$@"; do
-	done
-}
+export LD_RUN_PATH='$ORIGIN/lib'
 
 git_clone_tag() {
 	# https://man.archlinux.org/listing/git
@@ -252,7 +241,8 @@ elif [ "$1" = install-spmlinux ]; then
 else
 	echo "usage guide:"
 	echo "	spm build [<project-path>]"
-	echo "	spm install <gnunet-url> [<package-name>]"
+	echo "	spm build <gnunet-namespace> <package-name>"
+	echo "	spm install <gnunet-namespace> <package-name> [<install-name>]"
 	echo "	spm remove <package-name>"
 	echo "	spm update"
 	echo "	spm publish"
