@@ -11,10 +11,6 @@ fi
 export ARCH
 
 # if this script is run by any user other than root, just install "spm" to user's home directory, and exit
-# this needs to be done in a Posix compliant system with these programs installed:
-# 	gnunet sed
-# to build packages from source, these extra programs are required too:
-# 	git lsh-keygen (or ssh-keygen) clang
 if [ $(id -u) != 0 ]; then
 	if [ "$1" = src ]; then
 		state_dir="$XDG_STATE_HOME"
@@ -122,7 +118,6 @@ spm_dir="$spm_linux_dir"/packages/spm
 mkdir -p "$spm_dir"
 cp "$(dirname "$0")"/spm.sh "$spm_dir"/
 
-# essential (non'removable) packages
 echo 'acpid
 bash
 bluez

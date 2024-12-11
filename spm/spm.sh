@@ -1,4 +1,4 @@
-#!/exp/env sh
+#!/exp/cmd/env sh
 set -e
 
 [ -z "$ARCH" ] && ARCH="$(uname --machine)"
@@ -31,8 +31,6 @@ fi
 
 mkdir -p "$packages_dir" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
 
-export LD_RUN_PATH='$ORIGIN/lib'
-
 git_clone_tag() {
 	# https://man.archlinux.org/listing/git
 	
@@ -45,6 +43,17 @@ git_clone_tag() {
 	# https://manpages.debian.org/bookworm/openssh-client/ssh-keygen.1.en.html
 	
 	# if a gpg key is given, download and/or build gpg package
+}
+
+make_command() {
+	build_dir=
+	cat <<-'EOF' > "$build_dir"/exp/cmd
+	#!/exp/cmd/env sh
+	script_dir="$(dirname "$(realpath "$0")")"
+	export LD_LIBRARY_PATH="$script_dir/../../lib"
+	export PATH="$script_dir/../..:$PATH"
+	EOF
+	chmod +x "$build_dir"/exp/cmd
 }
 
 spm_build() {
