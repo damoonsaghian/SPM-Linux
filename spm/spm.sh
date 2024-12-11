@@ -45,15 +45,28 @@ git_clone_tag() {
 	# if a gpg key is given, download and/or build gpg package
 }
 
-make_command() {
-	build_dir=
-	cat <<-'EOF' > "$build_dir"/exp/cmd
-	#!/exp/cmd/env sh
-	script_dir="$(dirname "$(realpath "$0")")"
-	export LD_LIBRARY_PATH="$script_dir/../../lib"
-	export PATH="$script_dir/../..:$PATH"
-	EOF
-	chmod +x "$build_dir"/exp/cmd
+# this function can be used in SPMbuild.sh scripts to create package export
+# ie commands, applications, dbus interfaces and services, and system services
+spm_exp() {
+	local exp_type="$1" # can be: cmd app dbus sv
+	
+	local executable_path="$2"
+	local executable_name="$(basename "$executable_path")"
+	local exp_path="$(dirname "$executable_path")/exp/$exp_type/$executable_name"
+	
+	case "$exp_type" in
+	cmd | app)
+		cat <<-'EOF' > "$exp_path"
+		#!/exp/cmd/env sh
+		script_dir="$(dirname "$(realpath "$0")")"
+		export LD_LIBRARY_PATH="$script_dir/../../lib"
+		export PATH="$script_dir/../..:$PATH"
+		EOF
+		chmod +x "$exp_path"
+	;;
+	dbus) ;;
+	sv) ;;
+	esac
 }
 
 spm_build() {
@@ -79,7 +92,7 @@ spm_build() {
 	# if not root, before downloading a package first see if it already exists in /var/cache/spm/builds-dl/
 	# if so, sudo spm update <package-url>, then make hard links in ~/.cache/spm/builds-dl/
 	
-	# run spm_build for each package mentioned in SPMdeps file
+	# run spm_build for each package mentioned in SPMdep file
 	
 	# if "$build_dir" dir exists and its mod time is newer compared to "$pkg_dir", return
 	
@@ -130,6 +143,14 @@ spm_install() {
 	
 	# create symlinks from "$pkg_dir/exp/cmd/*"
 	# files into "$apps_dir"
+	
+	# .desktop file name: $package_name.$app_name.desktop
+	# icon_path="$(echo /packages/$pkg_name/exp/app/$app_name.*)"
+	# [Desktop Entry]
+	# Type=Application
+	# Name=$app_name
+	# Icon=$icon_path
+	# Exec=/packages/$pkg_name/exp/app/$app_name
 	
 	# create symlinks from "$pkg_dir/exp/dbus/*" directories
 	# to "$dbus_dir"
