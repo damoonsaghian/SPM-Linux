@@ -79,6 +79,8 @@ spm_build() {
 	# if not root, before downloading a package first see if it already exists in /var/cache/spm/builds-dl/
 	# if so, sudo spm update <package-url>, then make hard links in ~/.cache/spm/builds-dl/
 	
+	# run spm_build for each package mentioned in SPMdeps file
+	
 	# if "$build_dir" dir exists and its mod time is newer compared to "$pkg_dir", return
 	
 	# if "Build.sh" file is already open, it means that there is a cyclic dependency
@@ -96,10 +98,6 @@ spm_build() {
 	# , creates a hard'link from packages mentioned in spmdeps, if the mod time is newer
 	
 	. "$pkg_dir"/Build.sh
-}
-
-spm_include() {
-	# build then create hardlinks
 }
 
 spm_install() {
