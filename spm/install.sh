@@ -24,10 +24,10 @@ if [ $(id -u) != 0 ]; then
 	gnunet-config --section=ats --option=LAN_QUOTA_IN --value=unlimited
 	gnunet-config --section=ats --option=LAN_QUOTA_OUT --value=unlimited
 	
-	spm_dir="$HOME/.spm/packages/$gnunet_namespace/spm"
+	spm_dir="$HOME/.spm/packages/spm"
 	mkdir -p "$spm_dir"
-	cp "$(dirname "$0")"/spm.sh "$spm_dir"/
-	sh "$spm_dir"/spm.sh install "$gnunet_namespace" spm
+	cp "$(dirname "$0")/spm.sh" "$spm_dir/"
+	sh "$spm_dir"/{spm,spm-dl}.sh install "$gnunet_namespace" spm
 	exit
 fi
 
@@ -105,7 +105,7 @@ chown 1000:1000 "$spm_linux_dir"/home
 chmod a+w "$spm_linux_dir"/tmp
 
 if [ "$1" = src ]; then
-	mkdir -p "$spm_linux_dir"/var/state/spm
+	mkdir -p "$spm_linux_dir"/var/lib/spm
 	echo "always_build_from_src = true" > "$spm_linux_dir"/var/state/spm/config
 fi
 
@@ -116,7 +116,7 @@ gnunet-config --section=ats --option=LAN_QUOTA_OUT --value=unlimited
 
 spm_dir="$spm_linux_dir"/packages/spm
 mkdir -p "$spm_dir"
-cp "$(dirname "$0")"/spm.sh "$spm_dir"/
+cp "$(dirname "$0")"/{spm,spm-dl}.sh "$spm_dir"/
 
 echo 'acpid
 bash

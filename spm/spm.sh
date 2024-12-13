@@ -31,6 +31,11 @@ fi
 
 mkdir -p "$packages_dir" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
 
+# dependencies:
+# , libs: hardcode relative path of lib (no searching for libs)
+# , commands: usually as hashbang; use relative path
+# , lib data: avoid it
+
 git_clone_tag() {
 	# https://man.archlinux.org/listing/git
 	
@@ -59,8 +64,6 @@ spm_exp() {
 		cat <<-'EOF' > "$exp_path"
 		#!/exp/cmd/env sh
 		script_dir="$(dirname "$(realpath "$0")")"
-		export LD_LIBRARY_PATH="$script_dir/../../lib"
-		export PATH="$script_dir/../..:$PATH"
 		EOF
 		chmod +x "$exp_path"
 	;;
@@ -72,12 +75,11 @@ spm_exp() {
 spm_build() {
 	local pkg_name=
 	local pkg_dir="$1"
+	local build_dir=
+	
 	case "$1" in
-	gnunet://*)
-		build_dir="$cache_dir/spm/builds/$gn_namespace/$pkg_name"
-	*)
-		build_dir="$cache_dir/spm/builds/$pkg_group/$pkg_name"
-		;;
+	gnunet://*) build_dir="$cache_dir/spm/builds/$gn_namespace/$pkg_name" ;;
+	*) build_dir="$cache_dir/spm/builds/$pkg_group/$pkg_name" ;;
 	esac
 	
 	# if there is no "always_build_from_src" line in "$state_dir/spm/config",
@@ -92,8 +94,6 @@ spm_build() {
 	# if not root, before downloading a package first see if it already exists in /var/cache/spm/builds-dl/
 	# if so, sudo spm update <package-url>, then make hard links in ~/.cache/spm/builds-dl/
 	
-	# run spm_build for each package mentioned in SPMdep file
-	
 	# if "$build_dir" dir exists and its mod time is newer compared to "$pkg_dir", return
 	
 	# if "Build.sh" file is already open, it means that there is a cyclic dependency
@@ -106,9 +106,7 @@ spm_build() {
 	
 	# for run'time dependencies:
 	# 	spm_include <gnunet-namespace> <package-name>
-	# this is what it does:
-	# , appends the URL of the package to ".cache/spm/builds/spmdeps" (if not already)
-	# , creates a hard'link from packages mentioned in spmdeps, if the mod time is newer
+	# this will append the URL of the package to ".cache/spm/builds/spmdeps" (if not already)
 	
 	. "$pkg_dir"/Build.sh
 }
