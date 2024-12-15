@@ -34,7 +34,7 @@ mkdir -p "$packages_dir" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_di
 # dependencies:
 # , libs:
 # 	symlink into $pkg_dir/dep/lib
-# 	when building: LD_RUN_PATH=\$ORIGIN/../../$pkg_name/dep/lib
+# 	when building: -rpath=\$ORIGIN/../../$pkg_name/dep/lib
 # , commands:
 # 	symlink into $pkg_dir/dep/cmd
 # 	in sh scripts of commands and apps: export PATH=$script_dir/../../dep/cmd:/exp/cmd
