@@ -32,9 +32,15 @@ fi
 mkdir -p "$packages_dir" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
 
 # dependencies:
-# , libs: hardcode relative path of lib (no searching for libs)
-# , commands: usually as hashbang; use relative path
-# , lib data: avoid it
+# , libs:
+# 	symlink into $pkg_dir/dep/lib
+# 	when building: LD_RUN_PATH=\$ORIGIN/../../$pkg_name/dep/lib
+# , commands:
+# 	symlink into $pkg_dir/dep/cmd
+# 	in sh scripts of commands and apps: export PATH=$script_dir/../../dep/cmd:/exp/cmd
+# , lib data (like fonts and icons):
+# 	symlink the dat directories into $pkg_dir/data
+# 	in sh scripts of commands and apps: export XDG_DATA_DIRS=$script_dir/../../dep/data
 
 git_clone_tag() {
 	# https://man.archlinux.org/listing/git
