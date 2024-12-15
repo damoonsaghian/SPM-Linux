@@ -5,17 +5,17 @@ set -e
 
 script_dir="$(dirname "$(realpath "$0")")"
 
-root_dir="$script_dir/../../.."
+root_dir="$script_dir/../../../../../.."
 if [ "$(id -u)" = 0 ]; then
-	packages_dir="$root_dir/packages"
-	cmd_dir="$root_dir/exp/cmd" # "exp" directory contains package exports
-	sv_dir="$root_dir/exp/sv"
-	dbus_dir="$root_dir/exp/dbus"
-	apps_dir="$root_dir/exp/apps"
+	builds_dir="$root_dir/var/lib/spm/builds"
+	cmd_dir="$root_dir/inst/cmd"
+	sv_dir="$root_dir/inst/sv"
+	dbus_dir="$root_dir/inst/dbus" # dbus interfaces and services
+	apps_dir="$root_dir/inst/apps" # system services
 	state_dir="$root_dir/var/lib"
 	cache_dir="$root_dir/var/cache"
 else
-	packages_dir="$HOME/.packages"
+	builds_dir="$HOME/.local/state/spm/builds"
 	cmd_dir="$HOME/.local/bin"
 	
 	data_dir="$XDG_DATA_HOME"
@@ -29,19 +29,20 @@ else
 	[ -z "$cache_dir" ] && cache_dir="$HOME/.cache"
 fi
 
-mkdir -p "$packages_dir" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
+mkdir -p "$builds_dir" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
 
 # dependencies:
 # , libs:
 # 	symlink into $pkg_dir/dep/lib
-# 	when building: -rpath=\$ORIGIN/../../$pkg_name/dep/lib
+# 	when building: -rpath=\$ORIGIN/../../../$gnunet_namespace/$pkg_name/dep/lib
 # , commands:
 # 	symlink into $pkg_dir/dep/cmd
-# 	in sh scripts of commands and apps: export PATH=$script_dir/../../dep/cmd:/exp/cmd
+# 	in sh scripts of commands and apps: export PATH="$script_dir:$script_dir/../../dep/cmd:/exp/cmd"
 # , lib data (like fonts and icons):
-# 	symlink the dat directories into $pkg_dir/data
-# 	in sh scripts of commands and apps: export XDG_DATA_DIRS=$script_dir/../../dep/data
+# 	symlink the data directories into $pkg_dir/data
+# 	in sh scripts of commands and apps: export XDG_DATA_DIRS="$script_dir/../../dep/data"
 
+# this function can be used in SPMbuild.sh scripts to clone a tag brach from a git repository
 git_clone_tag() {
 	# https://man.archlinux.org/listing/git
 	
@@ -53,29 +54,25 @@ git_clone_tag() {
 	# https://manpages.debian.org/bookworm/lsh-utils/lsh-keygen.1.en.html
 	# https://manpages.debian.org/bookworm/openssh-client/ssh-keygen.1.en.html
 	
-	# if a gpg key is given, download and/or build gpg package
+	# if a gpg key is given, download and build gpg package
 }
 
-# this function can be used in SPMbuild.sh scripts to create package export
-# ie commands, applications, dbus interfaces and services, and system services
-spm_exp() {
-	local exp_type="$1" # can be: cmd app dbus sv
-	
-	local executable_path="$2"
+# this function can be used in SPMbuild.sh scripts to create commands and applications
+spm_mkexec() {
+	local executable_path="$1"
+	local destination_path="$2"
 	local executable_name="$(basename "$executable_path")"
-	local exp_path="$(dirname "$executable_path")/exp/$exp_type/$executable_name"
+	local inst_path="$(dirname "$executable_path")/../$destination_path/$executable_name"
 	
-	case "$exp_type" in
-	cmd | app)
-		cat <<-'EOF' > "$exp_path"
-		#!/exp/cmd/env sh
-		script_dir="$(dirname "$(realpath "$0")")"
-		EOF
-		chmod +x "$exp_path"
-	;;
-	dbus) ;;
-	sv) ;;
-	esac
+	cat <<-'EOF' > "$exp_path"
+	#!/exp/cmd/env sh
+	script_dir="$(dirname "$(realpath "$0")")"
+	root_dir="$script_dir/../../../../../.."
+	export PATH="$script_dir/../../exp/cmd:$script_dir/../../imp/cmd:$root_dir/inst/cmd"
+	export XDG_DATA_DIRS="$script_dir/../../exp/data:$script_dir/../../imp/data"
+	EOF
+	echo "\$script_dir/$executable_path" > "$exp_path"
+	chmod +x "$exp_path"
 }
 
 spm_build() {
@@ -123,7 +120,7 @@ spm_install() {
 	pkg_name="$3"
 	[ -z "$3" ] && pkg_name="$2"
 	
-	pkg_dir="$packages_dir/$pkg_name"
+	pkg_dir="$builds_dir/$pkg_name"
 	
 	spm_build "$pkg_id"
 	
@@ -205,7 +202,7 @@ elif [ "$1" = install ]; then
 	spm_install "$2" "$3"
 elif [ "$1" = remove ]; then
 	pkg_name="$2"
-	pkg_dir="$packages_dir/$pkg_name"
+	pkg_dir="$builds_dir/$pkg_name"
 	url="$(cat "$pkg_dir/pkg_url")"
 	
 	if [ "$(id -u)" = 0 ]; then
@@ -224,7 +221,7 @@ elif [ "$1" = remove ]; then
 	
 	# , removes "$root_dir/packages/<gnunet-namespace>/<package-name>" directory
 elif [ "$1" = update ]; then
-	# for each gnunet_namespace/package_name directory in $packages_dir
+	# for each gnunet_namespace/package_name directory in $builds_dir
 	# spm_install "$url" "$package_name"
 	
 	# check in each update, if the ref count of files in .cache/spm/builds is 1, clean that package
@@ -269,12 +266,12 @@ elif [ "$1" = publish ]; then
 	# the source files can be in the same place, or in a Git URL
 	# 	in which case, there must be a "git clone <git-url> .cache/git" line, in the "spmbuild.sh" file
 elif [ "$1" = install-spmlinux ]; then
-	. "$script_dir"/install.sh
+	sudo sh "$script_dir"/install.sh
 else
 	echo "usage guide:"
 	echo "	spm build [<project-path>]"
 	echo "	spm build <gnunet-namespace> <package-name>"
-	echo "	spm install <gnunet-namespace> <package-name> [<install-name>]"
+	echo "	spm install <gnunet-namespace> <package-name>"
 	echo "	spm remove <package-name>"
 	echo "	spm update"
 	echo "	spm publish"
