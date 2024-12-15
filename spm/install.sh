@@ -24,10 +24,10 @@ if [ $(id -u) != 0 ]; then
 	gnunet-config --section=ats --option=LAN_QUOTA_IN --value=unlimited
 	gnunet-config --section=ats --option=LAN_QUOTA_OUT --value=unlimited
 	
-	spm_dir="$HOME/.spm/packages/spm"
+	spm_dir="$HOME/.local/state/spm/builds/$gnunet_namespace/spm"
 	mkdir -p "$spm_dir"
-	cp "$(dirname "$0")/spm.sh" "$spm_dir/"
-	sh "$spm_dir"/{spm,spm-dl}.sh install "$gnunet_namespace" spm
+	cp "$(dirname "$0")/{spm,spm-dl}.sh" "$spm_dir/"
+	sh "$spm_dir"/spm.sh install "$gnunet_namespace" spm
 	exit
 fi
 
@@ -100,13 +100,13 @@ spm_linux_dir="$(mktemp -d)"
 mount "$target_partition2" "$spm_linux_dir"
 trap "trap - EXIT; umount \"$spm_linux_dir\"; rmdir \"$spm_linux_dir\"" EXIT INT TERM QUIT HUP PIPE
 
-mkdir -p "$spm_linux_dir"/{packages,home,tmp,run,proc,sys,dev}
+mkdir -p "$spm_linux_dir"/{home,tmp,run,proc,sys,dev}
 chown 1000:1000 "$spm_linux_dir"/home
 chmod a+w "$spm_linux_dir"/tmp
 
 if [ "$1" = src ]; then
 	mkdir -p "$spm_linux_dir"/var/lib/spm
-	echo "always_build_from_src = true" > "$spm_linux_dir"/var/state/spm/config
+	echo "always_build_from_src = true" > "$spm_linux_dir"/var/lib/spm/config
 fi
 
 gnunet-config --section=ats --option=WAN_QUOTA_IN --value=unlimited
@@ -114,7 +114,7 @@ gnunet-config --section=ats --option=WAN_QUOTA_OUT --value=unlimited
 gnunet-config --section=ats --option=LAN_QUOTA_IN --value=unlimited
 gnunet-config --section=ats --option=LAN_QUOTA_OUT --value=unlimited
 
-spm_dir="$spm_linux_dir"/packages/spm
+spm_dir="$spm_linux_dir/var/lib/spm/builds/$gnunet_namespace/spm"
 mkdir -p "$spm_dir"
 cp "$(dirname "$0")"/{spm,spm-dl}.sh "$spm_dir"/
 
@@ -146,8 +146,8 @@ util-linux' | while read -r pkg_name; do
 	sh "$spm_dir"/spm.sh install "$gnunet_namespace" "$pkg_name"
 done
 
-"$spm_linux_dir"/packages/sudo/sudo passwd
-"$spm_linux_dir"/packages/sudo/sudo passwd root
+"$spm_linux_dir"/inst/cmd/sudo passwd
+"$spm_linux_dir"/inst/cmd/sudo passwd root
 
 echo; echo -n "SPM Linux installed successfully; press any key to exit"
 read -rsn1
