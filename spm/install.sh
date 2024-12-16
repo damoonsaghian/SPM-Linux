@@ -26,7 +26,7 @@ if [ $(id -u) != 0 ]; then
 	
 	spm_dir="$HOME/.local/state/spm/builds/$gnunet_namespace/spm"
 	mkdir -p "$spm_dir"
-	cp "$(dirname "$0")/{spm,spm-dl}.sh" "$spm_dir/"
+	cp "$(dirname "$0")/spm.sh" "$spm_dir/"
 	sh "$spm_dir"/spm.sh install "$gnunet_namespace" spm
 	exit
 fi
@@ -116,7 +116,7 @@ gnunet-config --section=ats --option=LAN_QUOTA_OUT --value=unlimited
 
 spm_dir="$spm_linux_dir/var/lib/spm/builds/$gnunet_namespace/spm"
 mkdir -p "$spm_dir"
-cp "$(dirname "$0")"/{spm,spm-dl}.sh "$spm_dir"/
+cp "$(dirname "$0")"/spm.sh "$spm_dir"/
 
 echo 'acpid
 bash

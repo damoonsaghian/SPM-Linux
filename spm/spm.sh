@@ -31,16 +31,16 @@ fi
 
 mkdir -p "$builds_dir" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
 
-# dependencies:
+# imports:
 # , libs:
-# 	symlink into $pkg_dir/dep/lib
-# 	when building: -rpath=\$ORIGIN/../../../$gnunet_namespace/$pkg_name/dep/lib
+# 	symlink into $pkg_dir/lib
+# 	when building: -rpath="\$ORIGIN/../../../$gnunet_namespace/$pkg_name/lib"
 # , commands:
-# 	symlink into $pkg_dir/dep/cmd
-# 	in sh scripts of commands and apps: export PATH="$script_dir:$script_dir/../../dep/cmd:/exp/cmd"
+# 	symlink into $pkg_dir/cmd
+# 	in sh scripts of commands and apps: export PATH="$script_dir:/inst/cmd"
 # , lib data (like fonts and icons):
 # 	symlink the data directories into $pkg_dir/data
-# 	in sh scripts of commands and apps: export XDG_DATA_DIRS="$script_dir/../../dep/data"
+# 	in sh scripts of commands and apps: export XDG_DATA_DIRS="$script_dir/../data"
 
 # this function can be used in SPMbuild.sh scripts to clone a tag brach from a git repository
 git_clone_tag() {
@@ -73,6 +73,27 @@ spm_mkexec() {
 	EOF
 	echo "\$script_dir/$executable_path" > "$exp_path"
 	chmod +x "$exp_path"
+}
+
+spm_download() {
+	pkg_url="$1"
+	build_url=
+	gn_namespace="$(echo "$gn_url" | cut -d / -f 1)"
+	pkg_name="$(echo "$pkg_id" | cut -d / -f 2)"
+	
+	# download directory
+	pkg_dir="$cache_dir/spm/$pkg_name"
+	
+	build_dir="$cache_dir/spm/builds/$gn_namespace/$pkg_name"
+	
+	# if there is no "always_build_from_src" line in "$state_dir/spm/config",
+	# 	and the corresponding directory for the current architecture is available in $build_url,
+	# 	just download that into "$cache_dir/spm/builds-dl/$gn_namespace/$pkg_name"
+	# then spm_build all the packages mentioned in the included "spmdeps" file
+	
+	# try to download the package from "$pkg_url" to "$pkg_dir/"
+	# if not root, before downloading a package first see if it already exists in /var/cache/spm/builds-dl/
+	# if so, sudo spm update <package-url>, then make hard links in ~/.cache/spm/builds-dl/
 }
 
 spm_build() {
@@ -266,13 +287,14 @@ elif [ "$1" = publish ]; then
 	# the source files can be in the same place, or in a Git URL
 	# 	in which case, there must be a "git clone <git-url> .cache/git" line, in the "spmbuild.sh" file
 elif [ "$1" = install-spmlinux ]; then
-	sudo sh "$script_dir"/install.sh
+	. "$script_dir"/install.sh
 else
 	echo "usage guide:"
 	echo "	spm build [<project-path>]"
 	echo "	spm build <gnunet-namespace> <package-name>"
+	echo "	spm download <gnunet-namespace> <package-name>"
 	echo "	spm install <gnunet-namespace> <package-name>"
-	echo "	spm remove <package-name>"
+	echo "	spm remove <gnunet-namespace> <package-name>"
 	echo "	spm update"
 	echo "	spm publish"
 	echo "	spm install-spmlinux"

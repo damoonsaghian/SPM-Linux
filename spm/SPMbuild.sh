@@ -13,6 +13,6 @@ ln "$project_dir"/install.sh "$project_dir"/.cache/spm/
 # ln spm-autoupdate.sh .cache/spm/builds/<arch>/data/sv/spm-autoupdate
 # chmod +x .cache/spm/builds/<arch>/data/sv/spm-autoupdate
 
-# doas rules for install.sh and spm-dl.sh
+# doas rules for "spm install-spmlinux" and "spm download"
 
 # inhibit suspend/shutdown when an upgrade is in progress
