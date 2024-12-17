@@ -2,7 +2,7 @@
 
 // if "--term <term>" is given: export TERM=<term>
 
-// -n --normal: normal user with user id 1000
+// -u<uid>: user with id <uid>
 
 export SUDO=1
 
