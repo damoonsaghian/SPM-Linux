@@ -33,8 +33,8 @@ mkdir -p "$builds_dir" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir"
 
 # imports:
 # , libs:
-# 	symlink into $pkg_dir/lib
-# 	when building: -rpath="\$ORIGIN/../../../$gnunet_namespace/$pkg_name/lib"
+# 	symlink the files listed in $dep_pkg_dir/exp/lib into $pkg_dir/local/lib
+# 	when building: -rpath="\$ORIGIN/../../../../$gnunet_namespace/$pkg_name/lib"
 # , commands:
 # 	symlink into $pkg_dir/cmd
 # 	in sh scripts of commands and apps: export PATH="$script_dir:/inst/cmd"
@@ -57,22 +57,32 @@ git_clone_tag() {
 	# if a gpg key is given, download and build gpg package
 }
 
-# this function can be used in SPMbuild.sh scripts to create commands and applications
-spm_mkexec() {
-	local executable_path="$1"
-	local destination_path="$2"
-	local executable_name="$(basename "$executable_path")"
-	local inst_path="$(dirname "$executable_path")/../$destination_path/$executable_name"
+# this function can be used in SPMbuild.sh scripts to create commands from executable in $pkg_dir/local
+spm_cmd() {
+	local executable_name="$1"
 	
-	cat <<-'EOF' > "$exp_path"
+	cat <<-'EOF' > "$pkg_dir/local/cmd/$executable_name"
 	#!/exp/cmd/env sh
 	script_dir="$(dirname "$(realpath "$0")")"
-	root_dir="$script_dir/../../../../../.."
-	export PATH="$script_dir/../../exp/cmd:$script_dir/../../imp/cmd:$root_dir/inst/cmd"
-	export XDG_DATA_DIRS="$script_dir/../../exp/data:$script_dir/../../imp/data"
+	export PATH="$script_dir:$script_dir/../../../../../../../../inst/cmd"
+	export XDG_DATA_DIRS="$script_dir/../data"
 	EOF
-	echo "\$script_dir/$executable_path" > "$exp_path"
-	chmod +x "$exp_path"
+	echo "\$script_dir/../$executable_name" >> "$pkg_dir/local/cmd/$executable_name"
+	chmod +x "$pkg_dir/local/cmd/$executable_name"
+}
+
+# this function can be used in SPMbuild.sh scripts to create applications from executable in $pkg_dir/local
+spm_app() {
+	local executable_name="$1"
+	
+	cat <<-'EOF' > "$pkg_dir/local/app/$executable_name"
+	#!/exp/cmd/env sh
+	script_dir="$(dirname "$(realpath "$0")")"
+	export PATH="$script_dir:$script_dir/../../../../../../../../inst/cmd"
+	export XDG_DATA_DIRS="$script_dir/../data"
+	EOF
+	echo "\$script_dir/$executable_name" >> "$pkg_dir/local/app/$executable_name"
+	chmod +x "$pkg_dir/local/app/$executable_name"
 }
 
 spm_download() {
@@ -82,14 +92,14 @@ spm_download() {
 	pkg_name="$(echo "$pkg_id" | cut -d / -f 2)"
 	
 	# download directory
-	pkg_dir="$cache_dir/spm/$pkg_name"
+	dl_dir="$cache_dir/spm/packages/$gn_namespace/$pkg_name"
 	
-	build_dir="$cache_dir/spm/builds/$gn_namespace/$pkg_name"
+	dl_build_dir="$cache_dir/spm/builds/$gn_namespace/$pkg_name"
 	
 	# if there is no "always_build_from_src" line in "$state_dir/spm/config",
 	# 	and the corresponding directory for the current architecture is available in $build_url,
-	# 	just download that into "$cache_dir/spm/builds-dl/$gn_namespace/$pkg_name"
-	# then spm_build all the packages mentioned in the included "spmdeps" file
+	# 	just download that into "$dl_build_dir"
+	# then spm_download all the packages mentioned in the included "deps" file
 	
 	# try to download the package from "$pkg_url" to "$pkg_dir/"
 	# if not root, before downloading a package first see if it already exists in /var/cache/spm/builds-dl/
@@ -114,6 +124,8 @@ spm_build() {
 	# then hardlink the downloaded files plus the the packages mentioned in "spmdeps" file, into "$build_dir"
 	# and thats it, return
 	
+	# if uid is not 1: sudo -u1 spm download
+	
 	# try to download the package from "$pkg_url" to "$pkg_dir/"
 	# if not root, before downloading a package first see if it already exists in /var/cache/spm/builds-dl/
 	# if so, sudo spm update <package-url>, then make hard links in ~/.cache/spm/builds-dl/
@@ -136,14 +148,20 @@ spm_build() {
 }
 
 spm_install() {
-	pkg_url="gnunet://fs/sks/$1/packages/$2"
-	
-	pkg_name="$3"
-	[ -z "$3" ] && pkg_name="$2"
+	gn_namespace="$1"
+	pkg_name="$2"
 	
 	pkg_dir="$builds_dir/$pkg_name"
 	
-	spm_build "$pkg_id"
+	if [ "$(id -u)" = 0 ]; then
+		if [ "$3" = core ]; then
+			sudo -u1 spm build "$gn_namespace" "pkg_name"
+		else
+			sudo -u2 spm build "$gn_namespace" "pkg_name"
+		fi
+	else
+		spm_build "$pkg_name"
+	fi
 	
 	# if "$pkgs_dir/<gnunet-namespace>/<package-name>/" already exists:
 	# , create "$pkgs_dir/<gnunet-namespace>/<namespace>-new/" directory
