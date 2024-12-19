@@ -16,7 +16,7 @@ if [ $(id -u) != 0 ]; then
 		state_dir="$XDG_STATE_HOME"
 		[ -z "$state_dir" ] && state_dir="$HOME/.local/state"
 		mkdir -p "$state_dir"/spm
-		echo "always_build_from_src = true" > "$state_dir"/spm/config
+		echo "download'src" > "$state_dir"/spm/config
 	fi
 	
 	gnunet-config --section=ats --option=WAN_QUOTA_IN --value=unlimited
@@ -106,7 +106,7 @@ chmod a+w "$spm_linux_dir"/tmp
 
 if [ "$1" = src ]; then
 	mkdir -p "$spm_linux_dir"/var/lib/spm
-	echo "always_build_from_src = true" > "$spm_linux_dir"/var/lib/spm/config
+	echo "download'src" > "$spm_linux_dir"/var/lib/spm/config
 fi
 
 gnunet-config --section=ats --option=WAN_QUOTA_IN --value=unlimited
@@ -118,11 +118,12 @@ spm_dir="$spm_linux_dir/var/lib/spm/builds/$gnunet_namespace/spm"
 mkdir -p "$spm_dir"
 cp "$(dirname "$0")"/spm.sh "$spm_dir"/
 
+export PATH="$spm_linux_dir/inst/cmd:$PATH"
+
 echo 'acpid
 bash
 bluez
 chrony
-codev
 dash
 dbus
 dte
@@ -138,11 +139,15 @@ sd
 seatd
 spm
 sudo
-swapps
-sway
-termulator
 tz
 util-linux' | while read -r pkg_name; do
+	sh "$spm_dir"/spm.sh install "$gnunet_namespace" "$pkg_name" core
+done
+
+echo 'codev
+swapps
+sway
+termulator' | while read -r pkg_name; do
 	sh "$spm_dir"/spm.sh install "$gnunet_namespace" "$pkg_name"
 done
 

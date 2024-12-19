@@ -33,14 +33,10 @@ mkdir -p "$builds_dir" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir"
 
 # imports:
 # , libs:
-# 	symlink the files listed in $dep_pkg_dir/exp/lib into $pkg_dir/local/lib
+# 	symlink the files listed in $dep_pkg_dir/spm_exp/lib into $pkg_dir/lib
 # 	when building: -rpath="\$ORIGIN/../../../../$gnunet_namespace/$pkg_name/lib"
-# , commands:
-# 	symlink into $pkg_dir/cmd
-# 	in sh scripts of commands and apps: export PATH="$script_dir:/inst/cmd"
-# , lib data (like fonts and icons):
-# 	symlink the data directories into $pkg_dir/data
-# 	in sh scripts of commands and apps: export XDG_DATA_DIRS="$script_dir/../data"
+# , commands: symlink into $pkg_dir/cmd
+# , lib data (like fonts and icons): symlink the data directories into $pkg_dir/data
 
 # this function can be used in SPMbuild.sh scripts to clone a tag brach from a git repository
 git_clone_tag() {
@@ -61,42 +57,42 @@ git_clone_tag() {
 spm_cmd() {
 	local executable_name="$1"
 	
-	cat <<-'EOF' > "$pkg_dir/local/cmd/$executable_name"
+	cat <<-'EOF' > "$pkg_dir/cmd/$executable_name"
 	#!/exp/cmd/env sh
 	script_dir="$(dirname "$(realpath "$0")")"
-	export PATH="$script_dir:$script_dir/../../../../../../../../inst/cmd"
+	export PATH="$script_dir:$PATH"
 	export XDG_DATA_DIRS="$script_dir/../data"
 	EOF
-	echo "\$script_dir/../$executable_name" >> "$pkg_dir/local/cmd/$executable_name"
-	chmod +x "$pkg_dir/local/cmd/$executable_name"
+	echo "\$script_dir/../$executable_name" >> "$pkg_dir/cmd/$executable_name"
+	chmod +x "$pkg_dir/cmd/$executable_name"
 }
 
 # this function can be used in SPMbuild.sh scripts to create applications from executable in $pkg_dir/local
 spm_app() {
 	local executable_name="$1"
 	
-	cat <<-'EOF' > "$pkg_dir/local/app/$executable_name"
+	cat <<-'EOF' > "$pkg_dir/inst/app/$executable_name"
 	#!/exp/cmd/env sh
 	script_dir="$(dirname "$(realpath "$0")")"
-	export PATH="$script_dir:$script_dir/../../../../../../../../inst/cmd"
-	export XDG_DATA_DIRS="$script_dir/../data"
+	export PATH="$script_dir/../../cmd:$PATH"
+	export XDG_DATA_DIRS="$script_dir/../../data"
 	EOF
-	echo "\$script_dir/$executable_name" >> "$pkg_dir/local/app/$executable_name"
-	chmod +x "$pkg_dir/local/app/$executable_name"
+	echo "\$script_dir/$executable_name" >> "$pkg_dir/inst/app/$executable_name"
+	chmod +x "$pkg_dir/inst/app/$executable_name"
 }
 
 spm_download() {
-	pkg_url="$1"
-	build_url=
-	gn_namespace="$(echo "$gn_url" | cut -d / -f 1)"
-	pkg_name="$(echo "$pkg_id" | cut -d / -f 2)"
+	gn_namespace="$1"
+	pkg_name="$2"
+	pkg_url="gnunet://fs/sks/$gn_namespace/packages/$pkg_name"
+	build_url="gnunet://fs/sks/$gn_namespace/builds/$pkg_name"
 	
 	# download directory
 	dl_dir="$cache_dir/spm/packages/$gn_namespace/$pkg_name"
 	
 	dl_build_dir="$cache_dir/spm/builds/$gn_namespace/$pkg_name"
 	
-	# if there is no "always_build_from_src" line in "$state_dir/spm/config",
+	# if there is no "download'src" line in "$state_dir/spm/config",
 	# 	and the corresponding directory for the current architecture is available in $build_url,
 	# 	just download that into "$dl_build_dir"
 	# then spm_download all the packages mentioned in the included "deps" file
