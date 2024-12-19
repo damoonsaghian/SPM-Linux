@@ -31,13 +31,6 @@ fi
 
 mkdir -p "$builds_dir" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
 
-# imports:
-# , libs:
-# 	symlink the files listed in $dep_pkg_dir/spm_exp/lib into $pkg_dir/lib
-# 	when building: -rpath="\$ORIGIN/../../../../$gnunet_namespace/$pkg_name/lib"
-# , commands: symlink into $pkg_dir/cmd
-# , lib data (like fonts and icons): symlink the data directories into $pkg_dir/data
-
 # this function can be used in SPMbuild.sh scripts to clone a tag brach from a git repository
 git_clone_tag() {
 	# https://man.archlinux.org/listing/git
@@ -53,7 +46,7 @@ git_clone_tag() {
 	# if a gpg key is given, download and build gpg package
 }
 
-# this function can be used in SPMbuild.sh scripts to create commands from executable in $pkg_dir/local
+# this function can be used in SPMbuild.sh scripts to create commands from executable in $pkg_dir/data/exec
 spm_cmd() {
 	local executable_name="$1"
 	
@@ -63,11 +56,11 @@ spm_cmd() {
 	export PATH="$script_dir:$PATH"
 	export XDG_DATA_DIRS="$script_dir/../data"
 	EOF
-	echo "\$script_dir/../$executable_name" >> "$pkg_dir/cmd/$executable_name"
+	echo "\$script_dir/../data/exec/$executable_name" >> "$pkg_dir/cmd/$executable_name"
 	chmod +x "$pkg_dir/cmd/$executable_name"
 }
 
-# this function can be used in SPMbuild.sh scripts to create applications from executable in $pkg_dir/local
+# this function can be used in SPMbuild.sh scripts to create applications from executable in $pkg_dir/data/exec
 spm_app() {
 	local executable_name="$1"
 	
@@ -77,7 +70,7 @@ spm_app() {
 	export PATH="$script_dir/../../cmd:$PATH"
 	export XDG_DATA_DIRS="$script_dir/../../data"
 	EOF
-	echo "\$script_dir/$executable_name" >> "$pkg_dir/inst/app/$executable_name"
+	echo "\$script_dir/../../data/exec/$executable_name" >> "$pkg_dir/inst/app/$executable_name"
 	chmod +x "$pkg_dir/inst/app/$executable_name"
 }
 
@@ -130,6 +123,16 @@ spm_build() {
 	
 	# if "Build.sh" file is already open, it means that there is a cyclic dependency
 	# so warn and exit to avoid an infinite loop
+	
+	# when building: -rpath="\$ORIGIN/../../../$gnunet_namespace/$pkg_name/lib"
+	# spm_cmd
+	# spm_app
+	
+	# imports:
+	# , libs: symlink the files listed in $dep_pkg_dir/exp/lib into $pkg_dir/lib
+	# , commands: symlink the files listed in $dep_pkg_dir/exp/cmd into $pkg_dir/cmd
+	# , lib data (like fonts and icons):
+	# 	symlink the data directories listed in $dep_pkg_dir/exp/data into $pkg_dir/data
 	
 	pkg__$pkg_name="$cache_dir/spm/downloads/$gnunet_namespace/$pkg_name"
 	# packages needed as dependency, are mentioned in the "Build.sh" script, like this:
