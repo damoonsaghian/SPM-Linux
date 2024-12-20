@@ -48,10 +48,10 @@ git_clone_tag() {
 
 # this function can be used in SPMbuild.sh scripts to export executables in $pkg_dir/exec
 # usage guide:
-# spm_exp_exec <executable-name> exp/cmd
-# spm_exp_exec <executable-name> inst/cmd
-# spm_exp_exec <executable-name> inst/app
-spm_exp_exec() {
+# spm_xport <executable-name> exp/cmd
+# spm_xport <executable-name> inst/cmd
+# spm_xport <executable-name> inst/app
+spm_xport() {
 	local executable_name="$1"
 	local destination_dir_relpath="$2"
 	local destination_path="$pkg_dir/$destination_dir_relpath/$executable_name"
@@ -79,11 +79,8 @@ spm_download() {
 	
 	# if there is no "download'src" line in "$state_dir/spm/config", and $build_url exists,
 	# 	just download that into "$dl_build_dir"
-	# then spm_download all the packages mentioned in the included "deps" file
-	
-	# try to download the package from "$pkg_url" to "$pkg_dir/"
-	# if not root, before downloading a package first see if it already exists in /var/cache/spm/builds-dl/
-	# if so, sudo spm update <package-url>, then make hard links in ~/.cache/spm/builds-dl/
+	# 	then spm_download all the packages mentioned in the included "deps" file
+	# else: try to download the package from "$pkg_url" to "$dl_dir"
 }
 
 spm_build() {
