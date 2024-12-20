@@ -46,47 +46,38 @@ git_clone_tag() {
 	# if a gpg key is given, download and build gpg package
 }
 
-# this function can be used in SPMbuild.sh scripts to create commands from executable in $pkg_dir/data/exec
-spm_cmd() {
+# this function can be used in SPMbuild.sh scripts to export executables in $pkg_dir/exec
+# usage guide:
+# spm_exp_exec <executable-name> exp/cmd
+# spm_exp_exec <executable-name> inst/cmd
+# spm_exp_exec <executable-name> inst/app
+spm_exp_exec() {
 	local executable_name="$1"
+	local destination_dir_relpath="$2"
+	local destination_path="$pkg_dir/$destination_dir_relpath/$executable_name"
 	
-	cat <<-'EOF' > "$pkg_dir/cmd/$executable_name"
-	#!/exp/cmd/env sh
+	# adding "/usr/bin:/bin:/usr/sbin:/sbin" to PATH may be useful for cyclic dependencies when bootstraping
+	cat <<-'EOF' > "$destination_path"
+	#!/inst/cmd/env sh
 	script_dir="$(dirname "$(realpath "$0")")"
-	export PATH="$script_dir:$PATH"
-	export XDG_DATA_DIRS="$script_dir/../data"
-	EOF
-	echo "\$script_dir/../data/exec/$executable_name" >> "$pkg_dir/cmd/$executable_name"
-	chmod +x "$pkg_dir/cmd/$executable_name"
-}
-
-# this function can be used in SPMbuild.sh scripts to create applications from executable in $pkg_dir/data/exec
-spm_app() {
-	local executable_name="$1"
-	
-	cat <<-'EOF' > "$pkg_dir/inst/app/$executable_name"
-	#!/exp/cmd/env sh
-	script_dir="$(dirname "$(realpath "$0")")"
-	export PATH="$script_dir/../../cmd:$PATH"
+	export PATH="$script_dir/../../exec:$script_dir/../../../../../../../../inst/cmd"
+	PATH="$PATH:/usr/bin:/bin:/usr/sbin:/sbin"
 	export XDG_DATA_DIRS="$script_dir/../../data"
 	EOF
-	echo "\$script_dir/../../data/exec/$executable_name" >> "$pkg_dir/inst/app/$executable_name"
-	chmod +x "$pkg_dir/inst/app/$executable_name"
+	echo "\$script_dir/../../exec/$executable_name" >> "$destination_path"
+	chmod +x "$destination_path"
 }
 
 spm_download() {
-	gn_namespace="$1"
-	pkg_name="$2"
-	pkg_url="gnunet://fs/sks/$gn_namespace/packages/$pkg_name"
-	build_url="gnunet://fs/sks/$gn_namespace/builds/$pkg_name"
+	local gn_namespace="$1"
+	local pkg_name="$2"
+	local pkg_url="gnunet://fs/sks/$gn_namespace/packages/$pkg_name"
+	local build_url="gnunet://fs/sks/$gn_namespace/builds/$pkg_name"
+	# download directories
+	local dl_dir="$cache_dir/spm/packages/$gn_namespace/$pkg_name"
+	local dl_build_dir="$cache_dir/spm/builds/$ARCH/$gn_namespace/$pkg_name"
 	
-	# download directory
-	dl_dir="$cache_dir/spm/packages/$gn_namespace/$pkg_name"
-	
-	dl_build_dir="$cache_dir/spm/builds/$gn_namespace/$pkg_name"
-	
-	# if there is no "download'src" line in "$state_dir/spm/config",
-	# 	and the corresponding directory for the current architecture is available in $build_url,
+	# if there is no "download'src" line in "$state_dir/spm/config", and $build_url exists,
 	# 	just download that into "$dl_build_dir"
 	# then spm_download all the packages mentioned in the included "deps" file
 	
@@ -125,8 +116,6 @@ spm_build() {
 	# so warn and exit to avoid an infinite loop
 	
 	# when building: -rpath="\$ORIGIN/../../../$gnunet_namespace/$pkg_name/lib"
-	# spm_cmd
-	# spm_app
 	
 	# imports:
 	# , libs: symlink the files listed in $dep_pkg_dir/exp/lib into $pkg_dir/lib
