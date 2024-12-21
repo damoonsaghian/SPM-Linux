@@ -31,8 +31,8 @@ fi
 
 mkdir -p "$builds_dir" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
 
-# this function can be used in SPMbuild.sh scripts to clone a tag brach from a git repository
-git_clone_tag() {
+# this function can be used in SPMbuild.sh scripts to clone a tag branch from a git repository
+gitag_clone() {
 	# https://man.archlinux.org/listing/git
 	
 	# https://git-scm.com/docs/partial-clone
@@ -77,40 +77,46 @@ spm_download() {
 	local dl_dir="$cache_dir/spm/packages/$gn_namespace/$pkg_name"
 	local dl_build_dir="$cache_dir/spm/builds/$ARCH/$gn_namespace/$pkg_name"
 	
-	# if there is no "download'src" line in "$state_dir/spm/config", and $build_url exists,
-	# 	just download that into "$dl_build_dir"
-	# 	then spm_download all the packages mentioned in the included "deps" file
-	# else: try to download the package from "$pkg_url" to "$dl_dir"
+	# if there is no "download'src" line in "$state_dir/spm/config",
+	# 	and "$download_src" is not set, and $build_url exists,
+	# 	download that into "$dl_build_dir"
+	# else: download the package from "$pkg_url" to "$dl_dir"
 }
 
 spm_build() {
-	local pkg_name=
-	local pkg_dir="$1"
-	local build_dir=
+	local gn_namespace= pkg_name=
 	
-	case "$1" in
-	gnunet://*) build_dir="$cache_dir/spm/builds/$gn_namespace/$pkg_name" ;;
-	*) build_dir="$cache_dir/spm/builds/$pkg_group/$pkg_name" ;;
-	esac
-	
-	# if there is no "always_build_from_src" line in "$state_dir/spm/config",
-	# 	and "$always_build_from_src" is not set,
-	# 	and the corresponding directory for the current architecture is available in $build_url,
-	# 	just download that into "$cache_dir/spm/builds-dl/$gn_namespace/$pkg_name"
-	# then spm_build all the packages mentioned in the included "spmdeps" file
-	# then hardlink the downloaded files plus the the packages mentioned in "spmdeps" file, into "$build_dir"
-	# and thats it, return
-	
-	# if uid is not 1: sudo -u1 spm download
-	
-	# try to download the package from "$pkg_url" to "$pkg_dir/"
-	# if not root, before downloading a package first see if it already exists in /var/cache/spm/builds-dl/
-	# if so, sudo spm update <package-url>, then make hard links in ~/.cache/spm/builds-dl/
-	
-	# if "$build_dir" dir exists and its mod time is newer compared to "$pkg_dir", return
-	
-	# if "Build.sh" file is already open, it means that there is a cyclic dependency
-	# so warn and exit to avoid an infinite loop
+	if [ -z "$2" ]; then
+		pkg_dir="$1"
+		[ -z "$pkg_dir" ] && pkg_dir=.
+		build_dir="$pkg_dir/.cache/spm/builds/$pkg_name"
+		
+		elif [ -f "$2/SPMbuild.sh" ]; then
+			spm_build "$pkg_dir"
+		else
+			# search for "Build.sh" in child directories of "$2"
+			# the first one found plus its siblings are the packages to be built
+			# run spm_build and spm_test for each
+		fi
+	else
+		gn_namespace="$1"
+		pkg_name="$2"
+		build_dir="$cache_dir/spm/builds/$gn_namespace/$pkg_name"
+		
+		if [ "$(id -u)" = 1 ]; then
+			spm_download $gn_namespace $pkg_name
+		else
+			sudo -u1 spm download $gn_namespace $pkg_name
+		fi
+		
+		# if prebuild package is downloaded:
+		# spm_build all the packages mentioned in the "deps" file
+		# then symlink the files in "exp" of the packages mentioned in "deps" file, into "$build_dir"
+		# and thats it, return
+		
+		# if "SPMbuild.sh" file is already open, it means that there is a cyclic dependency
+		# so warn and return, to avoid an infinite loop
+	fi
 	
 	# when building: -rpath="\$ORIGIN/../../../$gnunet_namespace/$pkg_name/lib"
 	
@@ -127,7 +133,7 @@ spm_build() {
 	
 	# for run'time dependencies:
 	# 	spm_include <gnunet-namespace> <package-name>
-	# this will append the URL of the package to ".cache/spm/builds/spmdeps" (if not already)
+	# this will append the URL of the package to ".cache/spm/builds/deps" (if not already)
 	
 	. "$pkg_dir"/Build.sh
 }
@@ -212,16 +218,7 @@ spm_install() {
 }
 
 if [ "$1" = build ]; then
-	always_build_from_src=1
-	if [ -z "$2" ]; then
-		spm_build .
-	elif [ -f "$2/Build.sh" ]; then
-		spm_build "$2"
-	else
-		# search for "Build.sh" in child directories of "$2"
-		# the first one found plus its siblings are the packages to be built
-		# run spm_build and spm_test for each
-	fi
+	spm_build "$2" "$3"
 elif [ "$1" = install ]; then
 	spm_install "$2" "$3"
 elif [ "$1" = remove ]; then
