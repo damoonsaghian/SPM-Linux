@@ -6,7 +6,7 @@ set -e
 script_dir="$(dirname "$(realpath "$0")")"
 
 root_dir="$script_dir/../../../../../.."
-if [ "$(id -u)" = 0 ]; then
+if [ "$(id -u)" = 0 ] || [ "$(id -u)" = 1 ] || [ "$(id -u)" = 2 ]; then
 	builds_dir="$root_dir/var/lib/spm/builds"
 	cmd_dir="$root_dir/inst/cmd"
 	sv_dir="$root_dir/inst/sv"
@@ -54,16 +54,30 @@ gitag_clone() {
 spm_xport() {
 	local executable_name="$1"
 	local destination_dir_relpath="$2"
-	local destination_path="$pkg_dir/$destination_dir_relpath/$executable_name"
+	local destination_path="$script_dir/.cache/spm/builds/$ARCH/$destination_dir_relpath/$executable_name"
 	
-	# adding "/usr/bin:/bin:/usr/sbin:/sbin" to PATH may be useful for cyclic dependencies when bootstraping
-	cat <<-'EOF' > "$destination_path"
-	#!/inst/cmd/env sh
-	script_dir="$(dirname "$(realpath "$0")")"
-	export PATH="$script_dir/../../exec:$script_dir/../../../../../../../../inst/cmd"
-	PATH="$PATH:/usr/bin:/bin:/usr/sbin:/sbin"
-	export XDG_DATA_DIRS="$script_dir/../../data"
-	EOF
+	if [ cmd_dir = "$HOME/.local/bin" ]; then
+		# adding "/usr/bin:/bin:/usr/sbin:/sbin" to PATH is for when SPM is installed at HOME
+		cat <<-'EOF' > "$destination_path"
+		#!/inst/cmd/env sh
+		script_dir="$(dirname "$(realpath "$0")")"
+		export PATH="$script_dir/../../exec:$HOME/.local/bin:/inst/cmd"
+		PATH="$PATH:/usr/bin:/bin:/usr/sbin:/sbin"
+		export LD_LIBRARY_PATH="$script_dir/../../lib"
+		export XDG_DATA_DIRS="$script_dir/../../data"
+		EOF
+	else
+		# adding "/usr/bin:/bin:/usr/sbin:/sbin" to PATH may be useful for cyclic dependencies when bootstraping
+		cat <<-'EOF' > "$destination_path"
+		#!/inst/cmd/env sh
+		script_dir="$(dirname "$(realpath "$0")")"
+		export PATH="$script_dir/../../exec:$script_dir/../../../../../../../../inst/cmd"
+		PATH="$PATH:/usr/bin:/bin:/usr/sbin:/sbin"
+		export LD_LIBRARY_PATH="$script_dir/../../lib"
+		export XDG_DATA_DIRS="$script_dir/../../data"
+		EOF
+	fi
+	
 	echo "\$script_dir/../../exec/$executable_name" >> "$destination_path"
 	chmod +x "$destination_path"
 }
@@ -84,24 +98,15 @@ spm_download() {
 }
 
 spm_build() {
-	local gn_namespace= pkg_name=
+	local pkg_dir= build_dir= gn_namespace= pkg_name=
 	
 	if [ -z "$2" ]; then
 		pkg_dir="$1"
-		[ -z "$pkg_dir" ] && pkg_dir=.
-		build_dir="$pkg_dir/.cache/spm/builds/$pkg_name"
-		
-		elif [ -f "$2/SPMbuild.sh" ]; then
-			spm_build "$pkg_dir"
-		else
-			# search for "Build.sh" in child directories of "$2"
-			# the first one found plus its siblings are the packages to be built
-			# run spm_build and spm_test for each
-		fi
+		build_dir="$pkg_dir/.cache/spm/builds/$ARCH/$pkg_name"
 	else
 		gn_namespace="$1"
 		pkg_name="$2"
-		build_dir="$cache_dir/spm/builds/$gn_namespace/$pkg_name"
+		build_dir="$state_dir/spm/builds/$gn_namespace/$pkg_name"
 		
 		if [ "$(id -u)" = 1 ]; then
 			spm_download $gn_namespace $pkg_name
@@ -110,21 +115,12 @@ spm_build() {
 		fi
 		
 		# if prebuild package is downloaded:
-		# spm_build all the packages mentioned in the "deps" file
-		# then symlink the files in "exp" of the packages mentioned in "deps" file, into "$build_dir"
+		# spm_import all the packages mentioned in the "deps" file
 		# and thats it, return
 		
 		# if "SPMbuild.sh" file is already open, it means that there is a cyclic dependency
 		# so warn and return, to avoid an infinite loop
 	fi
-	
-	# when building: -rpath="\$ORIGIN/../../../$gnunet_namespace/$pkg_name/lib"
-	
-	# imports:
-	# , libs: symlink the files listed in $dep_pkg_dir/exp/lib into $pkg_dir/lib
-	# , commands: symlink the files listed in $dep_pkg_dir/exp/cmd into $pkg_dir/cmd
-	# , lib data (like fonts and icons):
-	# 	symlink the data directories listed in $dep_pkg_dir/exp/data into $pkg_dir/data
 	
 	pkg__$pkg_name="$cache_dir/spm/downloads/$gnunet_namespace/$pkg_name"
 	# packages needed as dependency, are mentioned in the "Build.sh" script, like this:
@@ -135,7 +131,25 @@ spm_build() {
 	# 	spm_include <gnunet-namespace> <package-name>
 	# this will append the URL of the package to ".cache/spm/builds/deps" (if not already)
 	
+	# at the end of SPMbuild.sh scripts, we can include test instructions, after his line:
+	# [ -z SPM_TEST ] && return
+	[ -z "$2" ] && SPM_TEST=1
+	
 	. "$pkg_dir"/Build.sh
+}
+
+# this function can be used in SPMbuild.sh scripts to import dependency packages
+spm_import() {
+	# spm_build
+	# symlink (absolute path) the files in "exp" into "$build_dir"
+	
+	# append the URL of the package to ".cache/spm/builds/deps" (if not already)
+	
+	# imports:
+	# , libs: symlink the files listed in $dep_pkg_dir/exp/lib into $pkg_dir/lib
+	# , commands: symlink the files listed in $dep_pkg_dir/exp/cmd into $pkg_dir/cmd
+	# , lib data (like fonts and icons):
+	# 	symlink the data directories listed in $dep_pkg_dir/exp/data into $pkg_dir/data
 }
 
 spm_install() {
@@ -218,7 +232,20 @@ spm_install() {
 }
 
 if [ "$1" = build ]; then
-	spm_build "$2" "$3"
+	if [ -z "$3" ]; then
+		project_dir="$2"
+		[ -z "$project_dir" ] && project_dir=.
+			
+		if [ -f "$2/SPMbuild.sh" ]; then
+			spm_build "$project_dir"
+		else
+			# search for "SMPbuild.sh" in child directories of "$project_dir"
+			# the first one found, plus its siblings, are the packages to be built
+			# run spm_build for each
+		fi
+	else
+		spm_build "$2" "$3"
+	fi
 elif [ "$1" = install ]; then
 	spm_install "$2" "$3"
 elif [ "$1" = remove ]; then
