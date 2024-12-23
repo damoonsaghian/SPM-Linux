@@ -1,3 +1,7 @@
+// https://git.suckless.org/ubase/file/passwd.c.html
+// https://git.busybox.net/busybox/tree/loginutils/cryptpw.c
+// https://github.com/mirror/busybox/blob/master/loginutils/cryptpw.c
+
 // clear all the environment variables
 
 // if "--term <term>" is given: export TERM=<term>
