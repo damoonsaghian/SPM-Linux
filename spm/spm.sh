@@ -46,6 +46,10 @@ gitag_clone() {
 	# if a gpg key is given, download and build gpg package
 }
 
+# in SPMbuild.sh scripts, to create executable scripts
+# in the first line replace #!/exp/cmd/env with #!/usr/bin/env
+# then make it executable
+
 # this function can be used in SPMbuild.sh scripts to export executables in $pkg_dir/exec
 # usage guide:
 # spm_xport <executable-name> exp/cmd
@@ -110,7 +114,6 @@ spm_build() {
 	else
 		gn_namespace="$1"
 		pkg_name="$2"
-		pkg_dir=
 		build_dir="$state_dir/spm/builds/$gn_namespace/$pkg_name"
 		
 		if [ "$(id -u)" = 1 ]; then
@@ -132,6 +135,10 @@ spm_build() {
 		# so warn and return, to avoid an infinite loop
 	fi
 	
+	# if "$build_dir" already exists:
+	# , create "${build_dir}-new"
+	# , at the end: exch "${build_dir}-new" "$build_dir"
+	
 	. "$pkg_dir"/SPMbuild.sh
 }
 
@@ -139,8 +146,11 @@ spm_build() {
 spm_import() {
 	local gn_namespace="$1"
 	local pkg_name="$2"
+	
 	# spm_build
-	# symlink (absolute path) the files in "exp" into "$build_dir"
+	# symlink (absolute path) the files in "cmd" "lib" and "data" into:
+	# 	"$build_dir/exec" "$build_dir/lib" and "$build_dir/data"
+	# do not symlink symlinks; make a symlink to the origin
 	
 	# append the URL of the package to ".cache/spm/builds/deps" (if not already)
 	
@@ -152,10 +162,9 @@ spm_import() {
 }
 
 spm_install() {
-	gn_namespace="$1"
-	pkg_name="$2"
-	
-	pkg_dir="$builds_dir/$pkg_name"
+	local gn_namespace="$1"
+	local pkg_name="$2"
+	local build_dir="$builds_dir/$gn_namespace/$pkg_name"
 	
 	if [ "$(id -u)" = 0 ]; then
 		if [ "$3" = core ]; then
@@ -167,67 +176,60 @@ spm_install() {
 		spm_build "$pkg_name"
 	fi
 	
-	# if "$pkgs_dir/<gnunet-namespace>/<package-name>/" already exists:
-	# , create "$pkgs_dir/<gnunet-namespace>/<namespace>-new/" directory
-	# , at the end: exch "$pkgs_dir/<gnunet-namespace>/<namespace>-new/" "$pkgs_dir/<gnunet-namespace>/<namespace>/"
+	# store "$gn_namespace $pkg_name" in $state_dir/spm/installed (if not already)
+	# if $pkg_name exists already, and namespaces does not match, append a numerical postfix, and try again
 	
-	# create hard links from files (recursively) in
-	# 	"$cache_dir/spm/downloads/$gnunet_namespace/$pkg_name/.cache/spm/builds/<arch>/",
-	# 	to "$pkgs_dir/<gnunet-namespace>/<package-name>/"
+	# if a symlink with the same name already exists:
+	# if it's linked into the same package, skip
+	# otherwise append a numerical postfix, and try agin
 	
-	# the GNUnet URL is stored in "$pkg_dir/pkg_url" file
-	# this will be used to update the app
+	# create symlinks from "$build_dir/inst/cmd/*" files into "$cmd_dir"
 	
-	# for files in "$pkg_dir/exp/cmd/*":
-	# chmod +x file
-	# if the file name has no extention, symlink into "$cmd_dir"
-	# if the file name has an extention:
-	# , if [ $(id -u) != 0 ]; then in the first line replace #!/exp/cmd/env with #!/usr/bin/env  
-	# , symlink it into "$cmd_dir" (without extention)
-	
-	# create symlinks from "$pkg_dir/exp/cmd/*"
-	# files into "$apps_dir"
-	
-	# .desktop file name: $package_name.$app_name.desktop
-	# icon_path="$(echo /packages/$pkg_name/exp/app/$app_name.*)"
+	# create .desktop files from "$build_dir/inst/app/*" files into "$apps_dir"
+	# .desktop file name: $pkg_name.$app_name.desktop
+	# icon_path=""
 	# [Desktop Entry]
 	# Type=Application
 	# Name=$app_name
-	# Icon=$icon_path
-	# Exec=/packages/$pkg_name/exp/app/$app_name
+	# Icon=$(echo $build_dir/inst/app/$app_name.*)
+	# Exec=$build_dir/inst/app//$app_name
 	
-	# create symlinks from "$pkg_dir/exp/dbus/*" directories
-	# to "$dbus_dir"
+	# create symlinks from "$build_dir/inst/dbus/*" directories to "$dbus_dir"
 	
 	[ "$(id -u)" = 0 ] || return 0
 	
-	# create symlinks from "$pkg_dir/exp/sv/*" directories, to "$sv_dir"
+	# create symlinks from "$build_dir/inst/sv/*" directories, to "$sv_dir"
 	
 	# when package is $gnunet_namespace/limine
 	# mount first partition of the device where this script resides, and copy efi and sys files to it
-	boot_dir="$(mktemp -d)"
-	mount "$root_device_partition1" "$boot_dir"
-	trap "trap - EXIT; umount \"$boot_dir\"; rmdir \"$boot_dir\"" EXIT INT TERM QUIT HUP PIPE
-	mkdir -p "$boot_dir"/EFI/BOOT
-	# copy efi file to "$boot_dir"/EFI/BOOT/
-	umount "$boot_dir"; rmdir "$boot_dir"
-	
-	if [ "$ARCH" = x86 ] || [ "$ARCH" = x86_64 ]; then
-		"$cmd_dir"/limine bios-install "$target_device"
-	elif [ "$ARCH" = ppc64le ]; then
-		# only OPAL Petitboot based systems are supported
-		cat <<-EOF > "$boot_dir"/syslinux.cfg
-		PROMPT 0
-		LABEL SPM Linux
-			LINUX vmlinuz
-			APPEND root=UUID=$(blkid /dev/"$root_device_partition2" | sed -rn 's/.*UUID="(.*)".*/\1/p') rw
-			INITRD initramfs.img
-		EOF
-	fi
+	{
+		boot_dir="$(mktemp -d)"
+		mount "$root_device_partition1" "$boot_dir"
+		trap "trap - EXIT; umount \"$boot_dir\"; rmdir \"$boot_dir\"" EXIT INT TERM QUIT HUP PIPE
+		mkdir -p "$boot_dir"/EFI/BOOT
+		
+		# copy efi file to "$boot_dir"/EFI/BOOT/
+		
+		if [ "$ARCH" = x86 ] || [ "$ARCH" = x86_64 ]; then
+			"$cmd_dir"/limine bios-install "$target_device"
+		elif [ "$ARCH" = ppc64le ]; then
+			# only OPAL Petitboot based systems are supported
+			cat <<-EOF > "$boot_dir"/syslinux.cfg
+			PROMPT 0
+			LABEL SPM Linux
+				LINUX vmlinuz
+				APPEND root=UUID=$(blkid /dev/"$root_device_partition2" | sed -rn 's/.*UUID="(.*)".*/\1/p') rw
+				INITRD initramfs.img
+			EOF
+		fi
+	}
 	
 	# when package is $gnunet_namespace/linux
 	# mount first partition of the device where this script resides, and copy the kernel and initramfs to it
-	# umount
+	{
+		mount "$root_device_partition1" "$boot_dir"
+		trap "trap - EXIT; umount \"$boot_dir\"; rmdir \"$boot_dir\"" EXIT INT TERM QUIT HUP PIPE
+	}
 }
 
 if [ "$1" = build ]; then
@@ -248,9 +250,9 @@ if [ "$1" = build ]; then
 elif [ "$1" = install ]; then
 	spm_install "$2" "$3"
 elif [ "$1" = remove ]; then
-	pkg_name="$2"
-	pkg_dir="$builds_dir/$pkg_name"
-	url="$(cat "$pkg_dir/pkg_url")"
+	gn_namespace="$2"
+	pkg_name="$3"
+	pkg_dir="$builds_dir/$gn_namespace/$pkg_name"
 	
 	if [ "$(id -u)" = 0 ]; then
 		# exit if package_name is: acpid bash bluez chrony dash dbus dte eudev fwupd gnunet limine linux netman runit
@@ -268,8 +270,8 @@ elif [ "$1" = remove ]; then
 	
 	# , removes "$root_dir/packages/<gnunet-namespace>/<package-name>" directory
 elif [ "$1" = update ]; then
-	# for each gnunet_namespace/package_name directory in $builds_dir
-	# spm_install "$url" "$package_name"
+	# for each line in $state_dir/spm/installed
+	# spm_install "$gn_namespace" "$package_name"
 	
 	# check in each update, if the ref count of files in .cache/spm/builds is 1, clean that package
 	# file_ref_count=$(stat -c %h filename)
