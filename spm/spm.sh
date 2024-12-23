@@ -128,7 +128,7 @@ spm_build() {
 		# now we can use "$PKG<package-name>" where ever you want to access a file in a package
 		
 		# if prebuild package is downloaded:
-		# spm_import all the packages mentioned in the "deps" file
+		# spm_import all the packages mentioned in the "imp" file
 		# and thats it, return
 		
 		# if "SPMbuild.sh" file is already open, it means that there is a cyclic dependency
@@ -147,12 +147,14 @@ spm_import() {
 	local gn_namespace="$1"
 	local pkg_name="$2"
 	
-	# spm_build
-	# symlink (absolute path) the files in "cmd" "lib" and "data" into:
+	spm_build "$gn_namespace" "$pkg_name"
+	# symlink (relative path) the files in "$PKG$pkg_name/cmd" "$PKG$pkg_name/lib" and "$PKG$pkg_name/data" into:
 	# 	"$build_dir/exec" "$build_dir/lib" and "$build_dir/data"
 	# do not symlink symlinks; make a symlink to the origin
 	
-	# append the URL of the package to ".cache/spm/builds/deps" (if not already)
+	# append the URL of the package to ".cache/spm/builds/imp" (if not already)
+	
+	# increment the number stored in spmcount file
 	
 	# imports:
 	# , libs: symlink the files listed in $dep_pkg_dir/exp/lib into $pkg_dir/lib
@@ -260,6 +262,12 @@ elif [ "$1" = remove ]; then
 		# warn if package_name is sway, swapps, termulator, or codev
 	fi
 	
+	# for packages mentioned in "imp" file:
+	# , decrement the number stored in their spmcount file
+	# , if the number gets zero, and it's not in $state_dir/spm/installed file, remove that package too
+	
+	# remove it from $state_dir/spm/installed file, but remove the package dir, only if spmcount is zero
+	
 	# removes the files mentioned in "$pkg_dir/exp/cmd" from "$cmd_dir"
 	
 	# remove symlinks in "$root_dir/exp/apps/" corresponding to
@@ -294,6 +302,8 @@ elif [ "$1" = publish ]; then
 	# make a BTRFS snapshot from the project's directory,
 	# to "~/.local/spm/published/$gnunet_namespace/$pkg_name"
 	
+	# when hardlinking files from build dir to publish dir, skip symlinks
+	
 	# ".data/gnurl" stores the project's GNUnet URL: gnunet://fs/sks/<name-space>/projects/<project_name>
 	# package URL is obtained from it like this: gnunet://fs/sks/<name-space>/packages/<project_name>
 	
@@ -305,7 +315,7 @@ elif [ "$1" = publish ]; then
 	# in "spmbuild.sh" scripts we can use "$carch" variable when cross'building
 	# "$carch" is an empty string when not cross'building
 	
-	# make hard links from "spmdeps" file, plus all files in ".cache/spm/builds/<arch>/" minus "deps" directory,
+	# make hard links from "imp" file, plus all files in ".cache/spm/builds/<arch>/" minus "imp" directory,
 	# and put them in ".cache/spm/builds-published/<arch>/"
 	
 	# publish ".cache/spm/builds-published/<arch>/" to:
