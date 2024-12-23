@@ -103,9 +103,14 @@ spm_build() {
 	if [ -z "$2" ]; then
 		pkg_dir="$1"
 		build_dir="$pkg_dir/.cache/spm/builds/$ARCH/$pkg_name"
+		
+		SPM_TEST=1
+		# at the end of SPMbuild.sh scripts, we can include test instructions, after this line:
+		# [ -z SPM_TEST ] && return
 	else
 		gn_namespace="$1"
 		pkg_name="$2"
+		pkg_dir=
 		build_dir="$state_dir/spm/builds/$gn_namespace/$pkg_name"
 		
 		if [ "$(id -u)" = 1 ]; then
@@ -113,6 +118,11 @@ spm_build() {
 		else
 			sudo -u1 spm download $gn_namespace $pkg_name
 		fi
+		
+		eval PKG$pkg_name="\"$build_dir\""
+		# packages needed as dependency, are mentioned in the "Build.sh" script, like this:
+		# 	spm_build <gnunet-namespace> <package-name>
+		# now we can use "$PKG<package-name>" where ever you want to access a file in a package
 		
 		# if prebuild package is downloaded:
 		# spm_import all the packages mentioned in the "deps" file
@@ -122,24 +132,13 @@ spm_build() {
 		# so warn and return, to avoid an infinite loop
 	fi
 	
-	pkg__$pkg_name="$cache_dir/spm/downloads/$gnunet_namespace/$pkg_name"
-	# packages needed as dependency, are mentioned in the "Build.sh" script, like this:
-	# 	spm_build <gnunet-namespace> [<package-name>]
-	# now we can use "$pkg_<package-name>" where ever you want to access a file in a package
-	
-	# for run'time dependencies:
-	# 	spm_include <gnunet-namespace> <package-name>
-	# this will append the URL of the package to ".cache/spm/builds/deps" (if not already)
-	
-	# at the end of SPMbuild.sh scripts, we can include test instructions, after his line:
-	# [ -z SPM_TEST ] && return
-	[ -z "$2" ] && SPM_TEST=1
-	
-	. "$pkg_dir"/Build.sh
+	. "$pkg_dir"/SPMbuild.sh
 }
 
-# this function can be used in SPMbuild.sh scripts to import dependency packages
+# this function can be used in SPMbuild.sh scripts to import run'time dependency packages
 spm_import() {
+	local gn_namespace="$1"
+	local pkg_name="$2"
 	# spm_build
 	# symlink (absolute path) the files in "exp" into "$build_dir"
 	
