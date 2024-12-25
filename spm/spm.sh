@@ -46,9 +46,18 @@ gitag_clone() {
 	# if a gpg key is given, download and build gpg package
 }
 
-# in SPMbuild.sh scripts, to create executable scripts
-# in the first line replace #!/exp/cmd/env with #!/usr/bin/env
-# then make it executable
+# each project contains a SPMns file whose first line is: <gnunet-namespace> <package-name>
+# the following line contains alternative gnunet namespaces
+# before updating a package, first we compare SPMns files
+# if they match, it will be downloaded, and then we go to the next namespaces which must have the same content
+# 	if not the content that most namespaces agree on, will be the downloaded result
+# but if SPMns files don't match, the SPMns that most namespaces agree on, will be chosen
+# when the main (ie the first) namespace is invalidated according to the above mechanism
+# , if it is in $state_dir/spm/installed, replace it with the new namespace
+# , if it's built as a dependecy, make a symlink from new download dir inplace of the old one
+
+# in SPMbuild.sh scripts, to create executable scripts,
+# in the first line replace #!/exp/cmd/env with #!/usr/bin/env, then make it executable
 
 # this function can be used in SPMbuild.sh scripts to export executables in $pkg_dir/exec
 # usage guide:
@@ -179,11 +188,12 @@ spm_install() {
 	fi
 	
 	# store "$gn_namespace $pkg_name" in $state_dir/spm/installed (if not already)
-	# if $pkg_name exists already, and namespaces does not match, append a numerical postfix, and try again
+	# if $pkg_name exists already, and namespaces does not match, but owners match, replace,
+	# 	otherwise exit with error
 	
 	# if a symlink with the same name already exists:
 	# if it's linked into the same package, skip
-	# otherwise append a numerical postfix, and try agin
+	# otherwise if the owners match, replace then, otherwise exit with error
 	
 	# create symlinks from "$build_dir/inst/cmd/*" files into "$cmd_dir"
 	
