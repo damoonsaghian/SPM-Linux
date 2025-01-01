@@ -22,4 +22,9 @@ OPTIONS = -b -e -a -p
 
 # decentralized time synchronization using DHT
 
-# encrypt the directory containing the private keys for gnunet egos
+# gnunet-identity stores private keys unencrypted
+# ~/.local/share/gnunet/identity/egos/
+# gnunet-publish.sh:
+# , ask for password
+# , decrypt the keys dir and namespace mount it to above path
+# , gnunet-publish
