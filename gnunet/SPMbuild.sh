@@ -21,10 +21,3 @@ OPTIONS = -b -e -a -p
 # https://en.wikipedia.org/wiki/WiGig
 
 # decentralized time synchronization using DHT
-
-# gnunet-identity stores private keys unencrypted
-# ~/.local/share/gnunet/identity/egos/
-# gnunet-publish.sh:
-# , ask for password
-# , decrypt the keys dir and namespace mount it to above path
-# , gnunet-publish
