@@ -23,7 +23,8 @@ OPTIONS = -b -e -a -p
 # decentralized time synchronization using DHT
 
 # gnunet-publish.sh
-# ask for password
-# decrypt and namespace mount the egos dir on itself
-# trap "trap - EXIT; umount \"$egos_dir\"" EXIT INT TERM QUIT HUP PIPE
-# gnunet-publish
+# , ask for password
+# , decrypt and namespace mount the egos dir on itself
+# , gnunet-publish
+# https://wiki.archlinux.org/title/ECryptfs
+# https://github.com/oszika/ecryptbtrfs
