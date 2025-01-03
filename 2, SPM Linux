@@ -47,10 +47,3 @@ this means that:
 for further explanation:
 "https://www.reddit.com/r/linuxquestions/comments/8mlil7/whats_the_point_of_the_sudo_password_prompt_if/"
 "https://security.stackexchange.com/questions/119410/why-should-one-use-sudo"
-
-to protect the computer from physical attacks, you must:
-, somehow prevent tampering with hardware
-, protect boot firmware by a password
-, disable changing the storage device used for booting
-these can make physical attacks more difficult, but keep in mind that:
-	physical access to a computer is root access, given enough time and resources
