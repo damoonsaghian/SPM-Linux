@@ -48,6 +48,7 @@ gitag_clone() {
 
 # each project contains a SPMns file whose first line is: <gnunet-namespace> <package-name>
 # the following line contains alternative gnunet namespaces
+# some of them can be reserved namespaces; ie they can have no package with that name
 # before updating a package, first we compare SPMns files
 # if they match, it will be downloaded, and then we go to the next namespaces which must have the same content
 # 	if not the content that most namespaces agree on, will be the downloaded result
@@ -58,6 +59,9 @@ gitag_clone() {
 
 # in SPMbuild.sh scripts, to create executable scripts,
 # in the first line replace #!/exp/cmd/env with #!/usr/bin/env, then make it executable
+
+# programs installed in ~/.local/bin and the SPMbuild.sh scripts when current user is 1000,
+# will be run as user 1001
 
 # this function can be used in SPMbuild.sh scripts to export executables in $pkg_dir/exec
 # usage guide:
