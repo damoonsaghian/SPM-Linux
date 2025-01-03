@@ -21,3 +21,9 @@ OPTIONS = -b -e -a -p
 # https://en.wikipedia.org/wiki/WiGig
 
 # decentralized time synchronization using DHT
+
+# gnunet-publish.sh
+# ask for password
+# decrypt and namespace mount the egos dir on itself
+# trap "trap - EXIT; umount \"$egos_dir\"" EXIT INT TERM QUIT HUP PIPE
+# gnunet-publish
