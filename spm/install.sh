@@ -140,11 +140,8 @@ seatd
 spm
 sudo
 tz
-util-linux' | while read -r pkg_name; do
-	sh "$spm_dir"/spm.sh install "$gnunet_namespace" "$pkg_name" core
-done
-
-echo 'codev
+util-linux
+codev
 swapps
 sway
 termulator' | while read -r pkg_name; do

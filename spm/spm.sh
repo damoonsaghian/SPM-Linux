@@ -181,10 +181,11 @@ spm_install() {
 	local pkg_name="$2"
 	local build_dir="$builds_dir/$gn_namespace/$pkg_name"
 	
-	if [ "$(id -u)" = 0 ] && [ "$3" != core ]; then
-		sudo -u1 spm build "$gn_namespace" "pkg_name"
+	if [ "$(id -u)" = 0 ]; then
+		# create build dir and set the owner as user 1
+		sudo -u1 spm build "$gn_namespace" "$pkg_name"
 	else
-		spm_build "$pkg_name"
+		spm_build "$pkg_n ame"
 	fi
 	
 	# store "$gn_namespace $pkg_name" in $state_dir/spm/installed (if not already)
