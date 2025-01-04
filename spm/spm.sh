@@ -181,7 +181,7 @@ spm_install() {
 	local pkg_name="$2"
 	local build_dir="$builds_dir/$gn_namespace/$pkg_name"
 	
-	if [ "$(id -u)" = 0 ] && [ "$3" = core ]; then
+	if [ "$(id -u)" = 0 ] && [ "$3" != core ]; then
 		sudo -u1 spm build "$gn_namespace" "pkg_name"
 	else
 		spm_build "$pkg_name"
