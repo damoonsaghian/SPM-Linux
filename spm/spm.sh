@@ -129,10 +129,10 @@ spm_build() {
 		pkg_name="$2"
 		build_dir="$state_dir/spm/builds/$gn_namespace/$pkg_name"
 		
-		if [ "$(id -u)" = 1 ]; then
+		if [ "$(id -u)" = 0 ]; then
 			spm_download $gn_namespace $pkg_name
 		else
-			sudo -u1 spm download $gn_namespace $pkg_name
+			sudo spm download $gn_namespace $pkg_name
 		fi
 		
 		eval PKG$pkg_name="\"$build_dir\""
@@ -181,12 +181,8 @@ spm_install() {
 	local pkg_name="$2"
 	local build_dir="$builds_dir/$gn_namespace/$pkg_name"
 	
-	if [ "$(id -u)" = 0 ]; then
-		if [ "$3" = core ]; then
-			sudo -u1 spm build "$gn_namespace" "pkg_name"
-		else
-			sudo -u2 spm build "$gn_namespace" "pkg_name"
-		fi
+	if [ "$(id -u)" = 0 ] && [ "$3" = core ]; then
+		sudo -u1 spm build "$gn_namespace" "pkg_name"
 	else
 		spm_build "$pkg_name"
 	fi
