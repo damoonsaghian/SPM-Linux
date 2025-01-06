@@ -62,8 +62,8 @@ fi
 sudo passwd root
 sudo passwd
 
-if argv[0] begin with "/", find the realpath of argv[0], then the dirname, then ../../../var/state/sudo/passwd
-otherwise just use /var/state/sudo/passwd
+if argv[0] begin with "/", find the realpath of argv[0], then the dirname, then ../../../var/lib/sudo/passwd
+otherwise just use /var/lib/sudo/passwd
 
 echo; printf "set root password: "
 while true; do
