@@ -6,12 +6,12 @@ set -e
 script_dir="$(dirname "$(realpath "$0")")"
 
 root_dir="$script_dir/../../../../../.."
-if [ "$(id -u)" = 0 ] || [ "$(id -u)" = 1 ] || [ "$(id -u)" = 2 ]; then
+if [ "$(id -u)" = 0 ] || [ "$(id -u)" = 1 ]; then
 	builds_dir="$root_dir/var/lib/spm/builds"
-	cmd_dir="$root_dir/inst/cmd"
-	sv_dir="$root_dir/inst/sv"
-	dbus_dir="$root_dir/inst/dbus" # dbus interfaces and services
-	apps_dir="$root_dir/inst/apps" # system services
+	cmd_dir="$root_dir/usr/bin"
+	sv_dir="$root_dir/usr/share/sv"
+	dbus_dir="$root_dir/usr/share/dbus" # dbus interfaces and services
+	apps_dir="$root_dir/usr/share/applications" # system services
 	state_dir="$root_dir/var/lib"
 	cache_dir="$root_dir/var/cache"
 else
@@ -73,27 +73,13 @@ spm_xport() {
 	local destination_dir_relpath="$2"
 	local destination_path="$script_dir/.cache/spm/builds/$ARCH/$destination_dir_relpath/$executable_name"
 	
-	if [ cmd_dir = "$HOME/.local/bin" ]; then
-		# adding "/usr/bin:/bin:/usr/sbin:/sbin" to PATH is for when SPM is installed at HOME
-		cat <<-'EOF' > "$destination_path"
-		#!/inst/cmd/env sh
-		script_dir="$(dirname "$(realpath "$0")")"
-		export PATH="$script_dir/../../exec:$HOME/.local/bin:/inst/cmd"
-		PATH="$PATH:/usr/bin:/bin:/usr/sbin:/sbin"
-		export LD_LIBRARY_PATH="$script_dir/../../lib"
-		export XDG_DATA_DIRS="$script_dir/../../data"
-		EOF
-	else
-		# adding "/usr/bin:/bin:/usr/sbin:/sbin" to PATH may be useful for cyclic dependencies when bootstraping
-		cat <<-'EOF' > "$destination_path"
-		#!/inst/cmd/env sh
-		script_dir="$(dirname "$(realpath "$0")")"
-		export PATH="$script_dir/../../exec:$script_dir/../../../../../../../../inst/cmd"
-		PATH="$PATH:/usr/bin:/bin:/usr/sbin:/sbin"
-		export LD_LIBRARY_PATH="$script_dir/../../lib"
-		export XDG_DATA_DIRS="$script_dir/../../data"
-		EOF
-	fi
+	cat <<-'EOF' > "$destination_path"
+	#!/inst/cmd/env sh
+	script_dir="$(dirname "$(realpath "$0")")"
+	export PATH="$script_dir/../../exec:$PATH"
+	export LD_LIBRARY_PATH="$script_dir/../../lib"
+	export XDG_DATA_DIRS="$script_dir/../../data"
+	EOF
 	
 	echo "\$script_dir/../../exec/$executable_name" >> "$destination_path"
 	chmod +x "$destination_path"

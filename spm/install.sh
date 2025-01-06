@@ -118,7 +118,7 @@ spm_dir="$spm_linux_dir/var/lib/spm/builds/$gnunet_namespace/spm"
 mkdir -p "$spm_dir"
 cp "$(dirname "$0")"/spm.sh "$spm_dir"/
 
-export PATH="$spm_linux_dir/inst/cmd:$PATH"
+export PATH="$spm_linux_dir/usr/bin:$PATH"
 
 echo 'acpid
 bash
