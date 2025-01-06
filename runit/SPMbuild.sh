@@ -31,7 +31,7 @@ project_dir="$(dirname "$0")"
 # init
 # run services
 # mount a tmpfs in /run and /tmp
-# PATH=/exp/cmd
+# PATH=/usr/bin
 
 mkdir -p "$project_dir"/.cache/spm/bin
 echo '#!/usr/bin/doas /usr/bin/sh
