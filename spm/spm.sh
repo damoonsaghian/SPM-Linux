@@ -1,4 +1,4 @@
-#!/exp/cmd/env sh
+#!/usr/bin/env sh
 set -e
 
 [ -z "$ARCH" ] && ARCH="$(uname --machine)"
@@ -10,7 +10,7 @@ if [ "$(id -u)" = 0 ] || [ "$(id -u)" = 1 ]; then
 	builds_dir="$root_dir/var/lib/spm/builds"
 	cmd_dir="$root_dir/usr/bin"
 	sv_dir="$root_dir/usr/share/sv"
-	dbus_dir="$root_dir/usr/share/dbus" # dbus interfaces and services
+	dbus_dir="$root_dir/usr/share/dbus-1" # dbus interfaces and services
 	apps_dir="$root_dir/usr/share/applications" # system services
 	state_dir="$root_dir/var/lib"
 	cache_dir="$root_dir/var/cache"
@@ -57,9 +57,6 @@ gitag_clone() {
 # , if it is in $state_dir/spm/installed, replace it with the new namespace
 # , if it's built as a dependecy, make a symlink from new download dir inplace of the old one
 
-# in SPMbuild.sh scripts, to create executable scripts,
-# in the first line replace #!/exp/cmd/env with #!/usr/bin/env, then make it executable
-
 # programs installed in ~/.local/bin and the SPMbuild.sh scripts when current user is 1000,
 # will be run as user 1001
 
@@ -92,9 +89,9 @@ spm_download() {
 	local build_url="gnunet://fs/sks/$gn_namespace/builds/$pkg_name"
 	# download directories
 	local dl_dir="$cache_dir/spm/packages/$gn_namespace/$pkg_name"
-	local dl_build_dir="$cache_dir/spm/builds/$ARCH/$gn_namespace/$pkg_name"
+	local dl_build_dir="$cache_dir/spm/builds/$gn_namespace/$pkg_name"
 	
-	# if there is no "download'src" line in "$state_dir/spm/config",
+	# if there is no line equal to "build'from'src" in "$state_dir/spm/config",
 	# 	and "$download_src" is not set, and $build_url exists,
 	# 	download that into "$dl_build_dir"
 	# else: download the package from "$pkg_url" to "$dl_dir"
@@ -292,7 +289,7 @@ elif [ "$1" = update ]; then
 	# doas fwupdmgr get-updates
 	# doas fwupdmgr update
 	
-	if [ "$arch" = x86 ] || [ "$arch" = x86_64 ]; then
+	if [ "$ARCH" = x86 ] || [ "$ARCH" = x86_64 ]; then
 		limine bios-install "$target_device"
 	fi
 elif [ "$1" = publish ]; then

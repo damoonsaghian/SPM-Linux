@@ -106,7 +106,7 @@ chmod a+w "$spm_linux_dir"/tmp
 
 if [ "$1" = src ]; then
 	mkdir -p "$spm_linux_dir"/var/lib/spm
-	echo "download'src" > "$spm_linux_dir"/var/lib/spm/config
+	echo "build'from'src" > "$spm_linux_dir"/var/lib/spm/config
 fi
 
 gnunet-config --section=ats --option=WAN_QUOTA_IN --value=unlimited
@@ -148,8 +148,8 @@ termulator' | while read -r pkg_name; do
 	sh "$spm_dir"/spm.sh install "$gnunet_namespace" "$pkg_name"
 done
 
-"$spm_linux_dir"/inst/cmd/sudo passwd
-"$spm_linux_dir"/inst/cmd/sudo passwd root
+"$spm_linux_dir"/usr/bin/sudo passwd
+"$spm_linux_dir"/usr/bin/sudo passwd root
 
 echo; echo -n "SPM Linux installed successfully; press any key to exit"
 read -rsn1
