@@ -8,7 +8,7 @@
 
 // -u<uid>: user with id <uid>
 
-export SUDO=1
+// export SUDO=1
 
 /*
 if the received dbus message, request to run the given command as user 1000
