@@ -78,7 +78,7 @@ spm_xport() {
 	export XDG_DATA_DIRS="$script_dir/../../data"
 	EOF
 	
-	echo "\$script_dir/../../exec/$executable_name" >> "$destination_path"
+	echo "exec \$script_dir/../../exec/$executable_name" >> "$destination_path"
 	chmod +x "$destination_path"
 }
 
@@ -128,7 +128,8 @@ spm_build() {
 		# and thats it, return
 		
 		# if "SPMbuild.sh" file is already open, it means that there is a cyclic dependency
-		# so warn and return, to avoid an infinite loop
+		# so just download a prebuilt package (even when "build'from'src" is in config)
+		# then warn and return, to avoid an infinite loop
 	fi
 	
 	# if "$build_dir" already exists:
@@ -186,9 +187,10 @@ spm_install() {
 	# icon_path=""
 	# [Desktop Entry]
 	# Type=Application
+	# StartupNotify=true
 	# Name=$app_name
 	# Icon=$(echo $build_dir/inst/app/$app_name.*)
-	# Exec=$build_dir/inst/app//$app_name
+	# Exec=$build_dir/inst/app/$app_name
 	
 	# create symlinks from "$build_dir/inst/dbus/*" directories to "$dbus_dir"
 	
