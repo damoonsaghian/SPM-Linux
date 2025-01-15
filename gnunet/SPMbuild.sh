@@ -29,5 +29,6 @@ OPTIONS = -b -e -a -p
 # otherwise we must do it manually: chattr +C ... (eg for MariaDB databases)
 # apparently Webkit uses SQLite in WAL mode, but i'm not sure about GnuNet
 
-# for now internally build gnutls and gcrypt
-# in the future replace them with openssl
+# for now, build libsodium and gcrypt internally
+# in the future, replace it with nettle
+# and for more security add NTRU on top (like in openssh)
