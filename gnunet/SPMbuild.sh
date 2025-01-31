@@ -1,5 +1,7 @@
 project_dir="$(dirname "$0")"
 
+# https://git.gnunet.org/gnunet.git/tree/src
+
 echo '[ats]
 WLAN_QUOTA_IN = unlimited
 WLAN_QUOTA_OUT = unlimited
