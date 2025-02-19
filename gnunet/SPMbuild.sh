@@ -29,7 +29,10 @@ OPTIONS = -b -e -a -p
 # for database files on BTRFS, COW must be disabled
 # generally it's done automatically by the program itself (eg for PostgreSQL)
 # otherwise we must do it manually: chattr +C ... (eg for MariaDB databases)
-# apparently Webkit uses SQLite in WAL mode, but i'm not sure about GnuNet
+# apparently Webkit uses SQLite in WAL mode, but i'm not sure about GnuNet database
+
+# wifi ad hoc
+# https://docs.gnunet.org/latest/users/configuration.html#configuring-the-wlan-transport-plugin
 
 # for now, build libsodium and gcrypt internally
 # in the future, replace it with nettle
