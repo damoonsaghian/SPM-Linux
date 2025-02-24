@@ -17,14 +17,8 @@ WAN_QUOTA_OUT = unlimited
 OPTIONS = -b -e -a -p
 ' > "$project_dir/.cache/spm/gnunet.conf"
 
-# inhibit suspend/shutdown when a publish is in progress
-
-# gnunet-publish.sh
-# , ask for password
-# , decrypt and namespace mount the egos dir on itself
-# , gnunet-publish
-# https://wiki.archlinux.org/title/ECryptfs
-# https://github.com/oszika/ecryptbtrfs
+# when a publish is in progress, and for minutes after that, inhibit suspend
+# also when a shutdown is requested, notice the user, and ask to confirm
 
 # for database files on BTRFS, COW must be disabled
 # generally it's done automatically by the program itself (eg for PostgreSQL)
@@ -34,6 +28,6 @@ OPTIONS = -b -e -a -p
 # wifi ad hoc
 # https://docs.gnunet.org/latest/users/configuration.html#configuring-the-wlan-transport-plugin
 
-# for now, build libsodium and gcrypt internally
+# for now, build libsodium and gcrypt internally, and link statically
 # in the future, replace it with nettle
 # and for more security add NTRU on top (like in openssh)
