@@ -17,8 +17,8 @@ WAN_QUOTA_OUT = unlimited
 OPTIONS = -b -e -a -p
 ' > "$project_dir/.cache/spm/gnunet.conf"
 
-# when a publish is in progress, and for minutes after that, inhibit suspend
-# also when a shutdown is requested, notice the user, and ask to confirm
+# gn-publish.sh
+# gn-download.sh
 
 # for database files on BTRFS, COW must be disabled
 # generally it's done automatically by the program itself (eg for PostgreSQL)
