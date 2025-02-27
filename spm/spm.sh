@@ -46,17 +46,6 @@ gitag_clone() {
 	# if a gpg key is given, download and build gpg package
 }
 
-# each project contains a SPMns file whose first line is: <gnunet-namespace> <package-name>
-# the following line contains alternative gnunet namespaces
-# some of them can be reserved namespaces; ie they can have no package with that name
-# before updating a package, first we compare SPMns files
-# if they match, it will be downloaded, and then we go to the next namespaces which must have the same content
-# 	if not the content that most namespaces agree on, will be the downloaded result
-# but if SPMns files don't match, the SPMns that most namespaces agree on, will be chosen
-# when the main (ie the first) namespace is invalidated according to the above mechanism
-# , if it is in $state_dir/spm/installed, replace it with the new namespace
-# , if it's built as a dependecy, make a symlink from new download dir inplace of the old one
-
 # programs installed in ~/.local/bin and the SPMbuild.sh scripts when current user is 1000,
 # will be run as user 1001
 
@@ -85,20 +74,23 @@ spm_xport() {
 spm_download() {
 	local gn_namespace="$1"
 	local pkg_name="$2"
-	local pkg_url="gnunet://fs/sks/$gn_namespace/packages/$pkg_name"
-	local build_url="gnunet://fs/sks/$gn_namespace/builds/$pkg_name"
+	local pkg_name_build="$pkg_name-$ARCH"
 	# download directories
 	local dl_dir="$cache_dir/spm/packages/$gn_namespace/$pkg_name"
-	local dl_build_dir="$cache_dir/spm/builds/$gn_namespace/$pkg_name"
+	local dl_build_dir="$cache_dir/spm/$ARCH/$gn_namespace/$pkg_name"
 	
-	# if there is no line equal to "build'from'src" in "$state_dir/spm/config",
-	# 	and "$download_src" is not set, and $build_url exists,
-	# 	download that into "$dl_build_dir"
-	# else: download the package from "$pkg_url" to "$dl_dir"
+	# if there is no line equal to "build'from'src" in "$state_dir/spm/config", and "$download_src" is not set
+	# 	download $pkg_name_build from $gn_namespace into "$dl_build_dir"
+	# 	result="$(gn-download "$gn_namespace" "$pkg_namebuild" "$dl_build_dir")"
+	# 	[ result = "not fount" ] || return
+	# download the package from "$pkg_url" to "$dl_dir"
+	# gn-download "$gn_namespace" "$pkg_name" "$dl_dir"
+	# when gn-download is not available use "$script_dir"/../gnunet/gnunet-download.sh
 }
 
 spm_build() {
 	local pkg_dir= build_dir= gn_namespace= pkg_name=
+	local spmbuildsh_dir="$pkg_dir"
 	
 	if [ -z "$2" ]; then
 		pkg_dir="$1"
@@ -119,7 +111,7 @@ spm_build() {
 		fi
 		
 		eval PKG$pkg_name="\"$build_dir\""
-		# packages needed as dependency, are mentioned in the "Build.sh" script, like this:
+		# packages needed as dependency, are mentioned in the "SPMbuild.sh" script, like this:
 		# 	spm_build <gnunet-namespace> <package-name>
 		# now we can use "$PKG<package-name>" where ever you want to access a file in a package
 		
@@ -245,6 +237,8 @@ if [ "$1" = build ]; then
 	else
 		spm_build "$2" "$3"
 	fi
+elif [ "$1" = import ]; then
+	spm_import "$2" "$3"
 elif [ "$1" = install ]; then
 	spm_install "$2" "$3"
 elif [ "$1" = remove ]; then
@@ -296,15 +290,12 @@ elif [ "$1" = update ]; then
 	fi
 elif [ "$1" = publish ]; then
 	# make a BTRFS snapshot from the project's directory,
-	# to "~/.local/spm/published/$gnunet_namespace/$pkg_name"
+	# to "~/.local/spm/publish/$gnunet_namespace/$pkg_name"
 	
-	# when hardlinking files from build dir to publish dir, skip symlinks
+	# ".data/gnunet" stores the project's GNUnet namespace and poject name
+	# sks identifier to publish pakage: <project_name>-pkg-<number>
 	
-	# ".data/gnurl" stores the project's GNUnet URL: gnunet://fs/sks/<name-space>/projects/<project_name>
-	# package URL is obtained from it like this: gnunet://fs/sks/<name-space>/packages/<project_name>
-	
-	# publish "~/.local/spm/published/$gnunet_namespace/$pkg_name" (minus the ".cache" directory) to:
-	# "gnunet://fs/sks/<namespace>/packages/<package-name>/"
+	gn-publish "~/.local/spm/published/$gnunet_namespace/$pkg_name" $gnunet_namespace $pkg_name-pkg
 	
 	# cross'built the package for all architectures mentioned in "$state_dir/spm.conf" (value of "arch" entry),
 	# and put the results in in ".cache/spm/builds/<arch>/"
@@ -314,8 +305,7 @@ elif [ "$1" = publish ]; then
 	# make hard links from "imp" file, plus all files in ".cache/spm/builds/<arch>/" minus "imp" directory,
 	# and put them in ".cache/spm/builds-published/<arch>/"
 	
-	# publish ".cache/spm/builds-published/<arch>/" to:
-	# "gnunet://fs/sks/<namespace>/packages_build/<package-name>/<arch>"
+	gn-publish ".cache/spm/builds-published/<arch>/" $gnunet_namespace $pkg_name-$ARCH
 	
 	# the "spmbuild.sh" file will be published into the GNUnet namespace
 	# the source files can be in the same place, or in a Git URL
@@ -326,6 +316,7 @@ else
 	echo "usage guide:"
 	echo "	spm build [<project-path>]"
 	echo "	spm build <gnunet-namespace> <package-name>"
+	echo "	spm import <gnunet-namespace> <package-name>"
 	echo "	spm download <gnunet-namespace> <package-name>"
 	echo "	spm install <gnunet-namespace> <package-name>"
 	echo "	spm remove <gnunet-namespace> <package-name>"

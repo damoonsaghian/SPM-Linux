@@ -1,7 +1,7 @@
 project_dir="$(dirname "$0")"
 
 mkdir -p "$project_dir"/.cache/spm/exp/cmd
-ln "$project_dir"/spm.sh > "$project_dir"/.cache/spm/exp/cmd/spm
+ln "$project_dir"/spm.sh > "$project_dir"/.cache/spm/cmd/spm
 
 ln "$project_dir"/install.sh "$project_dir"/.cache/spm/
 
