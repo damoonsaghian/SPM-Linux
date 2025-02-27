@@ -2,12 +2,12 @@ SPM Linux is a Linux based operating system, built and maintained using SPM (sim
 SPM uses a simple and innovative method that unifies software building and package management
 
 to install SPM Linux, first we need to be in a Linux system with these programs installed:
-	sfdisk mkfs.vfat mkfs.btrfs gnunet sed
+	sfdisk mkfs.vfat mkfs.btrfs sed gnunet
 to build packages from source, these extra programs are required too:
-	git lsh-keygen (or ssh-keygen) clang
+	clang git ssh-keygen
 for example you can boot into an Alpine Linux live system, and enter this at the command line:
 ; apk add sfdisk btrfs-progs gnunet
-to build packages from source, add these too: git openssh-keygen clang
+to build packages from source, add these too: clang git openssh-keygen
 
 now, SPM Linux can be installed on a storage device, just by running this command (as root):
 ; sh spm/install.sh <arch>
