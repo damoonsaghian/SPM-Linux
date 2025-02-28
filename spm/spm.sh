@@ -86,6 +86,10 @@ spm_download() {
 	# download the package from "$pkg_url" to "$dl_dir"
 	# gn-download "$gn_namespace" "$pkg_name" "$dl_dir"
 	# when gn-download is not available use "$script_dir"/../gnunet/gnunet-download.sh
+	
+	# when updating a package, if the main (ie the first) namespace is invalidated:
+	# , if it is in $state_dir/spm/installed, replace it with the new namespace
+	# , if it's built as a dependecy, make a symlink from new download dir inplace of the old one
 }
 
 spm_build() {
