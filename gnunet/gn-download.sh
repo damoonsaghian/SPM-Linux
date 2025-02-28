@@ -16,3 +16,8 @@ download_dir="$3"
 gnunet-search gnunet://fs/sks/$gnunet_namespace/"$publish_name"
 # if above command succeeds (network is connected) but returns empty result: echo "not found"; exit
 gnunet_url=
+
+# before updating a project, first we compare .data/gnunet files
+# if they match, it will be downloaded, and then we go to the next namespaces which must have the same content
+# 	if not the content that most namespaces agree on, will be the downloaded result
+# but if .data/gnunet files don't match, the one that most namespaces agree on, will be chosen
