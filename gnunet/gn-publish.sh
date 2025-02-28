@@ -16,8 +16,12 @@ publish_name="$3"
 # https://wiki.archlinux.org/title/ECryptfs
 # https://github.com/oszika/ecryptbtrfs
 
-# create ref links (or read'only hard links) of the files in $project_dir/.data/gnunet/publich
+# create ref links (or read'only hard links) of the files in $project_dir/.data/gnunet/publish
 # this way GNUnet can publish the files using the indexed method
+
+# when ref/hard linking files to publish dir, skip symlinks
+
+# skip .cache directory
 
 # gnunet-search gnunet://fs/sks/$gnunet_namespace/$publish_name
 # find the latest version, then compute the next version

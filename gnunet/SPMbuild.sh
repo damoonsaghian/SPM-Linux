@@ -20,6 +20,8 @@ OPTIONS = -b -e -a -p
 # gn-publish.sh
 # gn-download.sh
 
+# only make system services (do not create runit services for normal user)
+
 # for database files on BTRFS, COW must be disabled
 # generally it's done automatically by the program itself (eg for PostgreSQL)
 # otherwise we must do it manually: chattr +C ... (eg for MariaDB databases)
