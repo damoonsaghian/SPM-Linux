@@ -10,7 +10,7 @@ cp /mnt/os/{sway.conf,swapps.py} /usr/local/share/
 # export as a graphical shell
 echo '#!/exp/cmd/env sh
 dbus-run-session sway
-' > exp/cmd/gsh
+' > /usr/bin/gsh
 
 # after 600 seconds idle: swapps lock, turn screen off
 # idle can be monitored using a user service
