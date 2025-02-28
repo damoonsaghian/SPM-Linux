@@ -1,14 +1,3 @@
-# https://pythonbasics.org/
-# https://docs.python-guide.org/
-# https://docs.python.org/3/
-# https://docs.python.org/3/tutorial/
-# https://docs.python.org/3/library/index.html
-# https://docs.python.org/3/reference/datamodel.html
-# https://docs.python-guide.org/writing/gotchas/
-
-# https://pygobject.gnome.org/guide/api/signals.html
-# https://lazka.github.io/pgi-docs/
-
 # https://lazka.github.io/pgi-docs/Gtk-4.0/classes/ListBoxRow.html
 # https://lazka.github.io/pgi-docs/Gio-2.0/classes/ListStore.html
 # https://lazka.github.io/pgi-docs/Gio-2.0/classes/ListModel.html
@@ -26,9 +15,6 @@
 # https://github.com/Ulauncher/Ulauncher/blob/v6/ulauncher/modes/apps/app_mode.py
 # https://github.com/Ulauncher/Ulauncher/blob/v6/ulauncher/modes/apps/launch_app.py
 # https://github.com/otsaloma/catapult/blob/master/catapult/plugins/apps.py
-
-# start in lock mode
-# also go to codev workspace and lock it (if running)
 
 # the first item is "settings" that opens a vte window running "settings" command
 

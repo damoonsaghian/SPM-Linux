@@ -1,6 +1,4 @@
-project_dir="$(dirname "$0")"
-
-spm_include $gnunet_namespace python-gobject
+spm_include $gnunet_namespace jina
 
 # https://github.com/wmww/gtk4-layer-shell
 
