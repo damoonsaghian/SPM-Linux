@@ -7,13 +7,16 @@ publish_name="$3"
 # https://manpages.debian.org/unstable/gnunet/
 # https://git.gnunet.org/gnunet.git/tree/src
 
-# "$project_dir/.data/gnunet" file contains these lines:
+# "$project_dir/.data/gnunet/project" file contains these lines:
 # , project name
 # , the level of anonymity
-# , public key of egos used for publishing (namespaces)
+# , namespaces (public keys of egos that can be used for publishing)
 # if this file exists use it, try to copy from a siblibg project "$project_dir/../*/.data/gnunet",
 # 	otherwise ask the user, and create one
 # other than the main ego, create at least two alternative egos
+# https://docs.gnunet.org/latest/developers/apis/revocation.html
+# only the private key of the first ego is kept locally
+# other private keys will be stored (encrypted) on one or more removable devices
 
 # ask for password
 # decrypt and namespace mount the egos dir on itself
