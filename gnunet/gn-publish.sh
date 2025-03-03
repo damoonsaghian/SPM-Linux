@@ -8,11 +8,12 @@ publish_name="$3"
 # https://git.gnunet.org/gnunet.git/tree/src
 
 # "$project_dir/.data/gnunet/project" file contains these lines:
+# , namespace (public key of the ego used for publishing)
 # , project name
 # , the level of anonymity
-# , namespaces (public keys of egos that can be used for publishing)
 # if this file exists use it, try to copy from a siblibg project "$project_dir/../*/.data/gnunet",
 # 	otherwise ask the user, and create one
+# also there is "$project_dir/.data/gnunet/<namespace>" file containg alternative namespaces
 # other than the main ego, create at least two alternative egos
 # https://docs.gnunet.org/latest/developers/apis/revocation.html
 # only the private key of the first ego is kept locally

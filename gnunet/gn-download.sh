@@ -17,8 +17,7 @@ gnunet-search gnunet://fs/sks/$gnunet_namespace/"$publish_name"
 # if above command succeeds (network is connected) but returns empty result: echo "not found"; exit
 gnunet_url=
 
-# to download a project, we need these:
+# to download a project, we need:
 # , project name
-# , the level of anonymity
 # , namespaces (public keys of egos that can be used for publishing)
 # if a namespace is revoked, try the next one
