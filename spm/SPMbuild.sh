@@ -1,9 +1,10 @@
-project_dir="$(dirname "$0")"
-
-mkdir -p "$project_dir"/.cache/spm/exp/cmd
-ln "$project_dir"/spm.sh > "$project_dir"/.cache/spm/cmd/spm
-
-ln "$project_dir"/install.sh "$project_dir"/.cache/spm/
+mkdir -p "$build_dir"/exec
+ln "$pkg_dir/spm.sh" "$build_dir/exec/spm"
+chmod +x "$build_dir/exec/spm"
+spm_xcript spm inst/cmd
+ln "$pkg_dir/install.sh" "$build_dir/exec/spm-install"
+chmod +x "$build_dir/exec/spm-install"
+spm_xcript spm-install inst/cmd
 
 # create exch executable, which will be used by spm.sh to do atomic update for installed packages
 # https://github.com/util-linux/util-linux/blob/master/misc-utils/exch.c

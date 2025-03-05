@@ -2,6 +2,7 @@
 set -e
 
 [ -z "$ARCH" ] && ARCH="$(uname --machine)"
+TARGET=
 
 script_dir="$(dirname "$(realpath "$0")")"
 
@@ -51,16 +52,18 @@ gitag_clone() {
 
 # this function can be used in SPMbuild.sh scripts to export executables in $pkg_dir/exec
 # usage guide:
-# spm_xport <executable-name> exp/cmd
-# spm_xport <executable-name> inst/cmd
-# spm_xport <executable-name> inst/app
-spm_xport() {
+# spm_xcript <executable-name> exp/cmd
+# spm_xcript <executable-name> inst/cmd
+# spm_xcript <executable-name> inst/app
+spm_xcript() {
 	local executable_name="$1"
 	local destination_dir_relpath="$2"
-	local destination_path="$script_dir/.cache/spm/builds/$ARCH/$destination_dir_relpath/$executable_name"
+	local destination_path="$script_dir/.cache/spm/build/$ARCH/$destination_dir_relpath/$executable_name"
+	
+	mkdir -p "$script_dir/.cache/spm/build/$ARCH/$destination_dir_relpath"
 	
 	cat <<-'EOF' > "$destination_path"
-	#!/inst/cmd/env sh
+	#!/usr/bin/env sh
 	script_dir="$(dirname "$(realpath "$0")")"
 	export PATH="$script_dir/../../exec:$PATH"
 	export LD_LIBRARY_PATH="$script_dir/../../lib"
@@ -86,10 +89,6 @@ spm_download() {
 	# download the package from "$pkg_url" to "$dl_dir"
 	# gn-download "$gn_namespace" "$pkg_name" "$dl_dir"
 	# when gn-download is not available use "$script_dir"/../gnunet/gnunet-download.sh
-	
-	# when updating a package, if the main (ie the first) namespace is invalidated:
-	# , if it is in $state_dir/spm/installed, replace it with the new namespace
-	# , if it's built as a dependecy, make a symlink from new download dir inplace of the old one
 }
 
 spm_build() {
@@ -98,15 +97,21 @@ spm_build() {
 	
 	if [ -z "$2" ]; then
 		pkg_dir="$1"
-		build_dir="$pkg_dir/.cache/spm/builds/$ARCH/$pkg_name"
+		build_dir="$pkg_dir/.cache/spm/build/$TARGET/$pkg_name"
 		
 		SPM_TEST=1
 		# at the end of SPMbuild.sh scripts, we can include test instructions, after this line:
 		# [ -z SPM_TEST ] && return
+		
+		# read the fnunet namespace in $pkg_dir/.data/gnunet
+		GNNS=
 	else
 		gn_namespace="$1"
 		pkg_name="$2"
-		build_dir="$state_dir/spm/builds/$gn_namespace/$pkg_name"
+		build_dir="$state_dir/spm/build/$gn_namespace/$pkg_name"
+		
+		# if gn_namespace is revoked try the alternative ones from .data/gnunet/$gn_namespace
+		# also print a warning
 		
 		if [ "$(id -u)" = 0 ]; then
 			spm_download $gn_namespace $pkg_name
@@ -139,6 +144,11 @@ spm_build() {
 spm_import() {
 	local gn_namespace="$1"
 	local pkg_name="$2"
+	[ -z "$2" ] && {
+		# read gn_namespace from the first line of ".data/gnunet/project"
+		gn_namespace=
+		pkg_name="$1"
+	}
 	
 	spm_build "$gn_namespace" "$pkg_name"
 	# symlink (relative path) the files in "$PKG$pkg_name/cmd" "$PKG$pkg_name/lib" and "$PKG$pkg_name/data" into:
