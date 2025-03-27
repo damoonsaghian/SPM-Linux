@@ -38,6 +38,8 @@ gitag_clone() {
 	
 	# https://git-scm.com/docs/partial-clone
 	
+	# --depth 1
+	
 	# lsh-keygen/ssh-keygen to verify git tags
 	# https://git-scm.com/docs/git-verify-tag
 	# https://git-scm.com/docs/git-config#Documentation/git-config.txt-gpgltformatgtprogram
