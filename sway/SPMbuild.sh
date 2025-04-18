@@ -1,5 +1,3 @@
-project_dir="$(dirname "$0")"
-
 apt-get -qq install sway swayidle xwayland lua5.3 lua-lgi gir1.2-gtk-4.0 gnome-console
 cp /mnt/os/{sway.conf,swapps.py} /usr/local/share/
 
@@ -17,9 +15,7 @@ dbus-run-session sway
 # dim screen in several steps before turning screen off
 
 # to prevent BadUSB, when a new input device is connected: swapps lock
-# a user service checks when "/spm/installed/system/new-input-added" file is created, locks the session
-# udev rule that when an input device (ATTR{bInterfaceClass}=="03") is added:
-# 	 touch /spm/installed/system/new-input-added
+# udev rule that when an input device (ATTR{bInterfaceClass}=="03") is added, sudo -u 1000 swapps lock
 
 # mono'space fonts:
 # , wide characters are forced to squeeze
@@ -58,6 +54,8 @@ echo -n '<?xml version="1.0"?>
 	</alias>
 </fontconfig>
 ' > /etc/fonts/local.conf
+
+# https://github.com/alex-courtis/way-displays
 
 # on'screen keyboard
 # https://github.com/jjsullivan5196/wvkbd
