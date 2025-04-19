@@ -42,7 +42,7 @@ verify_passwd() {
 if command and its arguments are in /var/state/sudo/allow, run it, otherwise:
 
 show this message:
-press F8 (or F7, F6, F5) to access the prompt asking for root password
+press Fn (F1-F8) to access the prompt asking for root password
 
 in virtual terminal 2, run sway as system user 10, with a config file that only runs a dialog
 the dialog shows the command at the top, and asks for sudo password
