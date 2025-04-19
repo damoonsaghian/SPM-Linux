@@ -1,5 +1,13 @@
-apt-get -qq install sway swayidle xwayland lua5.3 lua-lgi gir1.2-gtk-4.0 gnome-console
-cp /mnt/os/{sway.conf,swapps.py} /usr/local/share/
+spm_import $gnunet_namespace python-gobject
+spm_import $gnunet_namespace gtk
+
+# https://github.com/wmww/gtk4-layer-shell
+
+# https://git.sr.ht/~emersion/grim
+
+# swayidle xwayland gtk
+# sway.conf
+# statusbar.py
 
 # bin/sway:
 # #!sh
