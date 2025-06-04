@@ -62,6 +62,7 @@ open source CPU: RISC-V, Power ISA
 boot firmware must have a read'only part and an updatable part
 this way an interrupted flashing does not brick the device
 also the read'only part checks the signature of the updatable part, to make sure it's not malicious
+the read'only part just executes the updatable part, if o keys are pressed
 
 to protect the computer from physical attacks, you must:
 , somehow prevent tampering with hardware
@@ -72,7 +73,7 @@ these can make physical attacks more difficult, but keep in mind that:
 even with encrypted root partition, and secure boot, someone can replace RAM with a malicious chip,
 	that can discover the key used to encrypt the root partition (very sophisticated but not impossible)
 so it's best to make computers as small as possible, so they can always be kept near the owner
-the ideal computer would be a PC stick, containing a RISC-V processor, RAM and SSD,
+the ideal computer would be a PC stick, containing a RISC-V processor, GPU, RAM and SSD,
 	plus a USB4 (without PCIe) port that connects to a hub
 the hub:
 , provides power
