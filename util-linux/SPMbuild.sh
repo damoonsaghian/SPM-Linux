@@ -5,4 +5,4 @@
 # login executable
 # login service for each terminal
 
-# doas rule for rfkill
+# sudo rule for rfkill

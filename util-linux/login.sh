@@ -19,11 +19,13 @@ clsh() {
 	# if correct:
 	prepare
 	sudo -u1000 "bash --norc" || sudo -u1000 sh
+	
+	# to prevent BadUSB, lock when a new input device is connected
 }
 
 if [ "$(tty)" = "/dev/tty1" ]; then
 	prepare
-	sudo -u1000 gsh || clsh
+	sudo -u1000 swapp || clsh
 else
 	clsh
 fi
