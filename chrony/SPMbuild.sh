@@ -1,5 +1,3 @@
-project_dir="$(dirname "$0")"
-
 # https://chrony-project.org/documentation.html
 # https://gitlab.com/chrony/chrony
 
@@ -9,9 +7,6 @@ project_dir="$(dirname "$0")"
 # https://www.ucolick.org/~sla/leapsecs/right+gps.html
 # https://skarnet.org/software/skalibs/flags.html#clockistai
 
-# add gpsd as a time reference
-
-# when chrony can't adjust time, try to set it using the time reported by modemmanager
-# https://www.freedesktop.org/software/ModemManager/api/latest/gdbus-org.freedesktop.ModemManager1.Modem.Time.html
+# when chrony can't adjust time, try to set it using the time reported by ofono
 
 # time sync over gnunet -> ip over gnunet
