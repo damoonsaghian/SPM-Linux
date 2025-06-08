@@ -4,7 +4,7 @@
 // put in clipboard
 // grim -o "$$HOME/.cache/screen.png" | wl-copy --type text/uri-list "file://$$HOME/.cache/screen.png"
 
-// don't close swapps, if workspace is empty
+// don't close launcher, if workspace is empty
 
 // escape: close launcher
 
