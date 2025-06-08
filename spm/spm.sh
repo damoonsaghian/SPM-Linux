@@ -3,6 +3,7 @@ set -e
 
 [ -z "$ARCH" ] && ARCH="$(uname --machine)"
 TARGET=
+# https://clang.llvm.org/docs/CrossCompilation.html
 
 script_dir="$(dirname "$(realpath "$0")")"
 
@@ -122,7 +123,7 @@ spm_build() {
 		fi
 		
 		eval PKG$pkg_name="\"$build_dir\""
-		# packages needed as dependency, are mentioned in the "SPMbuild.sh" script, like this:
+		# packages needed as dependency, are mentioned in the "spmbuild.sh" script, like this:
 		# 	spm_build <gnunet-namespace> <package-name>
 		# now we can use "$PKG<package-name>" where ever you want to access a file in a package
 		
@@ -246,8 +247,8 @@ if [ "$1" = build ]; then
 		if [ -f "$2/SPMbuild.sh" ]; then
 			spm_build "$project_dir"
 		else
-			# search for "SMPbuild.sh" in child directories of "$project_dir"
-			# the first one found, plus its siblings, are the packages to be built
+			# search for "spmbuild.sh" (case insensitive) in "$project_dir"
+			# the first one found, plus those sibling directories containing a spmbuild.sh, are the packages to be built
 			# run spm_build for each
 		fi
 	else

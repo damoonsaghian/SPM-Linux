@@ -128,26 +128,23 @@ dash
 dbus
 dte
 eudev
-fwupd
 gnunet
 limine
 linux
 netman
-runit
+dinit
 sbase
 sd
-seatd
 spm
 sudo
 tz
 util-linux
-sway
-swapps
-termulator
+swapp
 codev' | while read -r pkg_name; do
 	sh "$spm_dir"/spm.sh install "$gnunet_namespace" "$pkg_name"
 done
 
+echo
 "$spm_linux_dir"/usr/bin/sudo passwd
 "$spm_linux_dir"/usr/bin/sudo passwd root
 
