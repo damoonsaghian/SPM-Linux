@@ -32,9 +32,11 @@ the first item in application launcher is "system"; it opens the system menu:
 , timezone
 , passwords
 , packages (install, remove, upgrade, install SPM Linux)
+when there is a space in the text entered in the system menu, it'll be run in a terminal emulator box
+	the box will be accessible as a system menu entry labeled with a number followed by the entered command
+	to close the box, and remove its entry, press escape
 press "super+space" or "alt+tab" repeatedly, to switch between open apps (shown at the left side of taskbar)
 	the selected one will be moved to the first place
-to switch between windows, press "super+enter" or "alt+`" 
 to close focused window, press "super+backspace" or "alt+escape"
 
 the package management process is atomic
