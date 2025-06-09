@@ -123,7 +123,7 @@ spm_build() {
 		fi
 		
 		eval PKG$pkg_name="\"$build_dir\""
-		# packages needed as dependency, are mentioned in the "spmbuild.sh" script, like this:
+		# packages needed as dependency, are mentioned in the "SPMbuild.sh" script, like this:
 		# 	spm_build <gnunet-namespace> <package-name>
 		# now we can use "$PKG<package-name>" where ever you want to access a file in a package
 		
@@ -247,8 +247,8 @@ if [ "$1" = build ]; then
 		if [ -f "$2/SPMbuild.sh" ]; then
 			spm_build "$project_dir"
 		else
-			# search for "spmbuild.sh" (case insensitive) in "$project_dir"
-			# the first one found, plus those sibling directories containing a spmbuild.sh, are the packages to be built
+			# search for "SPMbuild.sh" (case insensitive) in "$project_dir"
+			# the first one found, plus those sibling directories containing a SPMbuild.sh, are the packages to be built
 			# run spm_build for each
 		fi
 	else
@@ -316,7 +316,7 @@ elif [ "$1" = publish ]; then
 	
 	# cross'built the package for all architectures mentioned in "$state_dir/spm.conf" (value of "arch" entry),
 	# and put the results in in ".cache/spm/builds/<arch>/"
-	# in "spmbuild.sh" scripts we can use "$carch" variable when cross'building
+	# in "SPMbuild.sh" scripts we can use "$carch" variable when cross'building
 	# "$carch" is an empty string when not cross'building
 	
 	# make hard links from "imp" file, plus all files in ".cache/spm/builds/<arch>/" minus "imp" directory,
@@ -324,9 +324,9 @@ elif [ "$1" = publish ]; then
 	
 	gn-publish ".cache/spm/builds-published/<arch>/" $gnunet_namespace $pkg_name-$ARCH
 	
-	# the "spmbuild.sh" file will be published into the GNUnet namespace
+	# the "SPMbuild.sh" file will be published into the GNUnet namespace
 	# the source files can be in the same place, or in a Git URL
-	# 	in which case, there must be a "git clone <git-url> .cache/git" line, in the "spmbuild.sh" file
+	# 	in which case, there must be a "git clone <git-url> .cache/git" line, in the "SPMbuild.sh" file
 elif [ "$1" = install-spmlinux ]; then
 	. "$script_dir"/install.sh
 else
