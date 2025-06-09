@@ -1,4 +1,6 @@
-// the first item is "system" that executes "system 'swapps -'", and closes when the command terminates
+// the first item is "system" that executes "system ext-menu", read its stdout,
+// shows it in a list for the user to choose, feeds the answer to stdin of the executed command
+// this ends when the command terminates (ie when EOF is send to stdout of the command)
 
 // an item for screenshot and screencast
 // put in clipboard
