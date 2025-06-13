@@ -1,0 +1,47 @@
+SPX is a simple POSIX'compliant operating system, built and maintained using SPM (simple package manager)
+SPM uses a simple and innovative method that unifies software building and package management
+
+in fact, SPM can be used as a standalone package manager on any POSIX system with these programs installed:
+	sed gnunet
+to build packages from source, these extra programs are required too:
+	clang git ssh-keygen
+now just run this command to install SPM in user's home directory:
+; sh spm/install.sh
+to build packages from source, run this instead:
+; sh spm/install.sh src
+
+to install SPX, first we need to be in a POSIX system with these programs installed:
+	sfdisk mkfs.vfat mkfs.btrfs sed gnunet
+to build packages from source, these extra programs are required too:
+	clang git ssh-keygen
+for example you can boot into an Alpine Linux live system, and enter this at the command line:
+; apk add sfdisk btrfs-progs gnunet
+to build packages from source, add these too: clang git openssh-keygen
+
+now, SPX can be installed on a storage device, just by running this command (as root):
+; sh spm/install.sh <arch>
+if no architecture is provided, current system's architecture will be used
+to build packages from source, run this instead:
+; sh spm/install.sh src <arch>
+
+the user interface of SPX is very simple
+press "super" (mod+mod) or "alt+space" to show the application launcher
+the first item in application launcher is "system"; it opens the system menu:
+, session (lock, suspend, exit, reboot, poweroff)
+, connections
+, timezone
+, passwords
+, packages (install, remove, upgrade, install SPX)
+when there is a space in the text entered in the system menu, it'll be run in a terminal emulator box
+	the box will be accessible as a system menu entry labeled with a number followed by the entered command
+	to close the box, and remove its entry, press escape
+press "super+space" or "alt+tab" repeatedly, to switch between open apps (shown at the left side of taskbar)
+	the selected one will be moved to the first place
+to close focused window, press "super+backspace" or "alt+escape"
+
+the package management process is atomic
+nonetheless, to have a really fail'safe system, redundant backups are necessary
+so make sure to have an extra SPX on a removable storage device
+
+to run a program as root:
+; sudo <command>
