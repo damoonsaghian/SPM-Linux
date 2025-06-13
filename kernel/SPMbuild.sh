@@ -1,15 +1,13 @@
-project_dir="$(dirname "$0")"
-
 # https://kernel.org/
 
 # costume modules path: /spm/linux/modules
 
-# custom init path, using kernel parameter: init=/spm/busybox/init
+# custom init path, using kernel parameter: init=/path/to/dinit
 
 # create initramfs containing:
 # , the modules and firmwares needed to access the storage device where root resides
 # , libc
-# , sh mount blkid
+# , sh, mount, and blkid
 # https://docs.kernel.org/admin-guide/initrd.html
 # https://gitlab.alpinelinux.org/alpine/mkinitfs
 # https://wiki.gentoo.org/wiki/Custom_Initramfs
@@ -22,3 +20,6 @@ project_dir="$(dirname "$0")"
 
 # wireless-regdb
 # https://wireless.wiki.kernel.org/en/developers/regulatory/wireless-regdb
+
+# https://github.com/haiku/haiku
+# https://github.com/haiku/haiku/tree/master/src/add-ons/kernel/drivers
