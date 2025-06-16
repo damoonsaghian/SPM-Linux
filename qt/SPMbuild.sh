@@ -2,6 +2,10 @@
 # https://github.com/qt/qtbase/blob/dev/config_help.txt
 # cmake args: -DFEATURE_glib=OFF -DFEATURE_xcb_xlib=OFF
 
+# https://github.com/qt/qtdeclarative
+
+# skip widgets and opengl widgets
+
 # skip Qt Network
 # if WIN32, build a limited version of Qt Network but without ssl
 # because it's apparently used as an replacement of DBus, for IPC
@@ -23,3 +27,5 @@
 # https://github.com/qt/qtlocation
 
 # https://doc.qt.io/qt-6/qtpdf-index.html
+
+# https://github.com/orgs/qt/repositories
