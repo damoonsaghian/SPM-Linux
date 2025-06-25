@@ -86,3 +86,4 @@ instead they run on a more sophisticated software machine (a virtual machine) ca
 in theory we can live without a kernel (an idea sometimes called a library operating system),
 	and it can be useful for some use cases (like embedded systems),
 	but a kernel based operating system makes developing and testing programs, much easier
+Linux is a highly developed, constantly evolving, open'source kernel
