@@ -20,6 +20,3 @@
 
 # wireless-regdb
 # https://wireless.wiki.kernel.org/en/developers/regulatory/wireless-regdb
-
-# https://github.com/haiku/haiku
-# https://github.com/haiku/haiku/tree/master/src/add-ons/kernel/drivers
