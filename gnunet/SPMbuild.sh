@@ -1,6 +1,10 @@
-project_dir="$(dirname "$0")"
-
 # https://git.gnunet.org/gnunet.git/tree/src
+
+# https://docs.gnunet.org/latest/users/subsystems.html
+# https://docs.gnunet.org/latest/users/configuration.html#access-control-for-gnunet
+# https://manpages.debian.org/unstable/gnunet/gnunet.1.en.html
+# https://manpages.debian.org/unstable/gnunet/index.html
+# https://wiki.archlinux.org/title/GNUnet
 
 echo '[ats]
 WLAN_QUOTA_IN = unlimited
@@ -20,7 +24,7 @@ OPTIONS = -b -e -a -p
 # gn-publish.sh
 # gn-download.sh
 
-# only make system services (do not create runit services for normal user)
+# only make system services (do not create system services for normal user)
 
 # for database files on BTRFS, COW must be disabled
 # generally it's done automatically by the program itself (eg for PostgreSQL)

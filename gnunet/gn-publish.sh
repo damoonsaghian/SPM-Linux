@@ -20,9 +20,8 @@ publish_name="$3"
 # other private keys will be stored (encrypted) on one or more removable devices
 
 # ask for password
-# decrypt and namespace mount the egos dir on itself
+# sd decrypt <egos-dir>
 # gnunet-publish
-# https://wiki.archlinux.org/title/ECryptfs
 # https://github.com/oszika/ecryptbtrfs
 
 # create ref links (or read'only hard links) of the files in $project_dir/.data/gnunet/publish
