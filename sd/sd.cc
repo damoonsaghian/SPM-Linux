@@ -1,5 +1,7 @@
 /*
 mounting and formatting storage devices
+encrypted directories
+snapshot and backup
 
 list of devices, notified when changed
 https://api-staging.kde.org/solid-index.html
@@ -17,6 +19,12 @@ https://github.com/netheril96/securefs
 https://www.agwa.name/blog/post/easily_running_fuse_in_an_isolated_mount_namespace
 sd encrypt <dir-path>
 sd decrypt <dir-path>
+
+sd backup create -> format with BTRFS
+btrfs send/receive
+	https://wiki.tnonline.net/w/Btrfs/Send
+do not follow mounts
+in case of bit rot, use backup to repair
 
 to access the content of mtp devices:
 https://sourceforge.net/p/libmtp
