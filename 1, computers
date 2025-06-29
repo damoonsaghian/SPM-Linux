@@ -74,12 +74,18 @@ even with encrypted root partition, and secure boot, someone can replace RAM wit
 	that can discover the key used to encrypt the root partition (very sophisticated but not impossible)
 so it's best to make computers as small as possible, so they can always be kept near the owner
 the ideal computer would be a PC stick, containing a RISC-V processor, GPU, RAM and SSD,
-	plus a USB4 (without PCIe) port that connects to a hub
+	plus a USB4 2.0 port that connects to a hub
 the hub:
 , provides power
 , has a USB dock (to connect peripherals like display and camera)
 , wifi, Bluetooth, maybe even speaker and microphone
 , extra ports: ethernet, audio jack, DP and HDMI
+for security reasons, th PCIe tunnel of USB4 2.0 will be disabled in boot firmware
+	"https://www.chromium.org/chromium-os/developer-library/reference/security/usb4/"
+	"https://en.wikipedia.org/wiki/Thunderbolt_(interface)#Security_vulnerabilities"
+gaming displays (those with their own GPU) should have two modes:
+, if the USB4 connection has PCIe tunnel, go through GPU
+, otherwise connect directly to the display
 
 programs usually do not run directly on computer hardware
 instead they run on a more sophisticated software machine (a virtual machine) called the kernel
