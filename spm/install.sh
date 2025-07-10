@@ -1,14 +1,6 @@
 set -e
 
-gnunet_namespace=
-
-if [ "$1" = src ]; then
-	ARCH="$2"
-else
-	ARCH="$1"
-fi
-[ -z "$ARCH" ] && ARCH="$(uname --machine)"
-export ARCH
+gnunet_namespace="$(cat "$(dirname "$(realpath "$0")")"/../.meta/gns)"
 
 # if this script is run by any user other than root, just install "spm" to user's home directory, and exit
 if [ $(id -u) != 0 ]; then
@@ -16,7 +8,7 @@ if [ $(id -u) != 0 ]; then
 		state_dir="$XDG_STATE_HOME"
 		[ -z "$state_dir" ] && state_dir="$HOME/.local/state"
 		mkdir -p "$state_dir"/spm
-		echo "download'src" > "$state_dir"/spm/config
+		echo "build'from'src" > "$state_dir"/spm/config
 	fi
 	
 	gnunet-config --section=ats --option=WAN_QUOTA_IN --value=unlimited
@@ -30,6 +22,31 @@ if [ $(id -u) != 0 ]; then
 	sh "$spm_dir"/spm.sh install "$gnunet_namespace" spm
 	exit
 fi
+
+ARCH="$(uname --machine)"
+# list available cpu architectures, and let the user choose
+# loongarch64, MIPS, Microblaze, PowerPC, powerpc64, x32, RISC-V, OpenRISC, s390x, SuperH
+# aarch64    - AArch64 (little endian)
+# aarch64_be - AArch64 (big endian)
+# arm        - ARM
+# arm64      - ARM64 (little endian)
+# mips       - MIPS (32-bit big endian)
+# mips64     - MIPS (64-bit big endian)
+# mips64el   - MIPS (64-bit little endian)
+# mipsel     - MIPS (32-bit little endian)
+# ppc32      - PowerPC 32
+# ppc64      - PowerPC 64
+# ppc64le    - PowerPC 64 LE
+# riscv32    - 32-bit RISC-V
+# riscv64    - 64-bit RISC-V
+# systemz    - SystemZ
+# wasm32     - WebAssembly 32-bit
+# wasm64     - WebAssembly 64-bit
+# x86        - 32-bit X86: Pentium-Pro and above
+# x86-64     - 64-bit X86: EM64T and AMD64
+# current system's cpu architecture is the default (on empty input)
+ARCH=
+export ARCH
 
 echo; echo "available storage devices:"
 printf "\tname\tsize\tmodel\n"
@@ -61,7 +78,7 @@ target_partitions="$(echo /sys/block/"$target_device"/"$target_device"* |
 	sed -n "s/\/sys\/block\/$target_device\///pg")"
 target_partition1="$(echo "$target_partitions" | cut -d " " -f1)"
 target_partition2="$(echo "$target_partitions" | cut -d " " -f2)"
-sfdisk -l /dev/"$target_device" | sed -n "/$target_partition1.*EFI System/p" | {
+fdisk -l /dev/"$target_device" | sed -n "/$target_partition1.*EFI System/p" | {
 	read -r line
 	test -n "$line" && target_partition1_is_efi=true
 }
@@ -81,10 +98,21 @@ then
 	[ "$answer" = y ] || exit
 	
 	# create partitions
-	sfdisk --quiet --wipe always --label gpt "/dev/$target_device" <<-EOF
-	size=512M, type=uefi
-	,
-	EOF
+	(
+	echo g # create a GPT partition table
+	echo n # new partition
+	echo 1 # make it partition number 1
+	echo # default, start at beginning of disk 
+	echo +512M # 512 MB boot parttion
+	echo t # change partition type
+	echo EFI System
+	echo n # new partition
+	echo 2 # make it partion number 2
+	echo # default, start immediately after preceding partition
+	echo # default, extend partition to end of disk
+	echo w # write the partition table
+	echo q # quit
+	) | fdisk "/dev/$target_device" > /dev/null
 	
 	target_partitions="$(echo /sys/block/"$target_device"/"$target_device"* |
 		sed -n "s/\/sys\/block\/$target_device\///pg")"

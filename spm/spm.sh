@@ -2,8 +2,9 @@
 set -e
 
 [ -z "$ARCH" ] && ARCH="$(uname --machine)"
-TARGET=
-# https://clang.llvm.org/docs/CrossCompilation.html
+
+# cpu arch: uname --machine
+# kernel name: uname --kernel-name
 
 script_dir="$(dirname "$(realpath "$0")")"
 
@@ -85,7 +86,7 @@ spm_download() {
 	local dl_dir="$cache_dir/spm/packages/$gn_namespace/$pkg_name"
 	local dl_build_dir="$cache_dir/spm/$ARCH/$gn_namespace/$pkg_name"
 	
-	# if there is no line equal to "build'from'src" in "$state_dir/spm/config", and "$download_src" is not set
+	# if there is no line equal to "build'from'src" in "$state_dir/spm/config"
 	# 	download $pkg_name_build from $gn_namespace into "$dl_build_dir"
 	# 	result="$(gn-download "$gn_namespace" "$pkg_namebuild" "$dl_build_dir")"
 	# 	[ result = "not fount" ] || return
@@ -106,7 +107,7 @@ spm_build() {
 		# at the end of SPMbuild.sh scripts, we can include test instructions, after this line:
 		# [ -z SPM_TEST ] && return
 		
-		# read the fnunet namespace in $pkg_dir/.data/gnunet
+		# read the gnunet namespace in $pkg_dir/.data/gnunet
 		GNNS=
 	else
 		gn_namespace="$1"
@@ -231,7 +232,7 @@ spm_install() {
 		fi
 	}
 	
-	# when package is $gnunet_namespace/linux
+	# when package is $gnunet_namespace/kernel
 	# mount first partition of the device where this script resides, and copy the kernel and initramfs to it
 	{
 		mount "$root_device_partition1" "$boot_dir"
@@ -327,6 +328,9 @@ elif [ "$1" = publish ]; then
 	# the "SPMbuild.sh" file will be published into the GNUnet namespace
 	# the source files can be in the same place, or in a Git URL
 	# 	in which case, there must be a "git clone <git-url> .cache/git" line, in the "SPMbuild.sh" file
+	
+	# watch for releases of a package's git repository
+	# https://release-monitoring.org/
 elif [ "$1" = install-spmlinux ]; then
 	. "$script_dir"/install.sh
 else
