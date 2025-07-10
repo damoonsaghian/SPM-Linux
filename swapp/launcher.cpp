@@ -97,6 +97,7 @@ when an item in the flowbox is clicked, run the app
 
 /*
 terminal emulator box
+https://api.kde.org/mauikit/mauikit-terminal/html/index.html
 
 scroll up: Page_Up
 scroll down: Page_Down
