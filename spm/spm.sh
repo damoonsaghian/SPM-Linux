@@ -1,6 +1,11 @@
 #!/usr/bin/env sh
 set -e
 
+# https://en.wikipedia.org/wiki/GoboLinux
+# https://gobolinux.org/
+# https://gobolinux.org/doc/articles/clueless.html
+# https://github.com/gobolinux
+
 [ -z "$ARCH" ] && ARCH="$(uname --machine)"
 
 # cpu arch: uname --machine
