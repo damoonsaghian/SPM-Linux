@@ -1,5 +1,6 @@
 # https://invent.kde.org/frameworks/solid
 # udev backend (no udisks)
+# no upower BUILD_DEVICE_BACKEND_upower
 # storage devices, mtp and imobile
 
 # sudo addrule
