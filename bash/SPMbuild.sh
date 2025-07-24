@@ -6,3 +6,5 @@ cat <<-'EOF' > $build_dir/cmd/bash
 #!/usr/bin/env sh
 PS1="\e[7m \u@\h \e[0m \e[7m \w \e[0m\n> " bash
 EOF
+
+# do not load ~/.bashrc and ~/bash_profile and ~/.profile
