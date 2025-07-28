@@ -216,3 +216,5 @@ other than the system timezone, show date in universal format:
 	UTC timezone and Persian calendar with Deioces epoch
 https://github.com/omid/Persian-Calendar-for-Gnome-Shell/blob/master/PersianCalendar%40oxygenws.com/PersianDate.js
 */
+
+// https://invent.kde.org/utilities/kpublicalerts
