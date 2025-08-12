@@ -1,7 +1,11 @@
 // https://github.com/qt/qtwayland
 // https://doc.qt.io/qt-6/qtwaylandcompositor-index.html
 // https://gitlab.com/desktop-frameworks/wayqt/
+// https://github.com/JUMO-GmbH-Co-KG/embedded-compositor
 // https://github.com/lirios/shell
+
+// https://doc.qt.io/qt-6/qtquick-deployment.html
+// https://doc.qt.io/qt-6/qtquick-qml-runtime.html
 
 // https://docs.voidlinux.org/config/session-management.html
 // https://git.sr.ht/~kennylevinsen/seatd
@@ -27,7 +31,7 @@ to prevent BadUSB, lock when a new input device is connected
 // Super+space
 // Alt+Tab
 
-//keybinding to close window
+// keybinding to close window
 // Super+Backspace
 // Super+Escape
 // Alt+Backspace
