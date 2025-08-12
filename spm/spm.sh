@@ -6,6 +6,10 @@ set -e
 # https://gobolinux.org/doc/articles/clueless.html
 # https://github.com/gobolinux
 
+# spm check
+# check if any git source needs an update
+# https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
+
 [ -z "$ARCH" ] && ARCH="$(uname --machine)"
 
 # cpu arch: uname --machine
