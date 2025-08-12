@@ -42,8 +42,6 @@
 # 	$is_metered
 # }
 
-# ppp
-
 # vpn
 
 # update system timezone when network changes:
