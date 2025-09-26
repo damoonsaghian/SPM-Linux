@@ -1,4 +1,4 @@
-project_dir="$(dirname "$0")"
+# for linux build musl
+# for others skip build, and just symlink the libc on the system
 
-# musl
 # mimalloc
