@@ -4,28 +4,14 @@
 
 # https://github.com/qt/qtdeclarative
 
-# skip widgets and opengl widgets
-
-# skip Qt Network
-# if WIN32, build a limited version of Qt Network but without ssl
-# because it's apparently used as an replacement of DBus, for IPC
-
-# use lines on borders of scrolled widgets to show the amount of overflowed content
+# gnutls implementes a compatibility wrapper for openssl; try to use that
+# if it failed, use openssl
+#
+# QtNetwork depends on openssl and does not support HTTP3
+# it would be good to reimplement it using Curl, in the future
+# https://doc.qt.io/qt-6/qtnetwork-module.html
+# https://curl.se/libcurl/c/
 
 # https://github.com/qt/qtimageformats
-# libjxl libavif webp librsvg
-
-# terminal emulator
-# https://github.com/KDE/qmlkonsole
-# https://github.com/contour-terminal/contour
-# https://github.com/sailfishos/fingerterm
-# https://github.com/Swordfish90/cool-retro-term
-# https://github.com/lirios/terminal
-# https://github.com/rburchell/literm
-
-# OpenStreetMap viewer
-# https://github.com/qt/qtlocation
-
-# https://doc.qt.io/qt-6/qtpdf-index.html
-
-# https://github.com/orgs/qt/repositories
+# https://github.com/qt/qtsvg
+# https://invent.kde.org/frameworks/kimageformats/
