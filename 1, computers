@@ -1,6 +1,13 @@
 computers can help people to easily access and improve human knowledge,
 	and as a result do things to improve the quality of human life
 
+an ideal computer would be as small as possible
+it would only contain CPU, RAM, SSD, TPM2, Bluetooth, and a USB4 2.0 port that will connect to a hub
+the hub provides:
+, power, GPU, WiFi
+, a USB dock (to connect peripherals like display, camera ...)
+, extra ports: ethernet, audio jack, DP and HDMI
+
 = digital circuits
 in conventional digital circuits when the inputs change, the outputs can have temporary invalid values,
 	until they stabilize to the valid values
@@ -34,10 +41,9 @@ compilers are special programs that generate instruction codes,
 	from a program written in a structured and human readable language
 "https://www.bottomupcs.com/"
 
-there is always the possibility of backdoors for closed source CPU,
-	especially if the boot firmware is also closed source
-recently introduction of "secure execution environment" makes this situation even worse
-it's a closed source, full'blown, always'running mini operating system,
+backdoors are always a possibility for closed'source CPU with closed'source boot firmware
+specially after the introduction of "trusted execution environment" (TEE) in the boot firmwares
+TEE is a full'blown, always'running mini operating system,
 	with full access to the whole system (including memory and network)
 furthermore they have made it practically impossible for users to disable it
 this mess of a design cries out for hidden and quite sophisticated backdoors
@@ -46,45 +52,17 @@ this mess of a design cries out for hidden and quite sophisticated backdoors
 "https://en.wikipedia.org/wiki/Intel_Management_Engine"
 "https://blog.invisiblethings.org/papers/2015/x86_harmful.pdf"
 
-on X86 architectures the default boot firmware on nearly all systems are closed source
+in the case of X86 architecture, the default boot firmware of nearly all systems are closed source
 flashing a CoreBoot based boot firmware is possible, but there still will be closed source parts (Intel FSP)
-in addition, there is no easy way to get rid of Intel ME (or AMD PSP),
+in addition, there is no easy way to get rid of the TEE part, ie Intel ME (or AMD PSP),
 	though there are some hacks to disable (but not completely remove) it:
 	"https://puri.sm/posts/deep-dive-into-intel-me-disablement/"
 
-ARM architecture is closed source too, but in most cases, the boot firmware is open source (U-Boot or EDK2)
-ARM TrustZone can host an open source operating system too, apparently:
-	"https://news.ycombinator.com/item?id=17783357"
+ARM architecture is closed source too, but some vendors (eg Rockchip) use an open source boot firmware (EDK2)
+there is even an open source implementation of ARM TrustZone: "https://www.trustedfirmware.org/projects/op-tee/"
 GPU with open source driver: Qualcomm/Adreno
 
 open source CPU: RISC-V, Power ISA
-
-boot firmware must have a read'only part and an updatable part
-this way an interrupted flashing does not brick the device
-also the read'only part checks the signature of the updatable part, to make sure it's not malicious
-the read'only part just executes the updatable part, if o keys are pressed
-
-to protect the computer from physical attacks, you must:
-, somehow prevent tampering with hardware
-, protect boot firmware settings by a password
-	to prevent changing the storage device used for booting
-these can make physical attacks more difficult, but keep in mind that:
-	physical access to a computer is root access, given enough time and resources
-even with encrypted root partition, and secure boot, someone can replace RAM with a malicious chip,
-	that can discover the key used to encrypt the root partition (very sophisticated but not impossible)
-so it's best to make computers as small as possible, so they can always be kept near the owner
-the ideal computer would be a PC stick, containing a RISC-V processor, GPU, RAM and SSD,
-	plus a USB4 2.0 port that connects to a hub
-the hub:
-, provides power
-, has a USB dock (to connect peripherals like display and camera)
-, wifi, Bluetooth, maybe even speaker and microphone
-, extra ports: ethernet, audio jack, DP and HDMI
-for security reasons, th PCIe tunnel of USB4 2.0 will be disabled in boot firmware
-	"https://www.chromium.org/chromium-os/developer-library/reference/security/usb4/"
-	"https://en.wikipedia.org/wiki/Thunderbolt_(interface)#Security_vulnerabilities"
-external graphic cards should allow direct connection to the display (bypassing GPU),
-	if the USB4 connection does not have a PCIe tunnel
 
 programs usually do not run directly on computer hardware
 instead they run on a more sophisticated software machine (a virtual machine) called the kernel
