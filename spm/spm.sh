@@ -6,9 +6,29 @@ set -e
 # https://gobolinux.org/doc/articles/clueless.html
 # https://github.com/gobolinux
 
+# if gnunet is not available, use gitea (through its http api)
+# files must be signed (with ssh-keygen)
+# hash of files followed by their path (relative to projet dir) are stored in .gitea file
+# this file will be used during download and publish, such that only changed files will be transfered
+
+# mount with read-write access only for processes running with a specific group id
+# sd mount <group-id>
+
 # spm check
 # check if any git source needs an update
 # https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
+
+# to verify git tag signatures use ssh-keygen
+# git config --global gpg.format ssh
+# echo "$(git config --get user.email) namespaces=\"git\" $(cat "$path_to_ssh_public_key")
+# " >> "$path_to_allowed_signers_file"
+# git config --global gpg.ssh.allowedSignersFile "$path_to_allowed_signers_file"
+# https://blog.dbrgn.ch/2021/11/16/git-ssh-signatures/
+# https://www.git-tower.com/blog/setting-up-ssh-for-commit-signing/
+# https://calebhearth.com/sign-git-with-ssh
+# https://github.com/git/git/blob/master/Documentation/config/gpg.adoc
+# https://git-scm.com/docs/git-verify-tag
+# https://lobi.to/writes/wacksigning/
 
 [ -z "$ARCH" ] && ARCH="$(uname --machine)"
 
@@ -95,6 +115,8 @@ spm_download() {
 	local dl_dir="$cache_dir/spm/packages/$gn_namespace/$pkg_name"
 	local dl_build_dir="$cache_dir/spm/$ARCH/$gn_namespace/$pkg_name"
 	
+	# if gn-download is not available (which is the case during first installation), just use normal gnunet download
+	
 	# if there is no line equal to "build'from'src" in "$state_dir/spm/config"
 	# 	download $pkg_name_build from $gn_namespace into "$dl_build_dir"
 	# 	result="$(gn-download "$gn_namespace" "$pkg_namebuild" "$dl_build_dir")"
@@ -102,6 +124,10 @@ spm_download() {
 	# download the package from "$pkg_url" to "$dl_dir"
 	# gn-download "$gn_namespace" "$pkg_name" "$dl_dir"
 	# when gn-download is not available use "$script_dir"/../gnunet/gnunet-download.sh
+	
+	# when building from source to be installed on system:
+	# use -march=native for clang
+	# pass CPU specific flags
 }
 
 spm_build() {
@@ -242,6 +268,7 @@ spm_install() {
 	}
 	
 	# when package is $gnunet_namespace/kernel
+	# link modules to /lib/modules
 	# mount first partition of the device where this script resides, and copy the kernel and initramfs to it
 	{
 		mount "$root_device_partition1" "$boot_dir"

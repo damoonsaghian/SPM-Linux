@@ -4,19 +4,15 @@ gnunet_namespace="$(cat "$(dirname "$(realpath "$0")")"/../.meta/gns)"
 
 # if this script is run by any user other than root, just install "spm" to user's home directory, and exit
 if [ $(id -u) != 0 ]; then
+	state_dir="$XDG_STATE_HOME"
+	[ -z "$state_dir" ] && state_dir="$HOME/.local/state"
+	
 	if [ "$1" = src ]; then
-		state_dir="$XDG_STATE_HOME"
-		[ -z "$state_dir" ] && state_dir="$HOME/.local/state"
 		mkdir -p "$state_dir"/spm
 		echo "build'from'src" > "$state_dir"/spm/config
 	fi
 	
-	gnunet-config --section=ats --option=WAN_QUOTA_IN --value=unlimited
-	gnunet-config --section=ats --option=WAN_QUOTA_OUT --value=unlimited
-	gnunet-config --section=ats --option=LAN_QUOTA_IN --value=unlimited
-	gnunet-config --section=ats --option=LAN_QUOTA_OUT --value=unlimited
-	
-	spm_dir="$HOME/.local/state/spm/builds/$gnunet_namespace/spm"
+	spm_dir="$state_dir/spm/builds/$gnunet_namespace/spm"
 	mkdir -p "$spm_dir"
 	cp "$(dirname "$0")/spm.sh" "$spm_dir/"
 	sh "$spm_dir"/spm.sh install "$gnunet_namespace" spm
@@ -34,19 +30,23 @@ ARCH="$(uname --machine)"
 # mips64     - MIPS (64-bit big endian)
 # mips64el   - MIPS (64-bit little endian)
 # mipsel     - MIPS (32-bit little endian)
-# ppc32      - PowerPC 32
-# ppc64      - PowerPC 64
 # ppc64le    - PowerPC 64 LE
 # riscv32    - 32-bit RISC-V
 # riscv64    - 64-bit RISC-V
-# systemz    - SystemZ
-# wasm32     - WebAssembly 32-bit
-# wasm64     - WebAssembly 64-bit
 # x86        - 32-bit X86: Pentium-Pro and above
 # x86-64     - 64-bit X86: EM64T and AMD64
 # current system's cpu architecture is the default (on empty input)
 ARCH=
 export ARCH
+
+# bootstraping and cross compilation
+# https://www.linuxfromscratch.org/ https://www.linuxfromscratch.org/lfs/view/stable/
+# https://t2sde.org/handbook/html/index.html
+# https://buildroot.org/downloads/manual/manual.html
+# https://github.com/glasnostlinux/glasnost
+# https://github.com/iglunix
+# https://github.com/oasislinux/oasis
+# https://mcilloni.ovh/2021/02/09/cxx-cross-clang/
 
 echo; echo "available storage devices:"
 printf "\tname\tsize\tmodel\n"
@@ -71,6 +71,24 @@ if [ "$target_device" = "$root_device" ]; then
 	echo "can't install on \"$target_device\", since it contains the running system"
 	exit 1
 fi
+
+# if target device is not removable, create full disk encryption using TPM2
+# https://news.opensuse.org/2025/07/18/fde-rogue-devices/
+# https://microos.opensuse.org/blog/2023-12-20-sdboot-fde/
+# https://en.opensuse.org/Portal:MicroOS/FDE
+# https://wiki.archlinux.org/title/Dm-crypt/Encrypting_an_entire_system
+# https://documentation.ubuntu.com/security/docs/security-features/storage/encryption-full-disk/
+# tmp2-tss depends on Openssl libcrypto
+
+# an incomplete upgrade can change bootloader or kernel without changing TPM,
+# 	and thus forcing TPM to ask for password, on te next boot
+# but how can we know there was no malicious tampering, and thus anter the password without concern
+# secure boot can help here, so
+# , enable secure boot, using custom keys
+# , when kernel is updated sign kernel and initrd
+
+# enable DMA protection (IOMMU) in UEFI, to make USB4 secure
+# set UEFI password to the value of root password
 
 # if the target device has a uefi vfat, plus a btrfs partition,
 # ask the user to use the current partitions instead of wiping them off
@@ -173,8 +191,8 @@ codev' | while read -r pkg_name; do
 done
 
 echo
-"$spm_linux_dir"/usr/bin/sudo passwd
-"$spm_linux_dir"/usr/bin/sudo passwd root
+"$spm_linux_dir"/usr/bin/passwd
+"$spm_linux_dir"/usr/bin/passwd root
 
 echo; echo -n "SPM Linux installed successfully; press any key to exit"
 read -rsn1
