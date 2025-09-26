@@ -1,2 +1,4 @@
 # https://github.com/libarchive/libarchive
-# with nettle (instead of openssl)
+# --with-nettle --without-openssl
+
+# https://github.com/bramp/archivemount
