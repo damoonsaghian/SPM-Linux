@@ -1,13 +1,4 @@
-# https://invent.kde.org/frameworks/solid
-# udev backend (no udisks)
-# no upower BUILD_DEVICE_BACKEND_upower
-# storage devices, mtp and imobile
+# https://github.com/tpm2-software/tpm2-tss
 
-# sudo addrule
-
-# btrfs-progs dosfstools exfatprogs
-# https://git.kernel.org/pub/scm/linux/kernel/git/kdave/btrfs-progs.git/about/
-# https://github.com/dosfstools/dosfstools
-# https://github.com/exfatprogs/exfatprogs
-
-# https://github.com/netheril96/securefs
+# gnutls implementes a compatibility wrapper for openssl; try to use that
+# if it failed, use openssl
