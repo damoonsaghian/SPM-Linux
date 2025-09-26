@@ -1,19 +1,15 @@
-project_dir="$(dirname "$0")"
-
 # https://man.archlinux.org/listing/dbus
 
-# sv/dbus
-
 # in system.conf:
-# <includedir>/exp/dbus</includedir>
-# <servicedir>/exp/dbus/services</servicedir>
+# <includedir>/usr/share/dbus-1</includedir>
+# <servicedir>/usr/share/dbus-1/services</servicedir>
 # in session.conf:
-# <includedir>$HOME/.spm/exp/dbus</includedir>
-# <servicedir>$HOME/.spm/exp/dbus/services</servicedir>
+# <includedir>$XDG_DATA_HOME/dbus-1</includedir>
+# <servicedir>$XDG_DATA_HOME/dbus-1/services</servicedir>
 
-# $dbus_dir/session.conf
-# $dbus_dir/session.d/
-# $dbus_dir/services/
+# /usr/share/dbus-1/session.conf
+# /usr/share/dbus-1/session.d/
+# /usr/share/dbus-1/services/
 
 # https://github.com/chimera-linux/dbus-wait-for
 # https://git.sr.ht/~whynothugo/dbus-waiter
