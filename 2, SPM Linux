@@ -25,4 +25,4 @@ this will install a minimal linux based operating system, running Codev, inside 
 packages will be updated automatically
 updating packages is an atomic process
 nonetheless, to have a really fail'safe system, redundant systems are necessary
-SPM Linux is easily replicatable using the command "spm install"
+SPM Linux is easily replicatable using the command "spm new"
