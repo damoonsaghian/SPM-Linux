@@ -7,32 +7,18 @@ set -e
 # https://github.com/gobolinux
 
 # if gnunet is not available, use gitea (through its http api)
-# files must be signed (with ssh-keygen)
-# hash of files followed by their path (relative to projet dir) are stored in .gitea file
-# this file will be used during download and publish, such that only changed files will be transfered
+# hash of files followed by their path (relative to projet dir) are stored in .data/gitea file
+# .data/gitea will be signed with ssh-keygen (using the EdDSA key of the gnunet namespace)
+# .data/gitea will be used during download and publish, such that only changed files will be transfered
+# use gitea as the last resort, because it can not support reliable revocation mechanism like gnunet
+# 	https://docs.gnunet.org/latest/users/gns.html#revocation
 
-# mount with read-write access only for processes running with a specific group id
-# sd mount <group-id>
-
-# spm check
-# check if any git source needs an update
-# https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
-
-# to verify git tag signatures use ssh-keygen
-# git config --global gpg.format ssh
-# echo "$(git config --get user.email) namespaces=\"git\" $(cat "$path_to_ssh_public_key")
-# " >> "$path_to_allowed_signers_file"
-# git config --global gpg.ssh.allowedSignersFile "$path_to_allowed_signers_file"
-# https://blog.dbrgn.ch/2021/11/16/git-ssh-signatures/
-# https://www.git-tower.com/blog/setting-up-ssh-for-commit-signing/
-# https://calebhearth.com/sign-git-with-ssh
-# https://github.com/git/git/blob/master/Documentation/config/gpg.adoc
-# https://git-scm.com/docs/git-verify-tag
-# https://lobi.to/writes/wacksigning/
+# if run by non'root, and --sandbox
+# run SPMbuild.sh files as user 65534 (nobody)
+# create executables that run as nobody
 
 [ -z "$ARCH" ] && ARCH="$(uname --machine)"
 
-# cpu arch: uname --machine
 # kernel name: uname --kernel-name
 
 script_dir="$(dirname "$(realpath "$0")")"
@@ -63,6 +49,10 @@ fi
 
 mkdir -p "$builds_dir" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
 
+# spm check
+# check if any git source needs an update
+# https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
+
 # this function can be used in SPMbuild.sh scripts to clone a tag branch from a git repository
 gitag_clone() {
 	# https://man.archlinux.org/listing/git
@@ -71,17 +61,19 @@ gitag_clone() {
 	
 	# --depth 1
 	
-	# lsh-keygen/ssh-keygen to verify git tags
+	# to verify git tag signatures use ssh-keygen
+	# git config --global gpg.format ssh
+	# echo "$(git config --get user.email) namespaces=\"git\" $(cat "$path_to_ssh_public_key")
+	# " >> "$path_to_allowed_signers_file"
+	# git config --global gpg.ssh.allowedSignersFile "$path_to_allowed_signers_file"
+	# https://blog.dbrgn.ch/2021/11/16/git-ssh-signatures/
+	# https://www.git-tower.com/blog/setting-up-ssh-for-commit-signing/
+	# https://calebhearth.com/sign-git-with-ssh
+	# https://github.com/git/git/blob/master/Documentation/config/gpg.adoc
 	# https://git-scm.com/docs/git-verify-tag
-	# https://git-scm.com/docs/git-config#Documentation/git-config.txt-gpgltformatgtprogram
-	# https://manpages.debian.org/bookworm/lsh-utils/lsh-keygen.1.en.html
-	# https://manpages.debian.org/bookworm/openssh-client/ssh-keygen.1.en.html
-	
+	#
 	# if a gpg key is given, download and build gpg package
 }
-
-# programs installed in ~/.local/bin and the SPMbuild.sh scripts when current user is 1000,
-# will be run as user 1001
 
 # this function can be used in SPMbuild.sh scripts to export executables in $pkg_dir/exec
 # usage guide:
@@ -123,11 +115,6 @@ spm_download() {
 	# 	[ result = "not fount" ] || return
 	# download the package from "$pkg_url" to "$dl_dir"
 	# gn-download "$gn_namespace" "$pkg_name" "$dl_dir"
-	# when gn-download is not available use "$script_dir"/../gnunet/gnunet-download.sh
-	
-	# when building from source to be installed on system:
-	# use -march=native for clang
-	# pass CPU specific flags
 }
 
 spm_build() {
@@ -211,10 +198,10 @@ spm_install() {
 	local build_dir="$builds_dir/$gn_namespace/$pkg_name"
 	
 	if [ "$(id -u)" = 0 ]; then
-		# create build dir and set the owner as user 1
-		sudo -u1 spm build "$gn_namespace" "$pkg_name"
+		# create build dir and set the owner as user 10
+		setpriv --reuid=10 --regid=10 --inh-caps=-all spm build "$gn_namespace" "$pkg_name"
 	else
-		spm_build "$pkg_n ame"
+		spm_build "$gn_namespace" "$pkg_name"
 	fi
 	
 	# store "$gn_namespace $pkg_name" in $state_dir/spm/installed (if not already)
@@ -276,6 +263,14 @@ spm_install() {
 	}
 }
 
+spm_search() {
+	# search in gnunet or gitea for projects tagged with spm
+}
+
+spm_list() {
+	# list installed packages filterd by $1
+}
+
 if [ "$1" = build ]; then
 	if [ -z "$3" ]; then
 		project_dir="$2"
@@ -294,7 +289,7 @@ if [ "$1" = build ]; then
 elif [ "$1" = import ]; then
 	spm_import "$2" "$3"
 elif [ "$1" = install ]; then
-	spm_install "$2" "$3"
+		spm_install "$2" "$3"
 elif [ "$1" = remove ]; then
 	gn_namespace="$2"
 	pkg_name="$3"
@@ -334,10 +329,10 @@ elif [ "$1" = update ]; then
 	# boot'firmware updates need special care
 	# unless there is a read'only backup, firmware update is not a good idea
 	# so warn and ask the user if she wants the update
-	# doas fwupdmgr get-devices
-	# doas fwupdmgr refresh
-	# doas fwupdmgr get-updates
-	# doas fwupdmgr update
+	# sudo fwupdmgr get-devices
+	# sudo fwupdmgr refresh
+	# sudo fwupdmgr get-updates
+	# sudo fwupdmgr update
 	
 	if [ "$ARCH" = x86 ] || [ "$ARCH" = x86_64 ]; then
 		limine bios-install "$target_device"
@@ -367,8 +362,8 @@ elif [ "$1" = publish ]; then
 	
 	# watch for releases of a package's git repository
 	# https://release-monitoring.org/
-elif [ "$1" = install-spmlinux ]; then
-	. "$script_dir"/install.sh
+elif [ "$1" = new ]; then
+	. "$script_dir"/spm-new.sh
 else
 	echo "usage guide:"
 	echo "	spm build [<project-path>]"
@@ -379,5 +374,5 @@ else
 	echo "	spm remove <gnunet-namespace> <package-name>"
 	echo "	spm update"
 	echo "	spm publish"
-	echo "	spm install-spmlinux"
+	echo "	spm new"
 fi

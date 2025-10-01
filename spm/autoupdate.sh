@@ -12,5 +12,3 @@ metered_connection && exit 0
 
 # if during autoupdate an error occures:
 # ; echo error > $spm_dir/status
-
-# update root and user packages
