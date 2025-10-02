@@ -3,8 +3,8 @@ https://git.suckless.org/ubase/file/passwd.c.html
 https://git.busybox.net/busybox/tree/loginutils/cryptpw.c
 https://github.com/rfc1036/whois/blob/next/mkpasswd.c
 
-if argv[0] begin with "/", find the realpath of argv[0], then the dirname, then ../../../var/lib/sudo/passwd
-otherwise just use /var/lib/sudo/passwd
+if argv[0] begin with "/", find the realpath of argv[0], then the dirname, then ../../../var/lib/util-linux/passwd
+otherwise just use /var/lib/utiil-linux/passwd
 
 printf "set root password: "
 while true; do
@@ -16,8 +16,8 @@ while true; do
 	printf "set root password: "
 done
 root_password_hashed="$($root_password)"
-mkdir -p "$spm_linux_dir"/var/state/sudo/passwd
-echo "$root_password_hashed" > "$spm_linux_dir"/var/state/sudo/passwd
+mkdir -p "$spm_linux_dir"/var/lib/util-linux/passwd
+echo "$root_password_hashed" > "$spm_linux_dir"/var/lib/util-linux/passwd
 
 printf "set lock'screen password: "
 while true; do
@@ -29,5 +29,5 @@ while true; do
 	printf "set lock'screen password: "
 done
 lock_password_hashed=
-echo "$lock_password_hashed" >> "$spm_linux_dir"/var/state/sudo/passwd
+echo "$lock_password_hashed" >> "$spm_linux_dir"/var/lib/util-linux/passwd
 */
