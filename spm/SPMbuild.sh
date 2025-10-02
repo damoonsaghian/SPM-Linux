@@ -9,6 +9,6 @@ ln "$pkg_dir/spm-new.sh" "$build_dir/exec/spm-new"
 chmod +x "$build_dir/exec/spm-install"
 spm_xcript spm-new inst/cmd
 
-# sudo rules for "spm new" and "spm download"
+# doas rules for "spm new" and "spm download"
 
 # inhibit suspend/shutdown when an upgrade is in progress

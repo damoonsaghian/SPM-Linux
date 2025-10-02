@@ -142,7 +142,7 @@ spm_build() {
 		if [ "$(id -u)" = 0 ]; then
 			spm_download $gn_namespace $pkg_name
 		else
-			sudo spm download $gn_namespace $pkg_name
+			doas spm download $gn_namespace $pkg_name
 		fi
 		
 		eval PKG$pkg_name="\"$build_dir\""
@@ -297,7 +297,7 @@ elif [ "$1" = remove ]; then
 	
 	if [ "$(id -u)" = 0 ]; then
 		# exit if package_name is: acpid bash bluez chrony dash dbus dte eudev fwupd gnunet limine linux netman runit
-		# 	sbase sd seatd spm sudo tz util-linux
+		# 	sbase sd seatd spm doas tz util-linux
 		# warn if package_name is sway, swapps, termulator, or codev
 	fi
 	
@@ -329,10 +329,10 @@ elif [ "$1" = update ]; then
 	# boot'firmware updates need special care
 	# unless there is a read'only backup, firmware update is not a good idea
 	# so warn and ask the user if she wants the update
-	# sudo fwupdmgr get-devices
-	# sudo fwupdmgr refresh
-	# sudo fwupdmgr get-updates
-	# sudo fwupdmgr update
+	# doas fwupdmgr get-devices
+	# doas fwupdmgr refresh
+	# doas fwupdmgr get-updates
+	# doas fwupdmgr update
 	
 	if [ "$ARCH" = x86 ] || [ "$ARCH" = x86_64 ]; then
 		limine bios-install "$target_device"
