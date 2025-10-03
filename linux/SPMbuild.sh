@@ -16,5 +16,9 @@
 # https://docs.kernel.org/arch/x86/microcode.html
 # https://wiki.archlinux.org/title/Microcode
 
+# self signed unified kernel image
+# https://wiki.archlinux.org/title/Unified_kernel_image
+# https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot#Using_your_own_keys
+
 # wireless-regdb
 # https://wireless.wiki.kernel.org/en/developers/regulatory/wireless-regdb
