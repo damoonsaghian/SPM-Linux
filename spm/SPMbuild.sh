@@ -11,4 +11,5 @@ spm_xcript spm-new inst/cmd
 
 # doas rules for "spm new" and "spm download"
 
-# inhibit suspend/shutdown when an upgrade is in progress
+# autoupdate
+# service timer: 5min after boot, every 24h

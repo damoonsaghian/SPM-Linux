@@ -6,9 +6,7 @@ metered_connection() {
 metered_connection && exit 0
 
 # if plugged
-# timer
-# 5min after boot
-# every 24h
 
-# if during autoupdate an error occures:
-# ; echo error > $spm_dir/status
+# inhibit suspend/shutdown when an upgrade is in progress
+
+# if during autoupdate an error occures: echo error > /var/cache/autoupdate-status
