@@ -5,7 +5,8 @@
 
 # https://gitlab.freedesktop.org/pipewire/media-session
 
-# without gstreamer glib pulse jack
+# pulse
+# without gstreamer glib jack
 
 # libpw-v4l2.so
 
