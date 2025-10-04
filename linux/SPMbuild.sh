@@ -1,7 +1,5 @@
 # https://kernel.org/
 
-# init path, using kernel parameter: init=/path/to/dinit
-
 # create initramfs containing:
 # , the modules and firmwares needed to access the storage device where root resides
 # , libc
