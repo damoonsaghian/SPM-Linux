@@ -94,28 +94,28 @@ body {
 </div><div>
 </div><div>SPM by itself can be used as a standalone build system and package manager on any Posix system
 </div><div>you just need to have either "gnunet" or "curl" on your system
-</div><div>also to build packages from source, these extra programs are required:
+</div><div>also to bootstrap from source, these extra programs are required:
 </div><div>	clang git ssh-keygen
 </div><div>now just run this command to install SPM in user's home directory:
-</div><div>; sh spm/install.sh
+</div><div>; sh spm/new.sh
 </div><div>note that SPM will try to download binary packages (instead of building from source),
 </div><div>	if they are available for your system
 </div><div>if you want to make sure that packages are always built from source, run this instead:
-</div><div>; sh spm/install.sh src
+</div><div>; sh spm/new.sh src
 </div><div>
 </div><div>to install SPM Linux on a storage device, first we need to be in a Linux system with these programs installed:
 </div><div>	gnunet (or curl) mkfs.vfat (dosfstools) mkfs.btrfs (btrfs-progs) tpm2-tools efivar
-</div><div>to build packages from source, these extra programs are required too:
+</div><div>to bootstrap from source, these extra programs are required too:
 </div><div>	clang git ssh-keygen
 </div><div>now just run this command as root:
-</div><div>; sh spm/install.sh
+</div><div>; sh spm/new.sh
 </div><div>or to build packages from source (agian as root):
-</div><div>; sh spm/install.sh src
-</div><div>this will install a minimal linux based operating system, running Codev, inside Codev Shell
+</div><div>; sh spm/new.sh src
+</div><div>this will install a minimal linux based operating system, running Codev, inside CodevShell
 </div><div>
 </div><div>packages will be updated automatically
 </div><div>updating packages is an atomic process
 </div><div>nonetheless, to have a really fail'safe system, redundant systems are necessary
-</div><div>SPM Linux is easily replicatable using the command "spm new"
+</div><div>also SPM Linux is easily replicatable using the command "spm new"
 </div>
 </body></html>
