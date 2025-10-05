@@ -3,26 +3,26 @@ SPM uses a simple and innovative method that unifies software building and packa
 
 SPM by itself can be used as a standalone build system and package manager on any Posix system
 you just need to have either "gnunet" or "curl" on your system
-also to build packages from source, these extra programs are required:
+also to bootstrap from source, these extra programs are required:
 	clang git ssh-keygen
 now just run this command to install SPM in user's home directory:
-; sh spm/install.sh
+; sh spm/new.sh
 note that SPM will try to download binary packages (instead of building from source),
 	if they are available for your system
 if you want to make sure that packages are always built from source, run this instead:
-; sh spm/install.sh src
+; sh spm/new.sh src
 
 to install SPM Linux on a storage device, first we need to be in a Linux system with these programs installed:
 	gnunet (or curl) mkfs.vfat (dosfstools) mkfs.btrfs (btrfs-progs) tpm2-tools efivar
-to build packages from source, these extra programs are required too:
+to bootstrap from source, these extra programs are required too:
 	clang git ssh-keygen
 now just run this command as root:
-; sh spm/install.sh
+; sh spm/new.sh
 or to build packages from source (agian as root):
-; sh spm/install.sh src
+; sh spm/new.sh src
 this will install a minimal linux based operating system, running Codev, inside CodevShell
 
 packages will be updated automatically
 updating packages is an atomic process
 nonetheless, to have a really fail'safe system, redundant systems are necessary
-SPM Linux is easily replicatable using the command "spm new"
+also SPM Linux is easily replicatable using the command "spm new"
