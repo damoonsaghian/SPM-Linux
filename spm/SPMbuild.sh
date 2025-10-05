@@ -1,5 +1,6 @@
 spm_import git
 spm_import ssh # needed for ssh-keygen
+spm_import codev-utils
 
 mkdir -p "$build_dir"/exec
 ln "$pkg_dir/spm.sh" "$build_dir/exec/spm"

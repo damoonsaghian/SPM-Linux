@@ -54,8 +54,8 @@ if [ "$target_device" = "$root_device" ]; then
 	exit 1
 fi
 
-# if target device is removable, or does not support UEFI and TPM2:
-# if the target device has a uefi vfat, a BTRFS partition, and a swap partition,
+# if target device is not removable:
+# if the target device has a uefi vfat, and a BTRFS partition,
 # ask the user whether to to use the current partitions instead of wiping them off
 target_partitions="$(echo /sys/block/"$target_device"/"$target_device"* |
 	sed -n "s/\/sys\/block\/$target_device\///pg")"
@@ -108,7 +108,12 @@ then
 	mkfs.btrfs -f --quiet "$target_partition2"
 fi
 
-# if target device is not removable, and supports UEFI and TPM2:
+# if the selected storage device is removable:
+# , only create one partition
+# , format it with fat32
+# , skip encryption
+
+# if target device is not removable:
 # create full disk encryption using TPM2
 # https://news.opensuse.org/2025/07/18/fde-rogue-devices/
 # https://microos.opensuse.org/blog/2023-12-20-sdboot-fde/
@@ -122,6 +127,7 @@ fi
 # but how can we know there was no malicious tampering, and thus anter the password without concern
 # secure boot can help here, so
 # , enable secure boot, using custom keys (using efivar)
+# , lock UEFI
 # , when kernel is updated sign kernel and initrd
 #
 # use efivar to:
@@ -169,7 +175,6 @@ dte
 efivar
 eudev
 gnunet
-limine
 linux
 netman
 pipewire
@@ -182,10 +187,6 @@ codev-shell
 codev' | while read -r pkg_name; do
 	sh "$spm_dir"/spm.sh install "$gnunet_namespace" "$pkg_name"
 done
-
-echo
-"$spm_linux_dir"/usr/bin/passwd
-"$spm_linux_dir"/usr/bin/passwd root
 
 echo; echo -n "SPM Linux installed successfully; press any key to exit"
 read -rsn1

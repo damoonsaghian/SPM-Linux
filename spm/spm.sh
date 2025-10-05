@@ -107,7 +107,8 @@ spm_download() {
 	local dl_dir="$cache_dir/spm/packages/$gn_namespace/$pkg_name"
 	local dl_build_dir="$cache_dir/spm/$ARCH/$gn_namespace/$pkg_name"
 	
-	# if gn-download is not available (which is the case during first installation), just use normal gnunet download
+	# if gn-download (from codev-utils) is not available (which is the case during the first installation),
+	# just use normal gnunet download
 	
 	# if there is no line equal to "build'from'src" in "$state_dir/spm/config"
 	# 	download $pkg_name_build from $gn_namespace into "$dl_build_dir"
