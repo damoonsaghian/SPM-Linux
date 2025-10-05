@@ -20,7 +20,7 @@ now just run this command as root:
 ; sh spm/install.sh
 or to build packages from source (agian as root):
 ; sh spm/install.sh src
-this will install a minimal linux based operating system, running Codev, inside Codev Shell
+this will install a minimal linux based operating system, running Codev, inside CodevShell
 
 packages will be updated automatically
 updating packages is an atomic process
