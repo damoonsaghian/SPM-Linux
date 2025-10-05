@@ -2,10 +2,6 @@ set -e
 
 gnunet_namespace="$(cat "$(dirname "$(realpath "$0")")"/../.meta/gns)"
 
-# ask for these two options
-# install SPM Linux to a storage device
-# run a PXE server (https://en.wikipedia.org/wiki/Network_booting)
-
 # if this script is run by any user other than root, just install "spm" to user's home directory, and exit
 if [ $(id -u) != 0 ]; then
 	state_dir="$XDG_STATE_HOME"
@@ -109,9 +105,10 @@ then
 fi
 
 # if the selected storage device is removable:
-# , only create one partition
-# , format it with fat32
-# , skip encryption
+# , only create one partition with fat32 format
+# , put a unified kernel image in it, which is signed by your gnunet namespace key
+# whenever you want to boot a new computer with it, you can import your key to UEFI, and enable secure boot
+# this way you can be sure that there was no tampering
 
 # if target device is not removable:
 # create full disk encryption using TPM2

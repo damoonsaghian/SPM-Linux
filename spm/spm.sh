@@ -338,6 +338,12 @@ elif [ "$1" = update ]; then
 	if [ "$ARCH" = x86 ] || [ "$ARCH" = x86_64 ]; then
 		limine bios-install "$target_device"
 	fi
+elif [ "$1" = new ]; then
+	# ask for these two options
+	# , install SPM Linux to a storage device
+	# , run a PXE server (https://en.wikipedia.org/wiki/Network_booting)
+	# if first option was selected
+	. "$script_dir"/new.sh
 elif [ "$1" = publish ]; then
 	# make a BTRFS snapshot from the project's directory,
 	# to "~/.local/spm/publish/$gnunet_namespace/$pkg_name"
@@ -363,8 +369,6 @@ elif [ "$1" = publish ]; then
 	
 	# watch for releases of a package's git repository
 	# https://release-monitoring.org/
-elif [ "$1" = new ]; then
-	. "$script_dir"/spm-new.sh
 else
 	echo "usage guide:"
 	echo "	spm build [<project-path>]"
@@ -374,6 +378,6 @@ else
 	echo "	spm install <gnunet-namespace> <package-name>"
 	echo "	spm remove <gnunet-namespace> <package-name>"
 	echo "	spm update"
-	echo "	spm publish"
 	echo "	spm new"
+	echo "	spm publish"
 fi
