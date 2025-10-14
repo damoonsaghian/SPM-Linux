@@ -21,3 +21,5 @@
 # https://github.com/eggert/tz
 # only produce "right" timezones
 # doas rules
+
+# doas rule for user 999 to run programs as user 1000
