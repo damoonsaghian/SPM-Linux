@@ -7,20 +7,19 @@ script_dir="$(dirname "$(realpath "$0")")"
 export TZ="$script_dir/tzdata/localtime"
 export LANG="en_US.UTF-8"
 export MUSL_LOCPATH="$script_dir/locales"
+export HOME="/home"
 export XDG_RUNTIME_DIR="/run/user/1000"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
+export WAYLAND_DISPLAY="wayland-0"
 
 rm -rf /run/user/1000
 mkdir -p /run/user/1000
 chown 1000:1000 /run/user/1000
 chmod 700 /run/user/1000
 
-# run services at /home/.spm/exp/sv
-# including dbus session bus: https://manpages.debian.org/trixie/dbus-daemon/dbus-daemon.1.en.html
+# run dinit user services, like pipewire, wireplumber, and dbus
+# https://manpages.debian.org/trixie/dbus-daemon/dbus-daemon.1.en.html
+# setpriv --reuid=1000 --regid=1000 --clear-groups --inh-caps=-all ...
 
-if [ "$(tty)" = "/dev/tty1" ]; then
-	# 1,2 are input,video groups
-	setpriv --reuid=999 --regid=999 --groups=1,2 --inh-caps=-all codev-shell ||
-	setpriv --reuid=999 --regid=999 --clear-groups --inh-caps=-all codev-shell text
-else
-	setpriv --reuid=999 --regid=999 --clear-groups --inh-caps=-all codev-shell text
-fi
+# 1,2 are input,render groups
+setpriv --reuid=1000 --regid=1000 --groups=1,2 --inh-caps=-all codev-shell
