@@ -5,5 +5,6 @@
 
 # https://pkgs.alpinelinux.org/package/edge/main/x86_64/eudev-netifnames
 
-# files in /dev/input can be read by users that are in the group with gid 1
-# files in /dev/dri can be written to by users that are in the group with gid 2
+# when creating /dev/input devices, set their group to 1
+# when creating /dev/dri devices, set their group to 2
+# when creating /dev/snd/* and /dev/video* devices, set their group to 1000
