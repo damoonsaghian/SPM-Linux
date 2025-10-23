@@ -343,7 +343,7 @@ elif [ "$1" = new ]; then
 	# , install SPM Linux to a storage device
 	# , run a PXE server (https://en.wikipedia.org/wiki/Network_booting)
 	# if first option was selected
-	. "$script_dir"/new.sh
+	. "$script_dir"/new.sh "$2"
 elif [ "$1" = publish ]; then
 	# make a BTRFS snapshot from the project's directory,
 	# to "~/.local/spm/publish/$gnunet_namespace/$pkg_name"

@@ -26,31 +26,43 @@ ARCH="$(uname --machine)"
 ARCH=
 export ARCH
 
-echo; echo "available storage devices:"
-printf "\tname\tsize\tmodel\n"
-printf "\t----\t----\t-----\n"
-ls -1 --color=never /sys/block/ | sed -n '/^loop/!p' | while read -r device_name; do
-	device_size="$(cat /sys/block/"$device_name"/size)"
-	device_size="$((device_size / 1000000))GB"
-	device_model="$(cat /sys/block/"$device_name"/device/model)"
-	printf "\t$device_name\t$device_size\t$device_model\n"
-done
-printf "enter the name of the device to install SPM Linux on: "
-read -r target_device
-test -e /sys/block/"$target_device" || {
-	echo "there is no storage device named \"$target_device\""
-	exit 1
-}
-
-root_partition="$(df / | tail -n 1 | cut -d " " -f 1 | cut -d / -f 3)"
-root_device_num="$(cat /sys/class/block/"$root_partition"/dev | cut -d ":" -f 1):0"
-root_device="$(basename "$(readlink /dev/block/"$root_device_num")")"
-if [ "$target_device" = "$root_device" ]; then
-	echo "can't install on \"$target_device\", since it contains the running system"
-	exit 1
+target_device="$1"
+if [ -z "$target_device" ]; then
+	echo; echo "available storage devices:"
+	printf "\tname\tsize\tmodel\n"
+	printf "\t----\t----\t-----\n"
+	ls -1 --color=never /sys/block/ | sed -n '/^loop/!p' | while read -r device_name; do
+		device_size="$(cat /sys/block/"$device_name"/size)"
+		device_size="$((device_size / 1000000))GB"
+		device_model="$(cat /sys/block/"$device_name"/device/model)"
+		printf "\t$device_name\t$device_size\t$device_model\n"
+	done
+	printf "enter the name of the device to install SPM Linux on: "
+	read -r target_device
+	test -e /sys/block/"$target_device" || {
+		echo "there is no storage device named \"$target_device\""
+		exit 1
+	}
+	
+	root_partition="$(df / | tail -n 1 | cut -d " " -f 1 | cut -d / -f 3)"
+	root_device_num="$(cat /sys/class/block/"$root_partition"/dev | cut -d ":" -f 1):0"
+	root_device="$(basename "$(readlink /dev/block/"$root_device_num")")"
+	if [ "$target_device" = "$root_device" ]; then
+		echo "can't install on \"$target_device\", since it contains the running system"
+		exit 1
+	fi
 fi
 
-# if target device is not removable:
+if ["$(basename "$0")" = spm ]; then
+	# this script is run through "spm new" command
+	# so we should install SPM Linux on a removable storage device
+	
+	# in EFI partition with vfat format:
+	# if the file date is not older than 1 month, exit
+	# unified kernel image, signed by current systems key
+	# it includes this script, codev project, and any other program needed to install SPM on a system
+fi
+
 # if the target device has a uefi vfat, and a BTRFS partition,
 # ask the user whether to to use the current partitions instead of wiping them off
 target_partitions="$(echo /sys/block/"$target_device"/"$target_device"* |
@@ -78,21 +90,21 @@ then
 	[ "$answer" = y ] || exit
 	
 	# create partitions
-	(
+	{
 	echo g # create a GPT partition table
 	echo n # new partition
 	echo 1 # make it partition number 1
 	echo # default, start at beginning of disk 
 	echo +512M # 512 MB boot parttion
 	echo t # change partition type
-	echo EFI System
+	echo uefi
 	echo n # new partition
 	echo 2 # make it partion number 2
 	echo # default, start immediately after preceding partition
 	echo # default, extend partition to end of disk
 	echo w # write the partition table
 	echo q # quit
-	) | fdisk "/dev/$target_device" > /dev/null
+	} | fdisk -w always "/dev/$target_device" > /dev/null
 	
 	target_partitions="$(echo /sys/block/"$target_device"/"$target_device"* |
 		sed -n "s/\/sys\/block\/$target_device\///pg")"
@@ -104,13 +116,6 @@ then
 	mkfs.btrfs -f --quiet "$target_partition2"
 fi
 
-# if the selected storage device is removable:
-# , only create one partition with fat32 format
-# , put a unified kernel image in it, which is signed by your gnunet namespace key
-# whenever you want to boot a new computer with it, you can import your key to UEFI, and enable secure boot
-# this way you can be sure that there was no tampering
-
-# if target device is not removable:
 # create full disk encryption using TPM2
 # https://news.opensuse.org/2025/07/18/fde-rogue-devices/
 # https://microos.opensuse.org/blog/2023-12-20-sdboot-fde/
@@ -119,14 +124,11 @@ fi
 # https://wiki.archlinux.org/title/Dm-crypt/Encrypting_an_entire_system#LUKS_on_a_partition_with_TPM2_and_Secure_Boot
 # https://documentation.ubuntu.com/security/docs/security-features/storage/encryption-full-disk/
 #
-# an incomplete upgrade can change bootloader or kernel without changing TPM,
-# 	and thus forcing TPM to ask for password, on the next boot
-# but how can we know there was no malicious tampering, and thus anter the password without concern
-# secure boot can help here, so
+# secure boot:
 # , enable secure boot, using custom keys (using efivar)
 # , lock UEFI
 # , when kernel is updated sign kernel and initrd
-#
+# https://security.stackexchange.com/a/281279
 # use efivar to:
 # , enable DMA protection (IOMMU) in UEFI, to make USB4 secure
 # , set UEFI password
@@ -184,6 +186,15 @@ codev-shell
 codev' | while read -r pkg_name; do
 	sh "$spm_dir"/spm.sh install "$gnunet_namespace" "$pkg_name"
 done
+
+# for headless system whose only interface is network (and obviuosely booted via PXE),
+# install ssh (lsh) and skip eudev pipewire bluez codev-shell and codev
+# https://wiki.alpinelinux.org/wiki/Installation_on_a_headless_host
+# https://wiki.alpinelinux.org/wiki/Netboot_Alpine_Linux_using_iPXE
+# in general provide package groups for different kind of systems
+
+# set sudo password
+"$spm_linux_dir"/usr/bin/sudo --passwd --root "$spm_linux_dir"
 
 echo; echo -n "SPM Linux installed successfully; press any key to exit"
 read -rsn1
