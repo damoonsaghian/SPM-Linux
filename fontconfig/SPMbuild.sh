@@ -10,4 +10,8 @@
 # Iosevka Aile (just change "I" character)
 # "https://github.com/iaolo/iA-Fonts/tree/master/iA%20Writer%20Quattro" (just change "I" character)
 
-# noto fonts for east and middle eastern characters
+# noto fonts for: math, symbols, emoji, armenian georgian hebrew arabic ethiopic nko,
+# 	devanagari gujarati telugu kannada malayalam oriya bengali tamil myanmar thai lao khmer cjk
+
+# for terminal:
+# https://github.com/eigilnikolajsen/commit-mono
