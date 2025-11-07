@@ -192,6 +192,7 @@ done
 # https://wiki.alpinelinux.org/wiki/Installation_on_a_headless_host
 # https://wiki.alpinelinux.org/wiki/Netboot_Alpine_Linux_using_iPXE
 # https://wiki.alpinelinux.org/wiki/PXE_boot
+# https://github.com/macmpi/alpine-linux-headless-bootstrap
 # in general provide package groups for different kind of systems
 
 # set sudo password
