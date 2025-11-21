@@ -55,16 +55,18 @@ fi
 
 if ["$(basename "$0")" = spm ]; then
 	# this script is run through "spm new" command
-	# so we should install SPM Linux on a removable storage device
+	# ask user for mode of installation
+	# , intall on internal storage device
+	# , install on removable storage device (to install SPM Linux on another system)
 	
-	# in EFI partition with vfat format:
-	# if the file date is not older than 1 month, exit
-	# unified kernel image, signed by current systems key
-	# it includes this script, codev project, and any other program needed to install SPM on a system
+	if [ "$installation_mode" = removable ]; then
+		# if the device does not have one EFI partition of at least 500MB size with fat32 format, create it
+		# create  an initramfs that includes programs needed to install SPM Linux, plus the content of this project
+		# https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage
+		exit
+	fi
 fi
 
-# if the target device has a uefi vfat, and a BTRFS partition,
-# ask the user whether to to use the current partitions instead of wiping them off
 target_partitions="$(echo /sys/block/"$target_device"/"$target_device"* |
 	sed -n "s/\/sys\/block\/$target_device\///pg")"
 target_partition1="$(echo "$target_partitions" | cut -d " " -f1)"
@@ -75,13 +77,29 @@ fdisk -l /dev/"$target_device" | sed -n "/$target_partition1.*EFI System/p" | {
 }
 target_partition1_fstype="$(blkid /dev/"$target_partition1" | sed -rn 's/.*TYPE="(.*)".*/\1/p')"
 target_partition2_fstype="$(blkid /dev/"$target_partition2" | sed -rn 's/.*TYPE="(.*)".*/\1/p')"
+
+# if the target device has a uefi vfat, and a LUKS encrypted BTRFS partition,
+# ask the user whether to to use the current partitions instead of wiping them off
 if [ "$target_partition1_is_efi" != true ] ||
 	[ "$target_partition1_fstype" != vfat ] ||
-	[ "$target_partition2_fstype" != btrfs ] ||
+	[ "$target_partition2_fstype" != luks ] ||
 	{
 		echo "it seems that the target device is already partitioned properly"
-		printf "do you want to keep them? (Y/n) "
+		printf "do you want to keep the partitions? (Y/n) "
 		read -r answer
+		[ "$answer" != n ] && while [ "$answer" != n ]; do
+			echo "enter the password to open the encrypted root partition"
+			cryptsetup open --allow-discards --persistent --type luks  "$target_partition2" "root" || {
+				echo "you entered wrong password to decrypt root partition; try again? (Y/n) "
+				read -r answer
+				[ "$answer" = n ] && break
+			}
+			root_fstype="$(blkid /dev/mapper/root | sed -rn 's/.*TYPE="(.*)".*/\1/p')"
+			[ "$root_fstype" = btrfs ] || {
+				echo "can't use the root partition, cause its file system is not BTRFS"
+				answer=n
+			}
+		}
 		[ "$answer" = n ]
 	}
 then
@@ -89,13 +107,13 @@ then
 	read -r answer
 	[ "$answer" = y ] || exit
 	
-	# create partitions
+	# create partitionsB
 	{
 	echo g # create a GPT partition table
 	echo n # new partition
 	echo 1 # make it partition number 1
 	echo # default, start at beginning of disk 
-	echo +512M # 512 MB boot parttion
+	echo +260M # boot parttion
 	echo t # change partition type
 	echo uefi
 	echo n # new partition
@@ -111,32 +129,31 @@ then
 	target_partition1="$(echo "$target_partitions" | cut -d " " -f1)"
 	target_partition2="$(echo "$target_partitions" | cut -d " " -f2)"
 	
-	# format the partitions
 	mkfs.vfat -F 32 "$target_partition1"
-	mkfs.btrfs -f --quiet "$target_partition2"
+	
+	luks_key_file="$(mktemp)"
+	chmod 600 "$luks_key_file"
+	dd if=/dev/random of="$luks_key_file" bs=32 count=1
+	cryptsetup luksFormat "$target_partition2" "$luks_key_file"
+	# other than a key based slot, create a password based slot
+	# warn the user that the passwrod must not be used carelessly
+	# only if the system is tampered it will ask for the password
+	# use password only if you are sure that the source of tamper is yourself
+	cryptsetup luksAddKey "$target_partition2"
+	cryptsetup open --allow-discards --persistent --type luks --key-file "$luks_key_file" "$target_partition2" "root"
+	
+	mkfs.btrfs -f --quiet "/dev/mapper/root"
+	
+	# https://wiki.archlinux.org/title/Btrfs#Swap_file
 fi
 
-# create full disk encryption using TPM2
-# https://news.opensuse.org/2025/07/18/fde-rogue-devices/
-# https://microos.opensuse.org/blog/2023-12-20-sdboot-fde/
-# https://en.opensuse.org/Portal:MicroOS/FDE
-# https://wiki.archlinux.org/title/Dm-crypt/Encrypting_an_entire_system
-# https://wiki.archlinux.org/title/Dm-crypt/Encrypting_an_entire_system#LUKS_on_a_partition_with_TPM2_and_Secure_Boot
-# https://documentation.ubuntu.com/security/docs/security-features/storage/encryption-full-disk/
-#
-# secure boot:
-# , enable secure boot, using custom keys (using efivar)
-# , lock UEFI
-# , when kernel is updated sign kernel and initrd
-# https://security.stackexchange.com/a/281279
-# use efivar to:
-# , enable DMA protection (IOMMU) in UEFI, to make USB4 secure
-# , set UEFI password
+# put the boot partition in fstab
 
-# https://wiki.archlinux.org/title/Btrfs#Swap_file
+cryptroot_uuid= # from $taget_partition2
+root_uuid= # from /dev/mapper/root
 
 spm_linux_dir="$(mktemp -d)"
-mount "$target_partition2" "$spm_linux_dir"
+mount /dev/mapper/root "$spm_linux_dir"
 trap "trap - EXIT; umount \"$spm_linux_dir\"; rmdir \"$spm_linux_dir\"" EXIT INT TERM QUIT HUP PIPE
 
 mkdir -p "$spm_linux_dir"/{home,tmp,run,proc,sys,dev}
@@ -171,7 +188,6 @@ dbus
 dinit
 doas
 dte
-efivar
 eudev
 gnunet
 linux
