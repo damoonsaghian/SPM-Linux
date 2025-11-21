@@ -13,7 +13,7 @@ if you want to make sure that packages are always built from source, run this in
 ; sh spm/new.sh src
 
 to install SPM Linux on a storage device, first we need to be in a Linux system with these programs installed:
-	gnunet (or curl) mkfs.vfat (dosfstools) mkfs.btrfs (btrfs-progs) tpm2-tools efivar
+	gnunet (or curl) mkfs.vfat (dosfstools) mkfs.btrfs (btrfs-progs) cryptsetup tpm2-tools
 to bootstrap from source, these extra programs are required too:
 	clang git ssh-keygen
 now just run this command as root:
