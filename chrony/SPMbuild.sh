@@ -7,6 +7,6 @@
 # https://www.ucolick.org/~sla/leapsecs/right+gps.html
 # https://skarnet.org/software/skalibs/flags.html#clockistai
 
-# when chrony can't adjust time, try to set it using the time reported by ofono's networktime-api
+# when chrony can't adjust time, try to set it using the time reported by modemmanager
 
 # time sync over gnunet -> vpn over gnunet
