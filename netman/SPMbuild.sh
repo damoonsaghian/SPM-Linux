@@ -15,6 +15,10 @@
 # wifi-source=false wifi-source=false 3g-source=false ip-source=false 
 # avahi-glib: build and statically link
 
+# https://github.com/eggert/tz
+# only produce "right" timezones
+# doas rules
+
 # echo '#!/bin/sh
 # tz check
 # ' > /etc/NetworkManager/dispatcher.d/09-dispatch-script
