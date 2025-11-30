@@ -4,7 +4,7 @@ export PATH="/usr/bin"
 
 script_dir="$(dirname "$(realpath "$0")")"
 
-export TZ="$script_dir/tzdata/localtime"
+export TZ="/var/lib/netman/tz"
 export LANG="en_US.UTF-8"
 export MUSL_LOCPATH="$script_dir/locales"
 export HOME="/home"
