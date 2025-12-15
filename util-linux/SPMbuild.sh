@@ -11,10 +11,10 @@
 # without pam
 # -D PASSWD_FILE=\"/var/etc/passwd\"
 
-# add user "home" with home at "/home"
+# add user "home" with home at "/home" and shell "/usr/bin/codev-shell"
 
-# agetty service for vt1: /usr/bin/agetty --skip-login -l /usr/bin/autologin home tty1 linux
-# agetty service for vt2: /usr/bin/agetty --skip-login -l /usr/bin/autologin home tty2 linux
+# agetty service for vt1: /usr/bin/agetty --skip-login -l /usr/bin/autologin tty1 linux
+# agetty service for vt2: /usr/bin/agetty --skip-login -l /usr/bin/autologin tty2 linux
 
 printf '#!/usr/bin/env sh
 # set resource limits for realtime applications like the rt module in pipewire
