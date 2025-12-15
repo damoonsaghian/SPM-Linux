@@ -11,7 +11,7 @@
 # without pam
 # -D PASSWD_FILE=\"/var/etc/passwd\"
 
-# add user "home" with home at "/home" and shell "/usr/bin/codev-shell"
+useradd --create-home --home-dir /home --shell /usr/bin/codev-shell
 
 # agetty service for vt1: /usr/bin/agetty --skip-login -l /usr/bin/autologin tty1 linux
 # agetty service for vt2: /usr/bin/agetty --skip-login -l /usr/bin/autologin tty2 linux
