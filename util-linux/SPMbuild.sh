@@ -11,10 +11,17 @@
 # without pam
 # -D PASSWD_FILE=\"/var/etc/passwd\"
 
-# add user "home" with home at "/home" and shell "/usr/bin/codev-shell"
+# add user "home" with home at "/home"
 
-# agetty service for vt1: /usr/bin/agetty --autologin home tty1 linux
-# agetty service for vt2: /usr/bin/agetty --autologin home tty2 linux
+# agetty service for vt1: /usr/bin/agetty --skip-login -l /usr/bin/autologin home tty1 linux
+# agetty service for vt2: /usr/bin/agetty --skip-login -l /usr/bin/autologin home tty2 linux
+
+printf '#!/usr/bin/env sh
+# set resource limits for realtime applications like the rt module in pipewire
+ulimit -r 95 -e -19 -l 4194304
+exec login -f home
+' > /usr/bin/autologin
+chmod +x /usr/bin/autologin
 
 echo '#!/usr/bin/env sh
 # run dinit user services, like pipewire, wireplumber, and dbus
