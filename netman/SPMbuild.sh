@@ -13,8 +13,3 @@
 # _find_scripts(request, scripts, NMLIBDIR, subdir);
 # with:
 # _find_scripts(request, scripts, "/usr/share/NetworkManager", subdir);
-
-# echo '#!/bin/sh
-# system tz guess
-# ' > /usr/share/NetworkManager/dispatcher.d/09-dispatch-script
-# chmod 755 /usr/share/NetworkManager/dispatcher.d/09-dispatch-script
