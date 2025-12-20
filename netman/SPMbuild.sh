@@ -14,11 +14,12 @@
 # wifi-source=false wifi-source=false 3g-source=false ip-source=false 
 # avahi-glib: build and statically link
 
-# https://github.com/eggert/tz
-# only produce "right" timezones
-# doas rules
+# in src/nm-dispatcher/nm-dispatcher.c replace:
+# _find_scripts(request, scripts, NMLIBDIR, subdir);
+# with:
+# _find_scripts(request, scripts, "/usr/share/NetworkManager", subdir);
 
 # echo '#!/bin/sh
-# tz check
-# ' > /etc/NetworkManager/dispatcher.d/09-dispatch-script
-# chmod 755 /etc/NetworkManager/dispatcher.d/09-dispatch-script
+# system tz guess
+# ' > /usr/share/NetworkManager/dispatcher.d/09-dispatch-script
+# chmod 755 /usr/share/NetworkManager/dispatcher.d/09-dispatch-script
