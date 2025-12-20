@@ -9,11 +9,6 @@
 
 # https://gitlab.freedesktop.org/mobile-broadband/ModemManager
 
-# https://gitlab.freedesktop.org/geoclue/geoclue
-# libgeoclue=false introspection=false gtk-doc=false
-# wifi-source=false wifi-source=false 3g-source=false ip-source=false 
-# avahi-glib: build and statically link
-
 # in src/nm-dispatcher/nm-dispatcher.c replace:
 # _find_scripts(request, scripts, NMLIBDIR, subdir);
 # with:
