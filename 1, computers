@@ -1,12 +1,19 @@
 computers can help people to easily access and improve human knowledge,
 	and as a result do things to improve the quality of human life
 
-an ideal computer would be as small as possible
-it would only contain CPU, RAM, SSD, TPM2, Bluetooth, and a USB4 2.0 port that will connect to a hub
+Unic (unified computer) is a combination of a smart'phone and a PC
+it contains CPU, RAM, SSD, TPM2, Bluetooth, and a USB4 2.0 port that will connect to a hub
 the hub provides:
-, power, GPU, WiFi
+, power, powerful GPU, WiFi
 , a USB dock (to connect peripherals like display, camera ...)
 , extra ports: ethernet, audio jack, DP and HDMI
+to act as a smart'phone it also has battery, integrated GPU, a small display, camera, speaker, microphone, WiFi and cell
+
+note that the OptionROM of external GPU (whose code will be run at boot) will not cause a vulnerability,
+	if during boot, the integrated GPU is used instead
+
+in smart'phone mode, CPU works in cool mode which does not need a fan
+in PC mode, Unic will be put on a cooler
 
 = digital circuits
 in conventional digital circuits when the inputs change, the outputs can have temporary invalid values,
