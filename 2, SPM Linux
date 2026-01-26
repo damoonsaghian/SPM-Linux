@@ -3,7 +3,7 @@ SPM uses a simple and innovative method that unifies software building and packa
 
 SPM by itself can be used as a standalone build system and package manager on any Posix system
 you just need to have either "gnunet" or "curl" on your system
-also to bootstrap from source, these extra programs are required:
+in addition, to bootstrap from source, these extra programs are required too:
 	clang git ssh-keygen
 now just run this command to install SPM in user's home directory:
 ; sh spm/new.sh
