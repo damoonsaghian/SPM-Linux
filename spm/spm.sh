@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
-set -e
 
 # https://en.wikipedia.org/wiki/GoboLinux
 # https://gobolinux.org/
@@ -17,11 +16,13 @@ set -e
 # run SPMbuild.sh files as user 65534 (nobody)
 # create executables that run as nobody
 
+# ROOT_DIR
+
 [ -z "$ARCH" ] && ARCH="$(uname --machine)"
 
 # kernel name: uname --kernel-name
 
-script_dir="$(dirname "$(realpath "$0")")"
+script_dir="$(dirname "$(readlink -f "$0")")"
 
 root_dir="$script_dir/../../../../../.."
 if [ "$(id -u)" = 0 ] || [ "$(id -u)" = 1 ]; then
@@ -89,7 +90,7 @@ spm_xcript() {
 	
 	cat <<-'EOF' > "$destination_path"
 	#!/usr/bin/env sh
-	script_dir="$(dirname "$(realpath "$0")")"
+	script_dir="$(dirname "$(readlink -f "$0")")"
 	export PATH="$script_dir/../../exec:$PATH"
 	export LD_LIBRARY_PATH="$script_dir/../../lib"
 	export XDG_DATA_DIRS="$script_dir/../../data"
