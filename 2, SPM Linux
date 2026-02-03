@@ -1,5 +1,5 @@
 SPM Linux is a Linux based operating system, built and maintained using SPM (simple package manager)
-SPM uses a simple and innovative method that unifies software building and package management
+SPM uses a simple and innovative method to unify software building and package management
 
 SPM by itself can be used as a standalone build system and package manager on any Posix system
 you just need to have either "gnunet" or "curl" on your system
@@ -12,17 +12,13 @@ note that SPM will try to download binary packages (instead of building from sou
 if you want to make sure that packages are always built from source, run this instead:
 ; sh spm/new.sh src
 
-to install SPM Linux on a storage device, first we need to be in a Linux system with these programs installed:
+to install SPM Linux, first we must create a bootable installer, on a removable storage device
+to do that, we must be in a Linux system with these programs installed:
 	gnunet (or curl) mkfs.vfat (dosfstools) mkfs.btrfs (btrfs-progs) cryptsetup tpm2-tools
 to bootstrap from source, these extra programs are required too:
 	clang git ssh-keygen
 now just run this command as root:
-; sh spm/new.sh
+; sh spm/mkinst.sh
 or to build packages from source (agian as root):
 ; sh spm/new.sh src
-this will install a minimal linux based operating system, running Codev, inside CodevShell
-
-packages will be updated automatically
-updating packages is an atomic process
-nonetheless, to have a really fail'safe system, redundant systems are necessary
-also SPM Linux is easily replicatable using the command "spm new"
+this will install a minimal Linux based operating system, running Codev inside CodevShell
