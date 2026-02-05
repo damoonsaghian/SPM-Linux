@@ -1,0 +1,32 @@
+UPM (unified package manager) uses a simple method to unify software building and package management
+
+UPM is still a work in progress
+meanwhile we can use Alpine Linux to implement a prototype of UPM
+first we must create a bootable installer on a removable storage device
+for that, we just need to be in a Linux system, and run the following command (as root):
+; sh alpine/mkinst.sh
+now boot into the installation media, and follow the instructions
+it provides a user interface based on UShell and Codev
+
+UPM Linux is a Linux based operating system, built and maintained using UPM
+to install UPM Linux, first we must create a bootable installer, on a removable storage device
+to do that, we must be in a Linux system with these programs installed:
+	gnunet (or curl) mkfs.vfat (dosfstools) mkfs.btrfs (btrfs-progs) cryptsetup tpm2-tools
+to bootstrap from source, these extra programs are required too:
+	clang git ssh-keygen
+now just run this command as root:
+; sh linux/upm/mkinst.sh
+note that UPM will try to download binary packages (instead of building from source),
+	if they are available for your system
+if you want to make sure that packages are always built from source, run this instead (agian as root):
+; sh linux/upm/mkinst.sh src
+this will install a minimal Linux based operating system, running Codev inside Ushell
+
+UPM (when ready) by itself can be used as a standalone build system and package manager on any Posix system
+you just need to have either "gnunet" or "curl" on your system
+in addition, to bootstrap from source, these extra programs are required too:
+	clang git ssh-keygen
+now just run this command to install UPM in user's home directory:
+; sh linux/upm/new.sh
+or to build packages from source:
+; sh linux/upm/new.sh src

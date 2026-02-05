@@ -12,6 +12,45 @@ the hub provides:
 to act as a smart'phone it also has battery, integrated GPU, a small display, camera, speaker, microphone, WiFi and cell
 during boot, the integrated GPU is used, to prevent any vulnerability due to the OptionROM of external GPU
 
+= the ideal keyboard
+".data/keyboard.png"
+
+navigation keys (arrows, page up, page down, home, end, esc), and ctrl/shift/alt based keybindings,
+	are available by pressing and holding "mod" key
+pressing one "mod" key while holding the other one, is equivalent to Super key
+
+to insert punctuations (in insert mode), press "pun"
+	after entering a punctuation charactor, it automatically returns to normal mode
+	unless the "pun" key is still pressed, in which case, it will return to normal mode after releasing "pun"
+to insert numbers, press and hold "num"
+
+pressing and releasing "Fn", sends "Super+L" key press (usually bound to session locking)
+holding "Fn" and pressing a number eg 1, sends "F1" key
+
+to insert capital letters, press comma then press the letter
+to insert an all capital word, press two commas
+	the following letters will be inserted in capitalized form, until space is pressed
+this is how it is implemented:
+when comma key is pressed, keyboard enters the cap mode in which:
+, pressing a letter key, sends a "backspace" key, and then the capitalized form of that letter,
+	and then the cap mode will be canceled
+, pressing comma again, sends a "backspace" key, and activates caps mode,
+	which remains active until space (or enter or mod) is pressed
+, pressing any other keys, acts like normal, and cancels the cap mode
+
+"https://jasoncarloscox.com/writing/my-strange-keyboards/"
+	"https://jasoncarloscox.com/creations/kyria/"
+	"https://jasoncarloscox.com/creations/lego-keyboard-stand/"
+"https://splitkb.com/"
+"https://shop.keyboard.io/"
+"https://github.com/abstracthat/dactyl-manuform"
+"https://zealot.hu/absolem/"
+"https://github.com/foostan/crkbd"
+"https://github.com/nglgzz/42"
+"https://github.com/adereth/dactyl-keyboard"
+Kinesis Advantage 2 keyboard
+"http://www.allthingsergo.com/the-best-ergonomic-mechanical-keyboards/"
+
 = digital circuits
 in conventional digital circuits when the inputs change, the outputs can have temporary invalid values,
 	until they stabilize to the valid values
