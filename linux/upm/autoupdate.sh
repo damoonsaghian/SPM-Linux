@@ -1,4 +1,12 @@
-# listen for, and process, ACPI events related to lid-switch activation and the power and suspend keys
-# https://wiki.archlinux.org/title/Acpid
-# https://wiki.alpinelinux.org/wiki/Power_management
-# https://gitlab.alpinelinux.org/alpine/aports/-/tree/master/main/acpid
+metered_connection() {
+	#nmcli --terse --fields GENERAL.METERED dev show | grep --quiet "yes"
+	#dbus: org.freedesktop.NetworkManager Metered
+}
+
+metered_connection && exit 0
+
+# if plugged
+
+# inhibit suspend/shutdown when an upgrade is in progress
+
+# if during autoupdate an error occures: echo error > /var/cache/autoupdate-status
