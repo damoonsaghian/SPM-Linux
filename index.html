@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset='utf-8'>
-<title>SPM Linux</title>
+<title>UPM</title>
 <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.css'>
 <style>
 body {
@@ -15,7 +15,7 @@ body {
 	tab-size: 4;
 }
 </style>
-</head><body><a href='https://github.com/damoonsaghian/SPM-Linux'><h1>SPM Linux</h1></a>
+</head><body><a href='https://github.com/damoonsaghian/UPM'><h1>UPM</h1></a>
 <h2>1, computers</h2><div>computers can help people to easily access and improve human knowledge,
 </div><div>	and as a result do things to improve the quality of human life
 </div><div>
@@ -29,6 +29,45 @@ body {
 </div><div>, compatibility ports for older devices: ethernet, audio jack, DP and HDMI
 </div><div>to act as a smart'phone it also has battery, integrated GPU, a small display, camera, speaker, microphone, WiFi and cell
 </div><div>during boot, the integrated GPU is used, to prevent any vulnerability due to the OptionROM of external GPU
+</div><div>
+</div><div><b>the ideal keyboard</b>
+</div><div><img src="keyboard.png" alt="keyboard.png"/>
+</div><div>
+</div><div>navigation keys (arrows, page up, page down, home, end, esc), and ctrl/shift/alt based keybindings,
+</div><div>	are available by pressing and holding "mod" key
+</div><div>pressing one "mod" key while holding the other one, is equivalent to Super key
+</div><div>
+</div><div>to insert punctuations (in insert mode), press "pun"
+</div><div>	after entering a punctuation charactor, it automatically returns to normal mode
+</div><div>	unless the "pun" key is still pressed, in which case, it will return to normal mode after releasing "pun"
+</div><div>to insert numbers, press and hold "num"
+</div><div>
+</div><div>pressing and releasing "Fn", sends "Super+L" key press (usually bound to session locking)
+</div><div>holding "Fn" and pressing a number eg 1, sends "F1" key
+</div><div>
+</div><div>to insert capital letters, press comma then press the letter
+</div><div>to insert an all capital word, press two commas
+</div><div>	the following letters will be inserted in capitalized form, until space is pressed
+</div><div>this is how it is implemented:
+</div><div>when comma key is pressed, keyboard enters the cap mode in which:
+</div><div>, pressing a letter key, sends a "backspace" key, and then the capitalized form of that letter,
+</div><div>	and then the cap mode will be canceled
+</div><div>, pressing comma again, sends a "backspace" key, and activates caps mode,
+</div><div>	which remains active until space (or enter or mod) is pressed
+</div><div>, pressing any other keys, acts like normal, and cancels the cap mode
+</div><div>
+</div><div><a href="https://jasoncarloscox.com/writing/my-strange-keyboards/">https://jasoncarloscox.com/writing/my-strange-keyboards/</a>
+</div><div>	<a href="https://jasoncarloscox.com/creations/kyria/">https://jasoncarloscox.com/creations/kyria/</a>
+</div><div>	<a href="https://jasoncarloscox.com/creations/lego-keyboard-stand/">https://jasoncarloscox.com/creations/lego-keyboard-stand/</a>
+</div><div><a href="https://splitkb.com/">https://splitkb.com/</a>
+</div><div><a href="https://shop.keyboard.io/">https://shop.keyboard.io/</a>
+</div><div><a href="https://github.com/abstracthat/dactyl-manuform">https://github.com/abstracthat/dactyl-manuform</a>
+</div><div><a href="https://zealot.hu/absolem/">https://zealot.hu/absolem/</a>
+</div><div><a href="https://github.com/foostan/crkbd">https://github.com/foostan/crkbd</a>
+</div><div><a href="https://github.com/nglgzz/42">https://github.com/nglgzz/42</a>
+</div><div><a href="https://github.com/adereth/dactyl-keyboard">https://github.com/adereth/dactyl-keyboard</a>
+</div><div>Kinesis Advantage 2 keyboard
+</div><div><a href="http://www.allthingsergo.com/the-best-ergonomic-mechanical-keyboards/">http://www.allthingsergo.com/the-best-ergonomic-mechanical-keyboards/</a>
 </div><div>
 </div><div><b>digital circuits</b>
 </div><div>in conventional digital circuits when the inputs change, the outputs can have temporary invalid values,
@@ -93,33 +132,73 @@ body {
 </div><div>	but a kernel based operating system makes developing and testing programs, much easier
 </div><div>Linux is a highly developed, constantly evolving, open'source kernel
 </div>
-<h2>2, SPM Linux</h2><div>SPM Linux is a Linux based operating system, built and maintained using SPM (simple package manager)
-</div><div>SPM uses a simple and innovative method that unifies software building and package management
+<h2>2, UPM</h2><div>UPM (unified package manager) uses a simple method to unify software building and package management
 </div><div>
-</div><div>SPM by itself can be used as a standalone build system and package manager on any Posix system
-</div><div>you just need to have either "gnunet" or "curl" on your system
-</div><div>in addition, to bootstrap from source, these extra programs are required too:
-</div><div>	clang git ssh-keygen
-</div><div>now just run this command to install SPM in user's home directory:
-</div><div>; sh spm/new.sh
-</div><div>note that SPM will try to download binary packages (instead of building from source),
-</div><div>	if they are available for your system
-</div><div>if you want to make sure that packages are always built from source, run this instead:
-</div><div>; sh spm/new.sh src
+</div><div>UPM is still a work in progress
+</div><div>meanwhile we can use Alpine Linux to implement a prototype of UPM
+</div><div>first we must create a bootable installer on a removable storage device
+</div><div>for that, we just need to be in a Linux system, and run the following command (as root):
+</div><div>; sh alpine/mkinst.sh
+</div><div>now boot into the installation media, and follow the instructions
+</div><div>it provides a user interface based on UShell and Codev
 </div><div>
-</div><div>to install SPM Linux on a storage device, first we need to be in a Linux system with these programs installed:
+</div><div>UPM Linux is a Linux based operating system, built and maintained using UPM
+</div><div>to install UPM Linux, first we must create a bootable installer, on a removable storage device
+</div><div>to do that, we must be in a Linux system with these programs installed:
 </div><div>	gnunet (or curl) mkfs.vfat (dosfstools) mkfs.btrfs (btrfs-progs) cryptsetup tpm2-tools
 </div><div>to bootstrap from source, these extra programs are required too:
 </div><div>	clang git ssh-keygen
 </div><div>now just run this command as root:
-</div><div>; sh spm/new.sh
-</div><div>or to build packages from source (agian as root):
-</div><div>; sh spm/new.sh src
-</div><div>this will install a minimal linux based operating system, running Codev, inside CodevShell
+</div><div>; sh linux/upm/mkinst.sh
+</div><div>note that UPM will try to download binary packages (instead of building from source),
+</div><div>	if they are available for your system
+</div><div>if you want to make sure that packages are always built from source, run this instead (agian as root):
+</div><div>; sh linux/upm/mkinst.sh src
+</div><div>this will install a minimal Linux based operating system, running Codev inside Ushell
+</div><div>
+</div><div>UPM (when ready) by itself can be used as a standalone build system and package manager on any Posix system
+</div><div>you just need to have either "gnunet" or "curl" on your system
+</div><div>in addition, to bootstrap from source, these extra programs are required too:
+</div><div>	clang git ssh-keygen
+</div><div>now just run this command to install UPM in user's home directory:
+</div><div>; sh linux/upm/new.sh
+</div><div>or to build packages from source:
+</div><div>; sh linux/upm/new.sh src
+</div>
+<h2>3, UShell</h2><div>UShell is a Wayland shell, based on QuickShell (<a href="https://quickshell.org/">https://quickshell.org/</a>)
+</div><div>
+</div><div>there is an application launcher which can be toggled by pressing "super" (mod+mod) or "alt+tab"
+</div><div>applications will be opened in their own workspace,	that will also contain any extra windows opened by that application
+</div><div>to close the focused window, press "super+backspace" or "alt+escape"
+</div><div>
+</div><div>entering "space" as the first character in application launcher, opens terminal emulator
+</div><div>the entered command will be run in a new terminal view, inside a list at the right column
+</div><div>when terminal view finishes its job, if there is any output, it'll be transfered to the history list under the prompt
+</div><div>to navigate between terminal views, use "ctrl+pageup" and "ctrl+pagedown" keys
+</div><div>to go back to the prompt, press "ctrl+tab"
+</div><div>to navigate in history list, use "up" and "down" arrow keys
+</div><div>	you can press enter on an entry to rerun the command, or press space to first edit it
+</div><div>to close a terminal view (that will also kill any running process) press "super+backspace" or "alt+escape"
+</div><div>
+</div><div>the first item in the application launcher is "system", which opens the system menu:
+</div><div>, session (lock, suspend, exit, reboot, poweroff)
+</div><div>, connections
+</div><div>, timezone
+</div><div>, passwords
+</div><div>, packages (install, remove, update, make installation media)
+</div><div>, backup (create, restore)
 </div><div>
 </div><div>packages will be updated automatically
-</div><div>updating packages is an atomic process
+</div><div>this is safe, since the process of updating packages is atomic
 </div><div>nonetheless, to have a really fail'safe system, redundant systems are necessary
-</div><div>also SPM Linux is easily replicatable using the command "spm new"
+</div><div>
+</div><div>you can create a backup on a removable storage device
+</div><div>backups will be done using "BTRFS send", so they will be incremental and fast
+</div><div>the backup device is encrypted, and contains a backup of your home directory
+</div><div>	dencryption can be done using a password, as well as a key stored on the computer
+</div><div>each time the device is connected, the backup procedure will be run automatically
+</div><div>even in case of bit rot for data in home directory, this procedure repairs it automatically
+</div><div>this backup can be easily restored on a new system
+</div><div>these systems will then form an F2F network using GNUnet, through which they will be synced to each other
 </div>
 </body></html>
