@@ -21,10 +21,7 @@ the first item in the application launcher is "system", which opens the system m
 , packages (install, remove, update, make installation media)
 , backup (create, restore)
 
-packages will be updated automatically
-this is safe, since the process of updating packages is atomic
-nonetheless, to have a really fail'safe system, redundant systems are necessary
-
+to have a really fail'safe system, redundant units are necessary
 you can create a backup on a removable storage device
 backups will be done using "BTRFS send", so they will be incremental and fast
 the backup device is encrypted, and contains a backup of your home directory
