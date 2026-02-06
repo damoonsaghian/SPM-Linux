@@ -1,4 +1,4 @@
-# install a minimal Alpine Linux system that runs Codev inside CodevShell
+# installs a minimal system based on Alpine Linux, providing a user interface using UShell and Codev
 # https://gitlab.alpinelinux.org/alpine/alpine-conf
 # https://gitlab.alpinelinux.org/alpine/aports/-/tree/master/main/alpine-baselayout
 # https://gitlab.alpinelinux.org/alpine/aports/-/tree/master/main/openrc
@@ -17,7 +17,7 @@ unmount_all="umount -q \"$new_root\"/boot; \
 	umount -q \"$new_root\"/dev; umount -q \"$new_root\"/proc; \
 	umount -q \"$new_root\"; rmdir \"$new_root\""
 trap "trap - EXIT; $unmount_all" EXIT INT TERM QUIT HUP PIPE
-sh "$script_dir"/../codev-util/sd.sh format-sys "$new_root" || exit
+sh "$script_dir"/format.sh sys "$new_root" || exit
 
 mkdir -p "$new_root"/dev "$new_root"/proc
 mount --bind /dev "$new_root"/dev
@@ -97,7 +97,7 @@ mkdir -p "$new_root"/etc/doas.d
 echo 'permit nopass nu cmd /usr/local/bin/spm' > "$new_root"/etc/doas.d/spm.conf
 
 cp -r "$script_dir"/../codev-util "$new_root"/usr/local/share/
-echo '* * * * * ID=autoupdate FREQ=1d/5m sh /usr/local/share/codev-util/spm-autoup.sh' > "$new_root"/etc/cron.d/spm-autoup
+echo '* * * * * ID=autoupdate FREQ=1d/5m sh /usr/local/share/upm/autoupdate.sh' > "$new_root"/etc/cron.d/autoupdate
 
 
 chmod +x "$new_root"/usr/local/share/codev-util/sd.sh

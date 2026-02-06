@@ -1,4 +1,4 @@
-# create a bootable installer on a removable storage device
+# creates a bootable installer on a removable storage device
 
 # name of the target device to write the installer on
 # it's an optional argument
@@ -7,7 +7,7 @@ target_device="$1"
 
 script_dir="$(dirname "$(readlink -f "$0")")"
 
-wdir="$HOME"/.cache/spm-alpine
+wdir="$HOME"/.cache/upm-alpine
 cd "$wdir"
 
 mkdir -p target iso_mount
@@ -15,19 +15,20 @@ ovl_dir="$(mktemp -d)"
 trap "trap - EXIT; umount -q target; umount -q iso_mount; rmdir target iso_mount; rm -r \"$ovl_dir\"" \
 	EXIT INT TERM QUIT HUP PIPE
 
-mkdir -p "$ovl_dir"/codev
-cp -r "$script_dir"/../spm-alpine "$ovl_dir"/codev/
-cp -r "$script_dir"/../codev "$ovl_dir"/codev/
-cp -r "$script_dir"/../codev-shell "$ovl_dir"/codev/
-cp -r "$script_dir"/../codev-util "$ovl_dir"/codev/
-if [ -d "$script_dir"/../.data]; then
-	cp -r "$script_dir"/../.data "$ovl_dir"/codev/
+mkdir -p "$ovl_dir"/upm
+cp -r "$script_dir"/../upm "$ovl_dir"/upm/
+cp -r "$script_dir"/../alpine/* "$ovl_dir"/upm/upm/
+cp -r "$script_dir"/../ushell "$ovl_dir"/upm/
+mkdir -p "$ovl_dir"/upm/codev
+cp -r "$script_dir"/../../*/codev/* "$ovl_dir"/upm/codev
+if [ -f "$script_dir"/../../*/.data/codev.svg ]; then
+	cp "$script_dir"/../../*/.data/codev.svg "$ovl_dir"/upm/codev/.data/
 else
-	cp -r "$script_dir"/../icons/hicolor/scalable/apps/codev.svg "$ovl_dir"/codev/.data/
+	cp "$script_dir"/../icons/hicolor/scalable/apps/codev.svg "$ovl_dir"/codev/.data/
 fi
 
 mkdir -p "$ovl_dir"/root
-printf 'sh /codev/alpine/new.sh
+printf 'sh /upm/new.sh
 ' > "$ovl_dir"/root/.profile
 
 printf '#!/usr/bin/env sh
@@ -125,8 +126,9 @@ fi
 mount "$alpine_iso_file_name" iso_mount
 
 # prepare a storage device, and copy the files into it
-sh "$script_dir"/../codev-util/sd.sh format-inst "$wdir/target" "$target_device" || exit
+sh "$script_dir"/../upm/format.sh inst "$wdir/target" "$target_device" || exit
 cp -r iso_mount/* target/
 mv localhost.apkovl.tar.gz target/
 
 echo "bootable installer successfully created"
+echo "now boot into the installation media, and follow the instructions"
