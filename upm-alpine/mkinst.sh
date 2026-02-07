@@ -7,7 +7,8 @@ target_device="$1"
 
 script_dir="$(dirname "$(readlink -f "$0")")"
 
-wdir="$HOME"/.cache/upm-alpine
+wdir=/var/cache/upm-alpine
+mkdir -p "$wdir"
 cd "$wdir"
 
 mkdir -p target iso_mount
@@ -20,10 +21,13 @@ cp -r "$script_dir"/../upm "$ovl_dir"/upm/
 cp -r "$script_dir"/../alpine/* "$ovl_dir"/upm/upm/
 cp -r "$script_dir"/../ushell "$ovl_dir"/upm/
 mkdir -p "$ovl_dir"/upm/codev
-cp -r "$script_dir"/../../*/codev/* "$ovl_dir"/upm/codev
-if [ -f "$script_dir"/../../*/.data/codev.svg ]; then
+if test -d /usr/share/codev; then
+elif test -d /usr/local/share/codev; then
+elif test -f "$script_dir"/../../*/codev/Ubuild.sh; then
+	cp -r "$script_dir"/../../*/codev/* "$ovl_dir"/upm/codev/
 	cp "$script_dir"/../../*/.data/codev.svg "$ovl_dir"/upm/codev/.data/
 else
+	# download codev using curl or wget
 	cp "$script_dir"/../icons/hicolor/scalable/apps/codev.svg "$ovl_dir"/codev/.data/
 fi
 
