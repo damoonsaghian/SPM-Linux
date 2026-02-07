@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset='utf-8'>
-<title>UPM</title>
+<title>Uni</title>
 <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.css'>
 <style>
 body {
@@ -15,8 +15,86 @@ body {
 	tab-size: 4;
 }
 </style>
-</head><body><a href='https://github.com/damoonsaghian/UPM'><h1>UPM</h1></a>
-<h2>1, computers</h2><div>computers can help people to easily access and improve human knowledge,
+</head><body><a href='https://github.com/damoonsaghian/Uni'><h1>Uni</h1></a>
+<h2>1, Uni</h2><div>Uni is a unified collaborative development environment, with command'based user interface,
+</div><div>	as an ideal frontend for GNUnet
+</div><div>
+</div><div>command'based user interfaces (using keyboard, voice, gesture) are faster, more convenient and more powerful,
+</div><div>	than pointer'based user interfaces (using mouse, touch, pen)
+</div><div>pointer'based interface seems appealing at first sight, because of its discoverability
+</div><div>but with simple uniform GUI (ie the oposite of what we see in websites),
+</div><div>	there is no need for a pointer based user interface
+</div><div>touch interface has an additional problem: interaction at a distance is not possible
+</div><div>note that, touch interface can be useful in special cases, but it's not good as a general purpose interface
+</div><div>detection of voice commands is a relatively simple process (compared to general speech recognition),
+</div><div>	because we only need to match against a relatively small set of commands
+</div><div>for those who neither can use all their fingers, nor can talk, gesture based (2d) input can be implemented
+</div><div>
+</div><div>list of all projects will appear in a floating layer, at the center of the screen, called overview layer
+</div><div>overview layer:
+</div><div>, left panel:
+</div><div>	, roots: home directory, plus attached devices
+</div><div>	, project groups: content of roots
+</div><div>, main view:
+</div><div>	projects: content of project groups
+</div><div>
+</div><div><img src="codev.png" alt="codev.png"/>
+</div><div>
+</div><div>in a project view, the list of files of a project will be displayed in the left side'bar
+</div><div>opened files will be slightly highlighted
+</div><div>files and directories with names starting with a dot, will be hidden
+</div><div>".cache" directory inside a project is for files we don't want to share or backup
+</div><div>
+</div><div>each opened file will have a side'bar at right showing its sections
+</div><div>there we can create new view corresponding to a section
+</div><div>sections with views will be slightly highlighted
+</div><div>
+</div><div>text files will be opened in a text editor
+</div><div>directories containing media files, will be opened in a gallery view
+</div><div>files and directories inside a gallery, will be opened in a floating layer
+</div><div>
+</div><div>non'local projects, web pages, PDF documents, etc, accessed from links inside the main project,
+</div><div>	will be opened in a floating layer
+</div><div>web pages: move caret between visual elements (ignoring structural elements)
+</div><div>
+</div><div>actions:
+</div><div>, next/previous word, line, paragraph, section
+</div><div>	ask before crossing files
+</div><div>, next/previous section view, opened file
+</div><div>, go to the list of files to open a file view
+</div><div>, go to the list of sections to open a section view
+</div><div>, start and end selection, then copy or cut
+</div><div>, paste
+</div><div>, undo
+</div><div>
+</div><div>, navigation: move, search
+</div><div>, selection
+</div><div>, completion
+</div><div>
+</div><div>right click or ctrl+enter: show a list of available commands and their key bindings
+</div><div>
+</div><div><b>collaborative development</b>
+</div><div>flaws of version control systems:
+</div><div>, they double the storage (working directory, local repository)
+</div><div>, their design makes it difficult to modify the history
+</div><div>	so in practice, the whole history must be kept indefinitely, even if not needed
+</div><div>
+</div><div>when we download a project, a pristine copy is kept untouched in ".cache/ude/pristine",
+</div><div>	and ref links will be created in the working directory, and then we can work on our own branch
+</div><div>after a while when we want to pull and merge changes made in the main branch,
+</div><div>	first a three'way diff will be shown, based on the main branch, pristine, and the working directory,
+</div><div>	then the user will be asked to accept all or some parts of the diff
+</div><div>to send a pull request to the main branch, first publish the pristine and the working directory (except .cache),
+</div><div>	then send the two addresses to the main developer
+</div><div>	the main developer will make a diff based on these two, plus her own working directory
+</div><div>
+</div><div>we can use GNUnet to share files in a P2P (a opposed to client'server) network
+</div><div><a href="https://www.gnunet.org/en/">https://www.gnunet.org/en/</a>
+</div><div><a href="https://docs.gnunet.org/latest/">https://docs.gnunet.org/latest/</a>
+</div><div>"the GNUnet system" by Christian Grothoff (<a href="https://grothoff.org/christian/habil.pdf">https://grothoff.org/christian/habil.pdf</a>)
+</div><div>
+</div>
+<h2>2, computers</h2><div>computers can help people to easily access and improve human knowledge,
 </div><div>	and as a result do things to improve the quality of human life
 </div><div>
 </div><div>an ideal computer would be a combination of a smart'phone and a PC
@@ -132,40 +210,40 @@ body {
 </div><div>	but a kernel based operating system makes developing and testing programs, much easier
 </div><div>Linux is a highly developed, constantly evolving, open'source kernel
 </div>
-<h2>2, UPM</h2><div>UPM (unified package manager) uses a simple method to unify software building and package management
+<h2>3, UPM</h2><div>UPM (unified package manager) uses a simple method to unify software building and package management
 </div><div>
-</div><div>UPM is still a work in progress
-</div><div>meanwhile we can use Alpine Linux to implement a prototype of UPM
+</div><div>UPM can be used as a build system and package manager on any Posix system
+</div><div>you just need to have either "gnunet" or "curl" on your system
+</div><div>to bootstrap from source, these extra programs are required too:
+</div><div>	clang git ssh-keygen
+</div><div>now just run this command to install UPM in user's home directory:
+</div><div>; sh upm/new.sh
+</div><div>note that UPM will try to download binary packages (instead of building from source),
+</div><div>	if they are available for your system
+</div><div>if you want to make sure that packages are always built from source, run this instead:
+</div><div>; sh upm/new.sh src
+</div><div>
+</div><div>furthermore, UPM can be used to build and maintain a Linux based operating system
 </div><div>first we must create a bootable installer on a removable storage device
-</div><div>for that, we just need to be in a Linux system, and run the following command (as root):
-</div><div>; sh alpine/mkinst.sh
-</div><div>now boot into the installation media, and follow the instructions
-</div><div>it provides a user interface based on UShell and Codev
-</div><div>
-</div><div>UPM Linux is a Linux based operating system, built and maintained using UPM
-</div><div>to install UPM Linux, first we must create a bootable installer, on a removable storage device
 </div><div>to do that, we must be in a Linux system with these programs installed:
-</div><div>	gnunet (or curl) mkfs.vfat (dosfstools) mkfs.btrfs (btrfs-progs) cryptsetup tpm2-tools
+</div><div>	gnunet (or curl) mkfs.vfat (dosfstools)
 </div><div>to bootstrap from source, these extra programs are required too:
 </div><div>	clang git ssh-keygen
 </div><div>now just run this command as root:
-</div><div>; sh linux/upm/mkinst.sh
-</div><div>note that UPM will try to download binary packages (instead of building from source),
-</div><div>	if they are available for your system
-</div><div>if you want to make sure that packages are always built from source, run this instead (agian as root):
-</div><div>; sh linux/upm/mkinst.sh src
-</div><div>this will install a minimal Linux based operating system, running Codev inside Ushell
+</div><div>; sh upm/mkinst.sh
+</div><div>or to build packages from source (agian run as root):
+</div><div>; sh upm/mkinst.sh src
+</div><div>now boot into the installation media, and follow the instructions
+</div><div>this will install a minimal Linux based operating system, providing a user interface using UShell and Uni
 </div><div>
-</div><div>UPM (when ready) by itself can be used as a standalone build system and package manager on any Posix system
-</div><div>you just need to have either "gnunet" or "curl" on your system
-</div><div>in addition, to bootstrap from source, these extra programs are required too:
-</div><div>	clang git ssh-keygen
-</div><div>now just run this command to install UPM in user's home directory:
-</div><div>; sh linux/upm/new.sh
-</div><div>or to build packages from source:
-</div><div>; sh linux/upm/new.sh src
+</div><div>packages will be updated automatically
+</div><div>this is safe, since the process of updating packages is atomic
+</div><div>
+</div><div>note that UPM is still a work in progress, so the above instructions actually do not work yet
+</div><div>but you can install a prototype of UPM, implemented using Alpine Linux
+</div><div>to do that, instead of "upm/mkinst.sh" use "upm-alpine/mkinst.sh"
 </div>
-<h2>3, UShell</h2><div>UShell is a Wayland shell, based on QuickShell (<a href="https://quickshell.org/">https://quickshell.org/</a>)
+<h2>4, UShell</h2><div>UShell is a Wayland shell, based on QuickShell (<a href="https://quickshell.org/">https://quickshell.org/</a>)
 </div><div>
 </div><div>there is an application launcher which can be toggled by pressing "super" (mod+mod) or "alt+tab"
 </div><div>applications will be opened in their own workspace,	that will also contain any extra windows opened by that application
@@ -188,10 +266,7 @@ body {
 </div><div>, packages (install, remove, update, make installation media)
 </div><div>, backup (create, restore)
 </div><div>
-</div><div>packages will be updated automatically
-</div><div>this is safe, since the process of updating packages is atomic
-</div><div>nonetheless, to have a really fail'safe system, redundant systems are necessary
-</div><div>
+</div><div>to have a really fail'safe system, redundant units are necessary
 </div><div>you can create a backup on a removable storage device
 </div><div>backups will be done using "BTRFS send", so they will be incremental and fast
 </div><div>the backup device is encrypted, and contains a backup of your home directory
