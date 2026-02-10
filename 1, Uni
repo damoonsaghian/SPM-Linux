@@ -1,5 +1,5 @@
-Uni is a unified collaborative development environment, with command'based user interface,
-	as an ideal frontend for GNUnet
+Uni is a unified collaborative development environment, and an ideal frontend for GNUnet,
+	with command'based user interface
 
 command'based user interfaces (using keyboard, voice, gesture) are faster, more convenient and more powerful,
 	than pointer'based user interfaces (using mouse, touch, pen)
@@ -20,7 +20,7 @@ overview layer:
 , main view:
 	projects: content of project groups
 
-".data/codev.png"
+".data/uni.png"
 
 in a project view, the list of files of a project will be displayed in the left side'bar
 opened files will be slightly highlighted
@@ -74,4 +74,3 @@ we can use GNUnet to share files in a P2P (a opposed to client'server) network
 "https://www.gnunet.org/en/"
 "https://docs.gnunet.org/latest/"
 "the GNUnet system" by Christian Grothoff ("https://grothoff.org/christian/habil.pdf")
-
