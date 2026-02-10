@@ -16,8 +16,8 @@ body {
 }
 </style>
 </head><body><a href='https://github.com/damoonsaghian/Uni'><h1>Uni</h1></a>
-<h2>1, Uni</h2><div>Uni is a unified collaborative development environment, with command'based user interface,
-</div><div>	as an ideal frontend for GNUnet
+<h2>1, Uni</h2><div>Uni is a unified collaborative development environment, and an ideal frontend for GNUnet,
+</div><div>	with command'based user interface
 </div><div>
 </div><div>command'based user interfaces (using keyboard, voice, gesture) are faster, more convenient and more powerful,
 </div><div>	than pointer'based user interfaces (using mouse, touch, pen)
@@ -38,7 +38,7 @@ body {
 </div><div>, main view:
 </div><div>	projects: content of project groups
 </div><div>
-</div><div><img src="codev.png" alt="codev.png"/>
+</div><div><img src="uni.png" alt="uni.png"/>
 </div><div>
 </div><div>in a project view, the list of files of a project will be displayed in the left side'bar
 </div><div>opened files will be slightly highlighted
@@ -92,7 +92,6 @@ body {
 </div><div><a href="https://www.gnunet.org/en/">https://www.gnunet.org/en/</a>
 </div><div><a href="https://docs.gnunet.org/latest/">https://docs.gnunet.org/latest/</a>
 </div><div>"the GNUnet system" by Christian Grothoff (<a href="https://grothoff.org/christian/habil.pdf">https://grothoff.org/christian/habil.pdf</a>)
-</div><div>
 </div>
 <h2>2, computers</h2><div>computers can help people to easily access and improve human knowledge,
 </div><div>	and as a result do things to improve the quality of human life
@@ -210,38 +209,35 @@ body {
 </div><div>	but a kernel based operating system makes developing and testing programs, much easier
 </div><div>Linux is a highly developed, constantly evolving, open'source kernel
 </div>
-<h2>3, UPM</h2><div>UPM (unified package manager) uses a simple method to unify software building and package management
+<h2>3, UPM</h2><div>Uni is build and installed using UPM
+</div><div>UPM (unified package manager) uses a simple method to unify software building and package management
 </div><div>
-</div><div>UPM can be used as a build system and package manager on any Posix system
-</div><div>you just need to have either "gnunet" or "curl" on your system
-</div><div>to bootstrap from source, these extra programs are required too:
-</div><div>	clang git ssh-keygen
-</div><div>now just run this command to install UPM in user's home directory:
-</div><div>; sh upm/new.sh
-</div><div>note that UPM will try to download binary packages (instead of building from source),
-</div><div>	if they are available for your system
-</div><div>if you want to make sure that packages are always built from source, run this instead:
-</div><div>; sh upm/new.sh src
-</div><div>
-</div><div>furthermore, UPM can be used to build and maintain a Linux based operating system
+</div><div>UPM can be used to build and maintain a Linux based operating system, with UShell and Uni as the user interface
 </div><div>first we must create a bootable installer on a removable storage device
 </div><div>to do that, we must be in a Linux system with these programs installed:
-</div><div>	gnunet (or curl) mkfs.vfat (dosfstools)
+</div><div>	curl (or wget) mkfs.vfat (dosfstools)
 </div><div>to bootstrap from source, these extra programs are required too:
 </div><div>	clang git ssh-keygen
 </div><div>now just run this command as root:
-</div><div>; sh upm/mkinst.sh
-</div><div>or to build packages from source (agian run as root):
-</div><div>; sh upm/mkinst.sh src
+</div><div>; sh uinst/mkinst.sh
+</div><div>note that UPM will try to download binary packages (instead of building from source),
+</div><div>	if they are available for your system
+</div><div>if you want to make sure that packages are always built from source, run this instead (agian run as root):
+</div><div>; sh uinst/mkinst.sh src
 </div><div>now boot into the installation media, and follow the instructions
-</div><div>this will install a minimal Linux based operating system, providing a user interface using UShell and Uni
 </div><div>
-</div><div>packages will be updated automatically
+</div><div>packages in the installed system will be updated automatically
 </div><div>this is safe, since the process of updating packages is atomic
 </div><div>
-</div><div>note that UPM is still a work in progress, so the above instructions actually do not work yet
-</div><div>but you can install a prototype of UPM, implemented using Alpine Linux
-</div><div>to do that, instead of "upm/mkinst.sh" use "upm-alpine/mkinst.sh"
+</div><div>UPM is still a work in progress, so the above instructions actually installs a prototype based on Alpine Linux
+</div><div>when UPM is ready, Uni can be installed on any Posix system
+</div><div>you just need to have either "curl" or "wget" on your system
+</div><div>to bootstrap from source, these extra programs are required too:
+</div><div>	clang git ssh-keygen
+</div><div>now just run this command (as normal user):
+</div><div>; sh uinst/inst.sh
+</div><div>or to build packages from source:
+</div><div>; sh uinst/inst.sh src
 </div>
 <h2>4, UShell</h2><div>UShell is a Wayland shell, based on QuickShell (<a href="https://quickshell.org/">https://quickshell.org/</a>)
 </div><div>
