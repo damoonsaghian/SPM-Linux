@@ -33,7 +33,7 @@ if [ -f /boot/vmlinuz ]; then
 	features_dir="$(mktemp -d)"
 	trap "trap - EXIT; rm -r \"$features_dir\"" EXIT INT TERM QUIT HUP PIPE
 	echo '/usr/bin/tpm2_nvread
-	/usr/local/bin/tpm-getkey
+	/usr/bin/tpm-getkey
 	' > "$features_dir"/tpm.files
 	mkinitfs -P "$features_dir" -F "$initfs_features" -o /boot/efi/boot-new/initramfs "$(uname -r)"
 	
