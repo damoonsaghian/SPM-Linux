@@ -6,14 +6,17 @@ usage_error() {
 	echo "usage:"
 	echo "	sd mount <dev-name>"
 	echo "	sd unmount <dev-name>"
-	echo "	sd format backup|fat|exfat <dev-name>"
+	echo "	sd mkbackup <dev-name>"
+	echo "	sd mkfat <dev-name>"
+	echo "	sd mkxfat <dev-name>"
 	exit 1
 }
 
+device_name="$(basename "$2")"
+[ -n "$device_name" ] && usage_error
+
+
 [ "$1" = mount ] && {
-	[ -n "$2" ] && usage_error
-	
-	device_name="$(basename "$2")"
 	[ -e /sys/block/"$device_name" ] || {
 		echo "there is no storage device named \"$device_name\""
 		exit 1
@@ -42,9 +45,6 @@ usage_error() {
 }
 
 [ "$1" = unmount ] && {
-	[ -n "$2" ] && usage_error
-	
-	device_name="$(basename "$2")"
 	mount_point=/nu/.local/state/mounts/"$device_name"
 	[ -d "$mount_point" ] || {
 		echo "there is no mounted storage device named \"$device_name\""
@@ -60,41 +60,34 @@ usage_error() {
 	exit
 }
 
-[ "$1" != format ] && [ "$1" != format-inst ] && [ "$1" != format-sys ] && usage_error
+[ "$1" != format ] && usage_error
 
-target_device="$(basename "$3")"
-
-[ -e /sys/block/"$target_device" ] || {
-	echo "there is no storage device named \"$target_device\""
+[ -e /sys/block/"$device_name" ] || {
+	echo "there is no storage device named \"$device_name\""
 	exit 1
 }
 
-# if $target_device is a partition, set it to the parent device
-target_device_num="$(cat /sys/class/block/"$target_device"/dev | cut -d ":" -f 1):0"
-target_device="$(basename "$(readlink /dev/block/"$target_device_num")")"
+# if $device_name is a partition, set it to the parent device
+device_num="$(cat /sys/class/block/"$device_name"/dev | cut -d ":" -f 1):0"
+device_name="$(basename "$(readlink /dev/block/"$device_num")")"
 
-# exit if $target_device is the root device
+# exit if $device_name is the root device
 root_partition="$(mount -l | grep " on / " | cut -d ' ' -f 1 | sed -n "s@/dev/@@p")"
 root_device_num="$(cat /sys/class/block/"$root_partition"/dev | cut -d ":" -f 1):0"
 root_device="$(basename "$(readlink /dev/block/"$root_device_num")")"
-if [ "$target_device" = "$root_device" ]; then
-	echo "can't install on \"$target_device\"; it contains the running system"
+if [ "$device_name" = "$root_device" ]; then
+	echo "can't install on \"$device_name\"; it contains the running system"
 	exit 1
 fi
 
-[ "$1" = format ] && [ "$2" = backup ] && {
-	mkfs.btrfs -f /dev/"$target_device"
+case "$2" in
+backup)
+	mkfs.btrfs -f /dev/"$device_name"
 	mount_dir="$(mktemp -d)"
 	trap "trap - EXIT; umount '$mount_dir'; rmdir '$mount_dir'" EXIT INT TERM QUIT HUP PIPE
-	mount /dev/"$target_device" "$mount_dir"
+	mount /dev/"$device_name" "$mount_dir"
 	chmod 777 "$mount_dir"
-	exit
-}
-[ "$1" = format ] && [ "$2" = fat ] && {
-	mkfs.vfat -I -F 32 /dev/"$target_device"
-	exit
-} 
-[ "$1" = format ] && [ "$2" = exfat ] && {
-	mkfs.exfat /dev/"$target_device"
-	exit
-} 
+	;;
+fat) mkfs.vfat -I -F 32 /dev/"$device_name" ;;
+exfat) mkfs.exfat /dev/"$device_name" ;;
+esac
