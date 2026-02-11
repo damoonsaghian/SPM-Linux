@@ -209,21 +209,18 @@ body {
 </div><div>	but a kernel based operating system makes developing and testing programs, much easier
 </div><div>Linux is a highly developed, constantly evolving, open'source kernel
 </div>
-<h2>3, UPM</h2><div>Uni is build and installed using UPM
-</div><div>UPM (unified package manager) uses a simple method to unify software building and package management
+<h2>3, installation</h2><div>Uni is build and installed using UPM (unified package manager)
+</div><div>UPM uses a simple method to unify software building and package management
 </div><div>
-</div><div>UPM can be used to build and maintain a Linux based operating system, with UShell and Uni as the user interface
-</div><div>first we must create a bootable installer on a removable storage device
+</div><div>ULinux is a Linux based operating system, build and maintain using UPM
+</div><div>the user interface of ULinux is based on UShell and Uni
+</div><div>to install Ulinux, first we must create a bootable installer on a removable storage device
 </div><div>to do that, we must be in a Linux system with these programs installed:
 </div><div>	curl (or wget) mkfs.vfat (dosfstools)
 </div><div>to bootstrap from source, these extra programs are required too:
 </div><div>	clang git ssh-keygen
 </div><div>now just run this command as root:
-</div><div>; sh uinst/mkinst.sh
-</div><div>note that UPM will try to download binary packages (instead of building from source),
-</div><div>	if they are available for your system
-</div><div>if you want to make sure that packages are always built from source, run this instead (agian run as root):
-</div><div>; sh uinst/mkinst.sh src
+</div><div>; sh ulinux/mkinst.sh
 </div><div>now boot into the installation media, and follow the instructions
 </div><div>
 </div><div>packages in the installed system will be updated automatically
@@ -235,11 +232,10 @@ body {
 </div><div>to bootstrap from source, these extra programs are required too:
 </div><div>	clang git ssh-keygen
 </div><div>now just run this command (as normal user):
-</div><div>; sh uinst/inst.sh
-</div><div>or to build packages from source:
-</div><div>; sh uinst/inst.sh src
-</div>
-<h2>4, UShell</h2><div>UShell is a Wayland shell, based on QuickShell (<a href="https://quickshell.org/">https://quickshell.org/</a>)
+</div><div>; sh upm/inst.sh
+</div><div>
+</div><div><b>Ushell</b>
+</div><div>Ushell is a Wayland shell, based on QuickShell (<a href="https://quickshell.org/">https://quickshell.org/</a>)
 </div><div>
 </div><div>there is an application launcher which can be toggled by pressing "super" (mod+mod) or "alt+tab"
 </div><div>applications will be opened in their own workspace,	that will also contain any extra windows opened by that application
