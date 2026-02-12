@@ -1,14 +1,17 @@
 #!/usr/bin/env sh
 
 # mounting and formatting storage devices
+# if run as normal user, use dbus API of udisks, and if not available, notify the user
+# 	https://storaged.org/udisks/docs/ref-dbus.html
+# otherwise implement it using posix commands
 
 usage_error() {
 	echo "usage:"
 	echo "	sd mount <dev-name>"
 	echo "	sd unmount <dev-name>"
-	echo "	sd mkbackup <dev-name>"
+	echo "	sd mkbtrfs <dev-name>"
 	echo "	sd mkfat <dev-name>"
-	echo "	sd mkxfat <dev-name>"
+	echo "	sd mkexfat <dev-name>"
 	exit 1
 }
 
@@ -60,7 +63,7 @@ device_name="$(basename "$2")"
 	exit
 }
 
-[ "$1" != format ] && usage_error
+[ "$1" != mkbtrfs ] && [ "$1" != mkfat ] && [ "$1" != mkexfat ] && usage_error
 
 [ -e /sys/block/"$device_name" ] || {
 	echo "there is no storage device named \"$device_name\""
@@ -80,14 +83,14 @@ if [ "$device_name" = "$root_device" ]; then
 	exit 1
 fi
 
-case "$2" in
-backup)
+case "$1" in
+mkbtrfs)
 	mkfs.btrfs -f /dev/"$device_name"
 	mount_dir="$(mktemp -d)"
 	trap "trap - EXIT; umount '$mount_dir'; rmdir '$mount_dir'" EXIT INT TERM QUIT HUP PIPE
 	mount /dev/"$device_name" "$mount_dir"
 	chmod 777 "$mount_dir"
 	;;
-fat) mkfs.vfat -I -F 32 /dev/"$device_name" ;;
-exfat) mkfs.exfat /dev/"$device_name" ;;
+mkfat) mkfs.vfat -I -F 32 /dev/"$device_name" ;;
+mkexfat) mkfs.exfat /dev/"$device_name" ;;
 esac
