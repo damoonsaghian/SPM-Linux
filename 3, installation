@@ -8,8 +8,8 @@ to do that, we must be in a Linux system with these programs installed:
 	curl (or wget) mkfs.vfat (dosfstools)
 to bootstrap from source, these extra programs are required too:
 	clang git ssh-keygen
-now just run this command as root:
-; sh ulinux/mkinst.sh
+now just run this command:
+; sh ulinux/inst/new.sh
 now boot into the installation media, and follow the instructions
 
 packages in the installed system will be updated automatically
@@ -20,8 +20,8 @@ when UPM is ready, Uni can be installed on any Posix system
 you just need to have either "curl" or "wget" on your system
 to bootstrap from source, these extra programs are required too:
 	clang git ssh-keygen
-now just run this command (as normal user):
-; sh upm/inst.sh
+now just run this command:
+; sh upm/install.sh
 
 = Ushell
 Ushell is a Wayland shell, based on QuickShell ("https://quickshell.org/")
