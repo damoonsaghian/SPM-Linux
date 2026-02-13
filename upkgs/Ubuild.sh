@@ -281,6 +281,8 @@ pkg=linux
 # wireless-regdb
 # https://wireless.wiki.kernel.org/en/developers/regulatory/wireless-regdb
 
+# bootup.sh
+
 pkg=llvm
 
 # https://llvm.org/docs/GettingStarted.html
@@ -539,3 +541,5 @@ chmod +x /usr/bin/home-services
 # suspend system with support for hooks (needed for some drivers)
 # https://github.com/jirutka/zzz
 # doas rules
+
+# autologin.sh
