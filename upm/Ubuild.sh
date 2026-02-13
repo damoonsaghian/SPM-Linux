@@ -9,3 +9,5 @@ upm_xcript upm inst/cmd
 # doas rules for "upm"
 
 # autoupdate crond file
+
+# mkinst.sh install.sh mkfs.sh
