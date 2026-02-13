@@ -1,22 +1,22 @@
 Uni is build and installed using UPM (unified package manager)
 UPM uses a simple method to unify software building and package management
 
-ULinux is a Linux based operating system, build and maintain using UPM
-the user interface of ULinux is based on UShell and Uni
-to install Ulinux, first we must create a bootable installer on a removable storage device
+UPM can also be used to build and maintain a Linux based operating system,
+	with a user interface based on UShell and Uni
+first we must create a bootable installer on a removable storage device
 to do that, we must be in a Linux system with these programs installed:
 	curl (or wget) mkfs.vfat (dosfstools)
 to bootstrap from source, these extra programs are required too:
 	clang git ssh-keygen
 now just run this command:
-; sh ulinux/inst/new.sh
+; sh upm/mkinst.sh
 now boot into the installation media, and follow the instructions
 
 packages in the installed system will be updated automatically
 this is safe, since the process of updating packages is atomic
 
 UPM is still a work in progress, so the above instructions actually installs a prototype based on Alpine Linux
-when UPM is ready, Uni can be installed on any Posix system
+when UPM is ready, it can be installed on any Posix system
 you just need to have either "curl" or "wget" on your system
 to bootstrap from source, these extra programs are required too:
 	clang git ssh-keygen
