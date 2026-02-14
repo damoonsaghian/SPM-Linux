@@ -1,31 +1,18 @@
-# creates a bootable installer on a removable storage device
-
-# name of the target device to write the installer on
-# it's an optional argument
-# if empty, this script will be interactive, and will allow the user to choose the target device
-target_device="$1"
-
-script_dir="$(dirname "$(readlink -f "$0")")"
-
-wdir=/var/cache/upm-alpine
-mkdir -p "$wdir"
-cd "$wdir"
-
-mkdir -p target iso_mount
+mkdir -p iso_mount
 ovl_dir="$(mktemp -d)"
 trap "trap - EXIT; umount -q target; umount -q iso_mount; rmdir target iso_mount; rm -r \"$ovl_dir\"" \
 	EXIT INT TERM QUIT HUP PIPE
 
-mkdir -p "$ovl_dir"/u
-cp -r "$script_dir"/../upm "$ovl_dir"/u/
-cp -r "$script_dir"/* "$ovl_dir"/u/upm/
-cp -r "$script_dir"/../ushell "$ovl_dir"/u/
-cp -r "$script_dir"/../uni "$ovl_dir"/u/
-cp "$script_dir"/../.data/uni.svg "$ovl_dir"/u/uni/data/ 2>/dev/null ||
-	cp /usr/share/icons/hicolor/scalable/apps/uni.svg "$ovl_dir"/u/uni/data/
+mkdir -p "$ovl_dir"/uinst
+cp -r "$script_dir"/../uni "$ovl_dir"/uinst/
+cp -r "$script_dir"/../upkgs "$ovl_dir"/uinst/
+cp -r "$script_dir"/../upm "$ovl_dir"/uinst/
+cp -r "$script_dir"/../ushell "$ovl_dir"/uinst/
+cp "$script_dir"/../.data/uni.svg "$ovl_dir"/uinst/ 2>/dev/null ||
+	cp /usr/share/icons/hicolor/scalable/apps/uni.svg "$ovl_dir"/uinst/
 
 mkdir -p "$ovl_dir"/root
-printf 'sh /u/upm/new.sh
+printf 'sh /uint/upm/install.sh
 ' > "$ovl_dir"/root/.profile
 
 printf '#!/usr/bin/env sh
@@ -52,19 +39,6 @@ touch "$ovl_dir"/etc/.default_boot_services
 
 rm -f localhost.apkovl.tar.gz
 tar --owner=0 --group=0 -czf localhost.apkovl.tar.gz "$ovl_dir"
-
-printf 'installation media can be made for these architectures:
-	1) x86_64
-	2) aarch64
-	3) riscv64
-'
-echo "enter the number of the desired architechture: "
-read -r ans
-case "$ans" in
-1) arch=x86_64 ;;
-2) arch=aarch64 ;;
-3) arch=riscv64 ;;
-esac
 
 # try previously downloaded file from cache, and exit if there is none
 try_cached_alpine_iso() {
@@ -122,8 +96,6 @@ else
 fi
 mount "$alpine_iso_file_name" iso_mount
 
-# prepare a storage device, and copy the files into it
-sh "$script_dir"/../upm/format.sh inst "$wdir/target" "$target_device" || exit
 cp -r iso_mount/* target/
 mv localhost.apkovl.tar.gz target/
 
