@@ -1,4 +1,5 @@
-# creates a bootable installer on a removable storage device
+# usage: sh mkinst.sh [<device-name> [<arch>]]
+echo "this will create a bootable Uni installer, on a removable storage device"
 
 script_dir="$(dirname "$(readlink -f "$0")")"
 
@@ -7,34 +8,41 @@ script_dir="$(dirname "$(readlink -f "$0")")"
 # if empty, this script will be interactive, and will allow the user to choose the target device
 target_device="$1"
 
-wdir="$HOME"/.cache/upm/mkinst
+arch="$2"
+[ -n "$1" ] && [ -z "$2" ] && arch="$(uname -m)"
+while [ -z "$arch" ]; do
+	echo "the following architectures are supported:"
+	echo "	1) x86_64"
+	echo "	2) aarch64"
+	echo "	3) riscv64"
+	echo "enter the number of the desired architechture: "
+	read -r ans
+	case "$ans" in
+	1) arch=x86_64 ;;
+	2) arch=aarch64 ;;
+	3) arch=riscv64 ;;
+	esac
+done
+
+if [ $(id -u) != 0 ]; then
+	wdir=/var/cache/upm/mkinst
+else
+	wdir="$HOME"/.cache/upm/mkinst
+fi
 mkdir -p "$wdir"
 cd "$wdir"
 
 mkdir -p target
+trap "trap - EXIT; umount -q target; rmdir target" EXIT INT TERM QUIT HUP PIPE
+
 sh "$script_dir"/mkfs.sh fat "$wdir/target" "$target_device" || exit
 
-printf 'installation media can be made for these architectures:
-	1) x86_64
-	2) aarch64
-	3) riscv64
-'
-echo "enter the number of the desired architechture: "
-read -r ans
-case "$ans" in
-1) arch=x86_64 ;;
-2) arch=aarch64 ;;
-3) arch=riscv64 ;;
-esac
-
 . "$script_dir"/mkinst-alpine.sh; exit
-
-trap "trap - EXIT; umount -q target; rmdir target" EXIT INT TERM QUIT HUP PIPE
 
 # create  an initramfs (for $arch) that includes programs needed to install Uni
 # https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage
 mkdir initfs
 # init, login as root, run install.sh
 
-echo "bootable installer successfully created"
+echo "bootable Uni installer successfully created"
 echo "now boot into the installation media, and follow the instructions"

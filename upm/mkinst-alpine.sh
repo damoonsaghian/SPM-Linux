@@ -8,23 +8,24 @@ cp -r "$script_dir"/../uni "$ovl_dir"/uinst/
 cp -r "$script_dir"/../upkgs "$ovl_dir"/uinst/
 cp -r "$script_dir"/../upm "$ovl_dir"/uinst/
 cp -r "$script_dir"/../ushell "$ovl_dir"/uinst/
-cp "$script_dir"/../.data/uni.svg "$ovl_dir"/uinst/ 2>/dev/null ||
-	cp /usr/share/icons/hicolor/scalable/apps/uni.svg "$ovl_dir"/uinst/
+mkdir -p "$ovl_dir"/uinst/uni/data
+cp "$script_dir"/../.data/uni.svg "$ovl_dir"/uinst/uni/data/ 2>/dev/null ||
+	cp /usr/share/icons/hicolor/scalable/apps/uni.svg "$ovl_dir"/uinst/uni/data/
 
 mkdir -p "$ovl_dir"/root
-printf 'sh /uint/upm/install.sh
+printf 'sh /uinst/upm/install.sh
 ' > "$ovl_dir"/root/.profile
 
 printf '#!/usr/bin/env sh
 exec login -f root
-' > "$ovl_dir"/usr/local/bin/autologin
-chmod +x "$ovl_dir"/usr/local/bin/autologin
+' > "$ovl_dir"/uinst/autologin
+chmod +x "$ovl_dir"/uinst/autologin
 
 mkdir -p "$ovl_dir"/etc
 printf '::sysinit:/sbin/openrc sysinit
 ::sysinit:/sbin/openrc boot
 ::wait:/sbin/openrc default
-tty1::respawn:/sbin/getty -n -l /usr/local/bin/autologin 38400 tty1
+tty1::respawn:/sbin/getty -n -l /uinst/autologin 38400 tty1
 tty2::respawn:/sbin/getty 38400 tty2
 tty3::respawn:/sbin/getty 38400 tty3
 tty4::respawn:/sbin/getty 38400 tty4
@@ -38,21 +39,17 @@ tty6::respawn:/sbin/getty 38400 tty6
 touch "$ovl_dir"/etc/.default_boot_services
 
 rm -f localhost.apkovl.tar.gz
-tar --owner=0 --group=0 -czf localhost.apkovl.tar.gz "$ovl_dir"
+tar --owner=0 --group=0 -czf target/localhost.apkovl.tar.gz "$ovl_dir"
 
 # try previously downloaded file from cache, and exit if there is none
 try_cached_alpine_iso() {
 	alpine_iso_file_name=$(ls alpine-standard-*-"$arch".iso | tail -n1)
-	sha256sum "$alpine_iso_file_name" || {
-		rm -f "$alpine_iso_file_name"
-		echo "downloaded file was corrupted; try again"
-		exit 1
-	}
+	sha256sum "$alpine_iso_file_name" || exit
 	if [ -e "$alpine_iso_file_name" ]; then
 		echo "using previousely downloaded file: '$wdir/$alpine_iso_file_name'"
 	else
-		echo "alternatively, download an standard image from https://alpinelinux.org/downloads/,"
-		echo "	and put it in '$wdir'"
+		echo "alternatively, download the standard image from \"https://alpinelinux.org/downloads/\","
+		echo "	and put it in \"$wdir\""
 		exit 1
 	fi
 }
@@ -70,7 +67,7 @@ if command -v curl; then
 			exit 1
 		}
 	else
-		echo "can't reach Alpine Linux server"
+		echo "can't reach Alpine Linux server; try again"
 		try_cached_alpine_iso
 	fi
 elif command -v wget; then
@@ -87,17 +84,17 @@ elif command -v wget; then
 			exit 1
 		}
 	else
-		echo "can't reach Alpine Linux server"
+		echo "can't reach Alpine Linux server; try again"
 		try_cached_alpine_iso
 	fi
 else
-	echo "can't download Alpine Linux installer image; since neither \"curl\" nor \"wget\" is available"
+	echo "can't download Alpine Linux installer image"
+	echo "either \"curl\" nor \"wget\" is required"
 	try_cached_alpine_iso
 fi
+
 mount "$alpine_iso_file_name" iso_mount
-
 cp -r iso_mount/* target/
-mv localhost.apkovl.tar.gz target/
 
-echo "bootable installer successfully created"
+echo "bootable Uni installer successfully created"
 echo "now boot into the installation media, and follow the instructions"
