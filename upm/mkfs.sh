@@ -10,7 +10,6 @@ mkdir -p "$target_dir" || exit
 is_interactive=false
 [ "$1" = sys ] && is_interactive=true
 [ "$1" = fat ] && [ -z "$target_device" ] && is_interactive=true
-fi
 $is_interactive && {
 	echo; echo "available storage devices:"
 	printf "\tname\tsize\tmodel\n"
@@ -49,10 +48,6 @@ fi
 		read -r answer
 		[ "$answer" = y ] || exit
 	}
-	
-	# if run as normal user, use dbus API of udisks, and if not available, notify the user
-	# 	https://storaged.org/udisks/docs/ref-dbus.html
-	# otherwise implement it using posix commands
 	
 	# create a UEFI partition, and format it with FAT32
 	printf "g\nn\n1\n\n\nt\nuefi\nw\nq\n" | fdisk -w always /dev/"$target_device"

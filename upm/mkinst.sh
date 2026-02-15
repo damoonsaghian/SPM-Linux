@@ -24,11 +24,7 @@ while [ -z "$arch" ]; do
 	esac
 done
 
-if [ $(id -u) != 0 ]; then
-	wdir=/var/cache/upm/mkinst
-else
-	wdir="$HOME"/.cache/upm/mkinst
-fi
+wdir=/var/cache/upm/mkinst
 mkdir -p "$wdir"
 cd "$wdir"
 
