@@ -8,7 +8,7 @@ to do that, we must be in a Linux system with these programs installed:
 	curl (or wget) mkfs.vfat (dosfstools)
 to bootstrap from source, these extra programs are required too:
 	clang git ssh-keygen
-now just run this command:
+now just run this command as root:
 ; sh upm/mkinst.sh
 now boot into the installation media, and follow the instructions
 
