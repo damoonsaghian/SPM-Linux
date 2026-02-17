@@ -1,23 +1,9 @@
-# installs a minimal system based on Alpine Linux, providing a user interface using UShell and Codev
+# installs a minimal system based on Alpine Linux, providing a user interface using UShell and Uni
 # https://gitlab.alpinelinux.org/alpine/alpine-conf
 # https://gitlab.alpinelinux.org/alpine/aports/-/tree/master/main/alpine-baselayout
 # https://gitlab.alpinelinux.org/alpine/aports/-/tree/master/main/openrc
 # https://gitlab.alpinelinux.org/alpine/aports/-/tree/master/main/busybox
 
-script_dir="$(dirname "$(readlink -f "$0")")"
-
-setup-interfaces -r
-ntpd -qnN -p pool.ntp.org
-rc-service --quiet seedrng start
-
-# format a storage device for installing the new system
-apk add cryptsetup btrfs-progs
-new_root="$(mktemp -d)"
-unmount_all="umount -q \"$new_root\"/boot; \
-	umount -q \"$new_root\"/dev; umount -q \"$new_root\"/proc; \
-	umount -q \"$new_root\"; rmdir \"$new_root\""
-trap "trap - EXIT; $unmount_all" EXIT INT TERM QUIT HUP PIPE
-sh "$script_dir"/format.sh sys "$new_root" || exit
 
 mkdir -p "$new_root"/dev "$new_root"/proc
 mount --bind /dev "$new_root"/dev
@@ -89,20 +75,23 @@ rc_new dcron
 rc_new fwupd
 
 cp -r "$script_dir" "$new_root"/usr/local/share/
-chmod +x "$new_root"/usr/local/share/spm-alpine/spm.sh
-echo '#!/apps/env sh
-sh /usr/local/share/spm-alpine/spm.sh run
-' > "$new_root"/usr/local/bin/spm
+chmod +x "$new_root"/usr/local/share/upm/upm.sh
+ln -s /usr/local/share/upm/upm.sh "$new_root"/usr/local/bin/spm
 mkdir -p "$new_root"/etc/doas.d
-echo 'permit nopass nu cmd /usr/local/bin/spm' > "$new_root"/etc/doas.d/spm.conf
-
-cp -r "$script_dir"/../codev-util "$new_root"/usr/local/share/
+echo 'permit nopass nu cmd /usr/local/bin/upm' > "$new_root"/etc/doas.d/upm.conf
 echo '* * * * * ID=autoupdate FREQ=1d/5m upm autoupdate' > "$new_root"/etc/cron.d/upm-autoupdate
 
+cp -r "$script_dir"/../ushare "$new_root"/usr/local/share/
+chmod +x "$new_root"/usr/local/share/ushare/ushare.sh
+ln -s /usr/local/share/ushare/ushare.sh "$new_root"/usr/local/bin/ushare
 
-chmod +x "$new_root"/usr/local/share/codev-util/sd.sh
-ln -s /usr/local/share/codev-util/sd.sh "$new_root"/usr/local/bin/sd
-echo 'permit nopass nu cmd /usr/local/bin/sd' > "$new_root"/etc/doas.d/sd.conf
+cp -r "$script_dir"/../upkgs/ "$new_root"/usr/local/share/
+
+# https://wiki.archlinux.org/title/Laptop_Mode_Tools
+# https://github.com/rickysarraf/laptop-mode-tools
+# https://github.com/rickysarraf/laptop-mode-tools/blob/lmt-upstream/Documentation/laptop-mode.txt
+# https://github.com/rickysarraf/laptop-mode-tools/wiki
+# use xrandr to lower screen refresh rate, when on battery
 
 ##########
 #  boot  #
@@ -133,7 +122,7 @@ esac
 chmod +x "$new_root"/usr/local/share/codev-util/tpm-getkey.sh
 ln -s /usr/local/share/codev-util/tpm-getkey.sh "$new_root"/usr/local/bin/tpm-getkey
 
-chroot "$new_root" sh /usr/local/share/codev-util/spm-bootup.sh
+chroot "$new_root" sh /usr/local/share/systemd-boot/bootup.sh
 
 ##########
 #  user  #
@@ -147,7 +136,7 @@ while ! chroot "$new_root" passwd root; do
 done
 
 # create a normal user
-chroot "$new_root" adduser --empty-password --no-create-home --home /nu --shell /usr/local/bin/codev-shell nu
+chroot "$new_root" adduser --empty-password --no-create-home --home /nu --shell /usr/local/bin/ushell nu
 btrfs subvolume create "$new_root/nu"
 chroot "$new_root" chown nu: /nu
 
@@ -161,12 +150,12 @@ sed 's@tty1:respawn:\(.*\)getty@tty1:respawn:\1getty -n -l /usr/local/bin/autolo
 sed 's@tty2:respawn:\(.*\)getty@tty2:respawn:\1getty -n -l /usr/local/bin/autologin@' \
 	"$new_root"/etc/inittab.tmp > "$new_root"/etc/inittab
 
-ln -s /usr/local/share/codev-util/autologin.sh "$new_root"/usr/local/bin/autologin
-chmod +x "$new_root"/usr/local/share/codev-util/autologin.sh
+ln -s /usr/local/share/util-linux/autologin.sh "$new_root"/usr/local/bin/autologin
+chmod +x "$new_root"/usr/local/share/util-linux/autologin.sh
 
-#################
-#  codev-shell  #
-#################
+############
+#  Ushell  #
+############
 
 if apk info quickshell >/dev/null 2>&1; then
 	apk_new quickshell --virtual .quickshell
@@ -174,7 +163,7 @@ else
 	apk_new git clang cmake ninja-is-really-ninja pkgconf spirv-tools wayland-protocols qt6-qtshadertools-dev \
 		jemalloc-dev pipewire-dev libdrm-dev mesa-dev wayland-dev \
 		qt6-qtbase-dev qt6-qtdeclarative-dev qt6-qtsvg-dev qt6-qtwayland-dev --virtual .quickshell
-		chroot "$new_root" sh "$script_dir"/spm.sh quickshell
+		chroot "$new_root" sh "$script_dir"/upm.sh quickshell
 fi
 apk_new setpriv doas-sudo-shim musl-locales exfatprogs tzdata geoclue bash bash-completion dbus \
 	pipewire pipewire-pulse pipewire-alsa pipewire-echo-cancel pipewire-spa-bluez wireplumber sof-firmware \
@@ -206,9 +195,9 @@ esac
 ' > /etc/NetworkManager/dispatcher.d/09-dispatch-script
 chmod 755 /etc/NetworkManager/dispatcher.d/09-dispatch-script
 
-###########
-#  codev  #
-###########
+#########
+#  Uni  #
+#########
 
 apk_new mauikit mauikit-filebrowsing mauikit-texteditor mauikit-imagetools mauikit-documents \
 	kio-extras kimageformats qt6-qtsvg \
@@ -216,9 +205,9 @@ apk_new mauikit mauikit-filebrowsing mauikit-texteditor mauikit-imagetools mauik
 	qt6-qtcharts qt6-qtgraphs qt6-qtdatavis3d qt6-qtquick3d qt6-qt3d qt6-qtquicktimeline \
 	gnunet aria2 openssh --virtual .codev
 # qt6-qtquick3dphysics qt6-qtlottie
-cp -r "$script_dir"/../codev "$new_root"/usr/local/share/
+cp -r "$script_dir"/../uni "$new_root"/usr/local/share/
 mkdir -p "$new_root"/usr/local/share/icons/hicolor/scalable/apps
-cp "$script_dir"/../.data/codev.svg "$new_root"/usr/local/share/icons/hicolor/scalable/apps/
+ln -s /usr/local/share/uni/data/uni.svg "$new_root"/usr/local/share/icons/hicolor/scalable/apps/
 
 mkdir -p "$new_root"/usr/local/share/applications
 echo '[Desktop Entry]
@@ -229,6 +218,10 @@ exec=qml6 /usr/local/share/codev/main.qml
 StartupNotify=true
 Type=Application
 ' > "$new_root"/usr/local/share/applications/codev.desktop
+
+chmod +x "$new_root"/usr/local/share/uni/sd.sh
+ln -s /usr/local/share/uni/sd.sh "$new_root"/usr/local/bin/sd
+echo 'permit nopass nu cmd /usr/local/bin/sd' > "$new_root"/etc/doas.d/sd.conf
 
 echo; echo "installation completed successfully"
 printf "reboot the system? (Y/n) "

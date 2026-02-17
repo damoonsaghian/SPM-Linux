@@ -1,40 +1,32 @@
 #!/usr/bin/env sh
 
+script_dir="$(dirname "$(readlink -f "$0")")"
+
+. "$script_dir"/upm-alpine.sh; exit
+
 # https://en.wikipedia.org/wiki/GoboLinux
 # https://gobolinux.org/
 # https://gobolinux.org/doc/articles/clueless.html
 # https://github.com/gobolinux
 
-# if gnunet is not available, use gitea (through its http api)
-# hash of files followed by their path (relative to projet dir) are stored in .data/gitea file
-# .data/gitea will be signed with ssh-keygen (using the EdDSA key of the gnunet namespace)
-# .data/gitea will be used during download and publish, such that only changed files will be transfered
-# use gitea as the last resort, because it can not support reliable revocation mechanism like gnunet
-# 	https://docs.gnunet.org/latest/users/gns.html#revocation
-
 # if run by non'root, and --sandbox
-# run SPMbuild.sh files as user 65534 (nobody)
+# run Ubuild.sh files as user 65534 (nobody)
 # create executables that run as nobody
 
 # ROOT_DIR
 
 [ -z "$ARCH" ] && ARCH="$(uname --machine)"
 
-# kernel name: uname --kernel-name
-
-script_dir="$(dirname "$(readlink -f "$0")")"
-
-root_dir="$script_dir/../../../../../.."
 if [ "$(id -u)" = 0 ] || [ "$(id -u)" = 1 ]; then
-	builds_dir="$root_dir/var/lib/spm/builds"
-	cmd_dir="$root_dir/usr/bin"
-	sv_dir="$root_dir/usr/share/sv"
-	dbus_dir="$root_dir/usr/share/dbus-1" # dbus interfaces and services
-	apps_dir="$root_dir/usr/share/applications" # system services
-	state_dir="$root_dir/var/lib"
-	cache_dir="$root_dir/var/cache"
+	builds_dir="$ROOT_DIR/var/lib/upm/builds"
+	cmd_dir="$ROOT_DIR/usr/bin"
+	sv_dir="$ROOT_DIR/usr/share/sv"
+	dbus_dir="$ROOT_DIR/usr/share/dbus-1" # dbus interfaces and services
+	apps_dir="$ROOT_DIR/usr/share/applications" # system services
+	state_dir="$ROOT_DIR/var/lib"
+	cache_dir="$ROOT_DIR/var/cache"
 else
-	builds_dir="$HOME/.local/state/spm/builds"
+	builds_dir="$HOME/.local/state/upm/builds"
 	cmd_dir="$HOME/.local/bin"
 	
 	data_dir="$XDG_DATA_HOME"
@@ -50,11 +42,7 @@ fi
 
 mkdir -p "$builds_dir" "$cmd_dir" "$sv_dir" "$dbus_dir" "$apps_dir" "$state_dir" "$cache_dir"
 
-# spm check
-# check if any git source needs an update
-# https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
-
-# this function can be used in SPMbuild.sh scripts to clone a tag branch from a git repository
+# this function can be used in Ubuild.sh scripts to clone a tag branch from a git repository
 gitag_clone() {
 	# https://man.archlinux.org/listing/git
 	
@@ -76,17 +64,17 @@ gitag_clone() {
 	# if a gpg key is given, download and build gpg package
 }
 
-# this function can be used in SPMbuild.sh scripts to export executables in $pkg_dir/exec
+# this function can be used in Ubuild.sh scripts to export executables in $pkg_dir/exec
 # usage guide:
-# spm_xcript <executable-name> exp/cmd
-# spm_xcript <executable-name> inst/cmd
-# spm_xcript <executable-name> inst/app
-spm_xcript() {
+# upm_xcript <executable-name> exp/cmd
+# upm_xcript <executable-name> inst/cmd
+# upm_xcript <executable-name> inst/app
+upm_xcript() {
 	local executable_name="$1"
 	local destination_dir_relpath="$2"
-	local destination_path="$script_dir/.cache/spm/build/$ARCH/$destination_dir_relpath/$executable_name"
+	local destination_path="$script_dir/.cache/upm/build/$ARCH/$destination_dir_relpath/$executable_name"
 	
-	mkdir -p "$script_dir/.cache/spm/build/$ARCH/$destination_dir_relpath"
+	mkdir -p "$script_dir/.cache/upm/build/$ARCH/$destination_dir_relpath"
 	
 	cat <<-'EOF' > "$destination_path"
 	#!/usr/bin/env sh
@@ -100,18 +88,15 @@ spm_xcript() {
 	chmod +x "$destination_path"
 }
 
-spm_download() {
+upm_download() {
 	local gn_namespace="$1"
 	local pkg_name="$2"
 	local pkg_name_build="$pkg_name-$ARCH"
 	# download directories
-	local dl_dir="$cache_dir/spm/packages/$gn_namespace/$pkg_name"
-	local dl_build_dir="$cache_dir/spm/$ARCH/$gn_namespace/$pkg_name"
+	local dl_dir="$cache_dir/upm/packages/$gn_namespace/$pkg_name"
+	local dl_build_dir="$cache_dir/upm/$ARCH/$gn_namespace/$pkg_name"
 	
-	# if gn-download is not available (which is the case during the first installation),
-	# just use normal gnunet download
-	
-	# if there is no line equal to "build'from'src" in "$state_dir/spm/config"
+	# if there is no line equal to "build'from'src" in "$state_dir/upm/config"
 	# 	download $pkg_name_build from $gn_namespace into "$dl_build_dir"
 	# 	result="$(gn-download "$gn_namespace" "$pkg_namebuild" "$dl_build_dir")"
 	# 	[ result = "not fount" ] || return
@@ -119,44 +104,44 @@ spm_download() {
 	# gn-download "$gn_namespace" "$pkg_name" "$dl_dir"
 }
 
-spm_build() {
+upm_build() {
 	local pkg_dir= build_dir= gn_namespace= pkg_name=
-	local spmbuildsh_dir="$pkg_dir"
+	local upmbuildsh_dir="$pkg_dir"
 	
 	if [ -z "$2" ]; then
 		pkg_dir="$1"
-		build_dir="$pkg_dir/.cache/spm/build/$TARGET/$pkg_name"
+		build_dir="$pkg_dir/.cache/upm/build/$TARGET/$pkg_name"
 		
-		SPM_TEST=1
-		# at the end of SPMbuild.sh scripts, we can include test instructions, after this line:
-		# [ -z SPM_TEST ] && return
+		UPM_TEST=1
+		# at the end of UPMbuild.sh scripts, we can include test instructions, after this line:
+		# [ -z UPM_TEST ] && return
 		
 		# read the gnunet namespace in $pkg_dir/.data/gnunet
 		GNNS=
 	else
 		gn_namespace="$1"
 		pkg_name="$2"
-		build_dir="$state_dir/spm/build/$gn_namespace/$pkg_name"
+		build_dir="$state_dir/upm/build/$gn_namespace/$pkg_name"
 		
 		# if gn_namespace is revoked try the alternative ones from .data/gnunet/$gn_namespace
 		# also print a warning
 		
 		if [ "$(id -u)" = 0 ]; then
-			spm_download $gn_namespace $pkg_name
+			upm_download $gn_namespace $pkg_name
 		else
-			doas spm download $gn_namespace $pkg_name
+			doas upm download $gn_namespace $pkg_name
 		fi
 		
 		eval PKG$pkg_name="\"$build_dir\""
-		# packages needed as dependency, are mentioned in the "SPMbuild.sh" script, like this:
-		# 	spm_build <gnunet-namespace> <package-name>
+		# packages needed as dependency, are mentioned in the "UPMbuild.sh" script, like this:
+		# 	upm_build <gnunet-namespace> <package-name>
 		# now we can use "$PKG<package-name>" where ever you want to access a file in a package
 		
 		# if prebuild package is downloaded:
-		# spm_import all the packages mentioned in the "imp" file
+		# upm_import all the packages mentioned in the "imp" file
 		# and thats it, return
 		
-		# if "SPMbuild.sh" file is already open, it means that there is a cyclic dependency
+		# if "UPMbuild.sh" file is already open, it means that there is a cyclic dependency
 		# so just download a prebuilt package (even when "build'from'src" is in config)
 		# then warn and return, to avoid an infinite loop
 	fi
@@ -165,11 +150,11 @@ spm_build() {
 	# , create "${build_dir}-new"
 	# , at the end: exch "${build_dir}-new" "$build_dir"
 	
-	. "$pkg_dir"/SPMbuild.sh
+	. "$pkg_dir"/UPMbuild.sh
 }
 
-# this function can be used in SPMbuild.sh scripts to import run'time dependency packages
-spm_import() {
+# this function can be used in Ubuild.sh scripts to import run'time dependency packages
+upm_import() {
 	local gn_namespace="$1"
 	local pkg_name="$2"
 	[ -z "$2" ] && {
@@ -178,14 +163,14 @@ spm_import() {
 		pkg_name="$1"
 	}
 	
-	spm_build "$gn_namespace" "$pkg_name"
+	upm_build "$gn_namespace" "$pkg_name"
 	# symlink (relative path) the files in "$PKG$pkg_name/cmd" "$PKG$pkg_name/lib" and "$PKG$pkg_name/data" into:
 	# 	"$build_dir/exec" "$build_dir/lib" and "$build_dir/data"
 	# do not symlink symlinks; make a symlink to the origin
 	
-	# append the URL of the package to ".cache/spm/builds/imp" (if not already)
+	# append the URL of the package to ".cache/upm/builds/imp" (if not already)
 	
-	# increment the number stored in spmcount file
+	# increment the number stored in upmcount file
 	
 	# imports:
 	# , libs: symlink the files listed in $dep_pkg_dir/exp/lib into $pkg_dir/lib
@@ -194,19 +179,19 @@ spm_import() {
 	# 	symlink the data directories listed in $dep_pkg_dir/exp/data into $pkg_dir/data
 }
 
-spm_install() {
+upm_install() {
 	local gn_namespace="$1"
 	local pkg_name="$2"
 	local build_dir="$builds_dir/$gn_namespace/$pkg_name"
 	
 	if [ "$(id -u)" = 0 ]; then
 		# create build dir and set the owner as user 10
-		setpriv --reuid=10 --regid=10 --inh-caps=-all spm build "$gn_namespace" "$pkg_name"
+		setpriv --reuid=10 --regid=10 --inh-caps=-all upm build "$gn_namespace" "$pkg_name"
 	else
-		spm_build "$gn_namespace" "$pkg_name"
+		upm_build "$gn_namespace" "$pkg_name"
 	fi
 	
-	# store "$gn_namespace $pkg_name" in $state_dir/spm/installed (if not already)
+	# store "$gn_namespace $pkg_name" in $state_dir/upm/installed (if not already)
 	# if $pkg_name exists already, and namespaces does not match, but owners match, replace,
 	# 	otherwise exit with error
 	
@@ -232,44 +217,18 @@ spm_install() {
 	
 	# create symlinks from "$build_dir/inst/sv/*" directories, to "$sv_dir"
 	
-	# when package is $gnunet_namespace/limine
-	# mount first partition of the device where this script resides, and copy efi and sys files to it
-	{
-		boot_dir="$(mktemp -d)"
-		mount "$root_device_partition1" "$boot_dir"
-		trap "trap - EXIT; umount \"$boot_dir\"; rmdir \"$boot_dir\"" EXIT INT TERM QUIT HUP PIPE
-		mkdir -p "$boot_dir"/EFI/BOOT
-		
-		# copy efi file to "$boot_dir"/EFI/BOOT/
-		
-		if [ "$ARCH" = x86 ] || [ "$ARCH" = x86_64 ]; then
-			"$cmd_dir"/limine bios-install "$target_device"
-		elif [ "$ARCH" = ppc64le ]; then
-			# only OPAL Petitboot based systems are supported
-			cat <<-EOF > "$boot_dir"/syslinux.cfg
-			PROMPT 0
-			LABEL SPM Linux
-				LINUX vmlinuz
-				APPEND root=UUID=$(blkid /dev/"$root_device_partition2" | sed -rn 's/.*UUID="(.*)".*/\1/p') rw
-				INITRD initramfs.img
-			EOF
-		fi
-	}
+	# when package is $gnunet_namespace/systemd-boot or linux
+	# run bootup.sh
 	
-	# when package is $gnunet_namespace/kernel
+	# when package is $gnunet_namespace/linux
 	# link modules to /lib/modules
-	# mount first partition of the device where this script resides, and copy the kernel and initramfs to it
-	{
-		mount "$root_device_partition1" "$boot_dir"
-		trap "trap - EXIT; umount \"$boot_dir\"; rmdir \"$boot_dir\"" EXIT INT TERM QUIT HUP PIPE
-	}
 }
 
-spm_search() {
-	# search in gnunet or gitea for projects tagged with spm
+upm_search() {
+	# search in gnunet for extra packages
 }
 
-spm_list() {
+upm_list() {
 	# list installed packages filterd by $1
 }
 
@@ -278,51 +237,47 @@ if [ "$1" = build ]; then
 		project_dir="$2"
 		[ -z "$project_dir" ] && project_dir=.
 			
-		if [ -f "$2/SPMbuild.sh" ]; then
-			spm_build "$project_dir"
+		if [ -f "$2/Ubuild.sh" ]; then
+			upm_build "$project_dir"
 		else
-			# search for "SPMbuild.sh" (case insensitive) in "$project_dir"
-			# the first one found, plus those sibling directories containing a SPMbuild.sh, are the packages to be built
-			# run spm_build for each
+			# search for "Ubuild.sh" (case insensitive) in "$project_dir"
+			# the first one found, plus those sibling directories containing a Ubuild.sh, are the packages to be built
+			# run upm_build for each
 		fi
 	else
-		spm_build "$2" "$3"
+		upm_build "$2" "$3"
 	fi
 elif [ "$1" = import ]; then
-	spm_import "$2" "$3"
+	upm_import "$2" "$3"
 elif [ "$1" = install ]; then
-		spm_install "$2" "$3"
+		upm_install "$2" "$3"
 elif [ "$1" = remove ]; then
 	gn_namespace="$2"
 	pkg_name="$3"
 	pkg_dir="$builds_dir/$gn_namespace/$pkg_name"
 	
 	if [ "$(id -u)" = 0 ]; then
-		# exit if package_name is: acpid bash bluez chrony dash dbus dte eudev fwupd gnunet limine linux netman runit
-		# 	sbase sd seatd spm doas tz util-linux
-		# warn if package_name is sway, swapps, termulator, or codev
+		# exit if package_name is: acpid bash bluez chrony dash dbus dte eudev fwupd gnunet systemd-boot linux netman dinit
+		# 	sbase upm doas tz util-linux
+		# warn if package_name is sway, swapps, termulator, or uni
 	fi
 	
 	# for packages mentioned in "imp" file:
-	# , decrement the number stored in their spmcount file
-	# , if the number gets zero, and it's not in $state_dir/spm/installed file, remove that package too
+	# , decrement the number stored in their upmcount file
+	# , if the number gets zero, and it's not in $state_dir/upm/installed file, remove that package too
 	
-	# remove it from $state_dir/spm/installed file, but remove the package dir, only if spmcount is zero
+	# remove it from $state_dir/upm/installed file, but remove the package dir, only if upmcount is zero
 	
 	# removes the files mentioned in "$pkg_dir/exp/cmd" from "$cmd_dir"
 	
-	# remove symlinks in "$root_dir/exp/apps/" corresponding to
-	# "$root_dir/packages/<gnunet-namespace>/<package-name>/exp/apps/*.desktop"
+	# remove corresponding symlinks in "$apps_dir" and "$sv_dir"
 	
-	# remove symlinks in "$root_dir/exp/sv/" corresponding to
-	# "$root_dir/packages/<gnunet-namespace>/<package-name>/exp/sv/*"
-	
-	# , removes "$root_dir/packages/<gnunet-namespace>/<package-name>" directory
+	# remove package directory
 elif [ "$1" = update ]; then
-	# for each line in $state_dir/spm/installed
-	# spm_install "$gn_namespace" "$package_name"
+	# for each line in $state_dir/upm/installed
+	# upm_install "$gn_namespace" "$package_name"
 	
-	# check in each update, if the ref count of files in .cache/spm/builds is 1, clean that package
+	# check in each update, if the ref count of files in .cache/upm/builds is 1, clean that package
 	# file_ref_count=$(stat -c %h filename)
 	
 	# when the namespace directory is empty, delete it
@@ -339,46 +294,46 @@ elif [ "$1" = update ]; then
 	if [ "$ARCH" = x86 ] || [ "$ARCH" = x86_64 ]; then
 		limine bios-install "$target_device"
 	fi
-elif [ "$1" = new ]; then
-	# ask for these two options
-	# , install SPM Linux to a storage device
-	# , run a PXE server (https://en.wikipedia.org/wiki/Network_booting)
-	# if first option was selected
-	. "$script_dir"/new.sh "$2"
+elif [ "$1" = check ]; then
+	# check if any git source needs an update
+	# https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags
+elif [ "$1" = mkinst ]; then
+	. "$script_dir"/mkinst.sh "$2"
 elif [ "$1" = publish ]; then
 	# make a BTRFS snapshot from the project's directory,
-	# to "~/.local/spm/publish/$gnunet_namespace/$pkg_name"
+	# to "~/.local/upm/publish/$gnunet_namespace/$pkg_name"
 	
 	# ".data/gnunet" stores the project's GNUnet namespace and poject name
 	# sks identifier to publish pakage: <project_name>-pkg-<number>
 	
-	gn-publish "~/.local/spm/published/$gnunet_namespace/$pkg_name" $gnunet_namespace $pkg_name-pkg
+	gn-publish "~/.local/upm/published/$gnunet_namespace/$pkg_name" $gnunet_namespace $pkg_name-pkg
 	
-	# cross'built the package for all architectures mentioned in "$state_dir/spm.conf" (value of "arch" entry),
-	# and put the results in in ".cache/spm/builds/<arch>/"
-	# in "SPMbuild.sh" scripts we can use "$carch" variable when cross'building
+	# cross'built the package for all architectures mentioned in "$state_dir/upm.conf" (value of "arch" entry),
+	# and put the results in in ".cache/upm/builds/<arch>/"
+	# in "Ubuild.sh" scripts we can use "$carch" variable when cross'building
 	# "$carch" is an empty string when not cross'building
 	
-	# make hard links from "imp" file, plus all files in ".cache/spm/builds/<arch>/" minus "imp" directory,
-	# and put them in ".cache/spm/builds-published/<arch>/"
+	# make hard links from "imp" file, plus all files in ".cache/upm/builds/<arch>/" minus "imp" directory,
+	# and put them in ".cache/upm/builds-published/<arch>/"
 	
-	gn-publish ".cache/spm/builds-published/<arch>/" $gnunet_namespace $pkg_name-$ARCH
+	gn-publish ".cache/upm/builds-published/$ARCH/" $gnunet_namespace $pkg_name-$ARCH
 	
-	# the "SPMbuild.sh" file will be published into the GNUnet namespace
+	# the "Ubuild.sh" file will be published into the GNUnet namespace
 	# the source files can be in the same place, or in a Git URL
-	# 	in which case, there must be a "git clone <git-url> .cache/git" line, in the "SPMbuild.sh" file
+	# 	in which case, there must be a "git clone <git-url> .cache/git" line, in the "Ubuild.sh" file
 	
 	# watch for releases of a package's git repository
 	# https://release-monitoring.org/
 else
 	echo "usage guide:"
-	echo "	spm build [<project-path>]"
-	echo "	spm build <gnunet-namespace> <package-name>"
-	echo "	spm import <gnunet-namespace> <package-name>"
-	echo "	spm download <gnunet-namespace> <package-name>"
-	echo "	spm install <gnunet-namespace> <package-name>"
-	echo "	spm remove <gnunet-namespace> <package-name>"
-	echo "	spm update"
-	echo "	spm new"
-	echo "	spm publish"
+	echo "	upm build [<project-path>]"
+	echo "	upm build <gnunet-namespace> <package-name>"
+	echo "	upm import <gnunet-namespace> <package-name>"
+	echo "	upm download <gnunet-namespace> <package-name>"
+	echo "	upm install <gnunet-namespace> <package-name>"
+	echo "	upm remove <gnunet-namespace> <package-name>"
+	echo "	upm update"
+	echo "	upm check"
+	echo "	upm mkinst"
+	echo "	upm publish"
 fi

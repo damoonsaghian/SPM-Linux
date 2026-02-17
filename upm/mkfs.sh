@@ -58,6 +58,8 @@ fi
 	exit
 }
 
+[ "$1" = sys ] || exit
+
 should_repaire() {
 	local target_device="$1" target_partitions=''
 	local target_partition1_fstype='' target_partition2_fstype=''

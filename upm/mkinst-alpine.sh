@@ -7,13 +7,18 @@ mkdir -p "$ovl_dir"/uinst
 cp -r "$script_dir"/../uni "$ovl_dir"/uinst/
 cp -r "$script_dir"/../upkgs "$ovl_dir"/uinst/
 cp -r "$script_dir"/../upm "$ovl_dir"/uinst/
+cp -r "$script_dir"/../ushare "$ovl_dir"/uinst/
 cp -r "$script_dir"/../ushell "$ovl_dir"/uinst/
 mkdir -p "$ovl_dir"/uinst/uni/data
 cp "$script_dir"/../.data/uni.svg "$ovl_dir"/uinst/uni/data/ 2>/dev/null ||
 	cp /usr/share/icons/hicolor/scalable/apps/uni.svg "$ovl_dir"/uinst/uni/data/
 
 mkdir -p "$ovl_dir"/root
-printf 'sh /uinst/upm/install.sh
+printf 'setup-interfaces -r
+ntpd -qnN -p pool.ntp.org
+rc-service --quiet seedrng start
+apk add cryptsetup btrfs-progs
+sh /uinst/upm/install.sh
 ' > "$ovl_dir"/root/.profile
 
 printf '#!/usr/bin/env sh

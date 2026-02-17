@@ -155,7 +155,8 @@ list)
 srv) openrc -U ;;
 quickshell) build_and_install_quickshell ;;
 mkinst)
+	shift
 	script_dir="$(dirname "$(readlink -f "$0")")"
-	sh "$script_dir"/mkinst.sh
+	sh "$script_dir"/mkinst.sh "$@"
 	;;
 esac

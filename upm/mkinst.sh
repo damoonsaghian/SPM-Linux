@@ -35,10 +35,42 @@ sh "$script_dir"/mkfs.sh fat "$wdir/target" "$target_device" || exit
 
 . "$script_dir"/mkinst-alpine.sh; exit
 
+# bootstraping and cross compilation
+# https://www.linuxfromscratch.org/lfs/view/stable/
+# https://t2sde.org/handbook/html/index.html
+# https://buildroot.org/downloads/manual/manual.html
+# https://github.com/glasnostlinux/glasnost
+# https://github.com/iglunix
+# https://github.com/oasislinux/oasis
+# https://mcilloni.ovh/2021/02/09/cxx-cross-clang/
+
 # create  an initramfs (for $arch) that includes programs needed to install Uni
 # https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage
 mkdir initfs
 # init, login as root, run install.sh
+
+echo 'acpid
+bluez
+chrony
+cryptsetup
+dbus
+dinit
+doas
+dte
+eudev
+gnunet
+linux
+netman
+pipewire
+sbase
+sh
+upm
+tpm2-tools
+util-linux
+codev-shell
+codev' | while read -r pkg_name; do
+	ROOT_DIR="$wdir"/initfs sh "$script_dir"/upm.sh install "$pkg_name"
+done
 
 echo "bootable Uni installer successfully created"
 echo "now boot into the installation media, and follow the instructions"
