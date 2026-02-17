@@ -281,8 +281,6 @@ pkg=linux
 # wireless-regdb
 # https://wireless.wiki.kernel.org/en/developers/regulatory/wireless-regdb
 
-# bootup.sh
-
 pkg=llvm
 
 # https://llvm.org/docs/GettingStarted.html
@@ -497,6 +495,10 @@ pkg=ssh
 # or
 # configure git to use ssh program in a way that is compatible with lsh:
 # https://github.com/git/git/blob/master/Documentation/config/ssh.adoc
+
+pkg=systemd-boot
+
+# bootup.sh
 
 pkg=tpm2-tools
 
