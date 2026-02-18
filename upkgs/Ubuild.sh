@@ -498,8 +498,6 @@ pkg=ssh
 
 pkg=systemd-boot
 
-# bootup.sh
-
 pkg=tpm2-tools
 
 # https://github.com/tpm2-software/tpm2-tools
