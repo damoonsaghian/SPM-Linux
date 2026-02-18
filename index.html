@@ -212,7 +212,14 @@ body {
 <h2>3, installation</h2><div>Uni is build and installed using UPM (unified package manager)
 </div><div>UPM uses a simple method to unify software building and package management
 </div><div>
-</div><div>UPM can also be used to build and maintain a Linux based operating system,
+</div><div>UPM can be used as a software builder and package manager, on any Linux system
+</div><div>you just need to have "bubblewrap" and either "curl" or "wget" on your system
+</div><div>to bootstrap from source, these extra programs are required too:
+</div><div>	clang git ssh-keygen
+</div><div>now just run this command:
+</div><div>; sh upm/install.sh
+</div><div>
+</div><div>UPM can also be used to build and maintain a Linux based operating system, from scratch,
 </div><div>	with a user interface based on UShell and Uni
 </div><div>first we must create a bootable installer on a removable storage device
 </div><div>to do that, we must be in a Linux system with these programs installed:
@@ -226,13 +233,8 @@ body {
 </div><div>packages in the installed system will be updated automatically
 </div><div>this is safe, since the process of updating packages is atomic
 </div><div>
-</div><div>UPM is still a work in progress, so the above instructions actually installs a prototype based on Alpine Linux
-</div><div>when UPM is ready, it can be installed on any Posix system
-</div><div>you just need to have either "curl" or "wget" on your system
-</div><div>to bootstrap from source, these extra programs are required too:
-</div><div>	clang git ssh-keygen
-</div><div>now just run this command:
-</div><div>; sh upm/install.sh
+</div><div>note that, UPM is still a work in progress
+</div><div>so the above instructions actually installs a prototype based on APK and Alpine Linux
 </div><div>
 </div><div><b>Ushell</b>
 </div><div>Ushell is a Wayland shell, based on QuickShell (<a href="https://quickshell.org/">https://quickshell.org/</a>)
