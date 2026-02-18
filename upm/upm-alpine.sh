@@ -5,6 +5,10 @@
 # update of /usr will be atomic
 # the fact that Alpine keeps info about installed packages in /usr/lib/apk/db (and not in /var), helps a lot
 
+# if run as non'root, use apk in bubblewrap
+# https://gitlab.postmarketos.org/postmarketOS/coldbrew
+# https://gitlab.postmarketos.org/postmarketOS/coldbrew/-/blob/main/coldbrew
+
 essential_packages="^alpine-base$
 ^eudev$
 ^eudev-netifnames$

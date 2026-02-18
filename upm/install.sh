@@ -2,8 +2,10 @@ script_dir="$(dirname "$(readlink -f "$0")")"
 
 # if this script is run by any user other than root, just install "upm" to user's home directory, and exit
 if [ $(id -u) != 0 ]; then
+	. "$script_dir"/install-alpine.sh; exit
+	
 	state_dir="$XDG_STATE_HOME"
-	[ -z "$state_dir" ] && state_dir="$HOME/.local/state"
+	[ -z "$state_dir" ] && state_dir="$HOME"/.local/state
 	
 	echo "UPM will try to download binary packages (instead of building from source), if they are available for your system"
 	printf "do you want to always built packages from source? (y/N) "
@@ -13,7 +15,8 @@ if [ $(id -u) != 0 ]; then
 		echo "build'from'src" > "$state_dir"/upm/config
 	fi
 	
-	sh "$script_dir/upm.sh" install "$(cat "$scripr_dir")"/../.meta/gns)" upm
+	gnunet_namespace="$(cat "$scripr_dir"/../.meta/gns)"
+	sh "$script_dir"/upm.sh install "$gnunet_namespace" upm
 	exit
 fi
 
@@ -25,9 +28,9 @@ unmount_all="umount -q \"$new_root\"/boot; \
 trap "trap - EXIT; $unmount_all" EXIT INT TERM QUIT HUP PIPE
 sh "$script_dir"/format.sh sys "$new_root" || exit
 
-. "$script_dir"/install-alpine.sh; exit
+btrfs subvolume create "$new_root/usr"
 
-gnunet_namespace=
+. "$script_dir"/install-alpine.sh; exit
 
 target_dir="$(mktemp -d)"
 mount /dev/mapper/root "$target_dir"
@@ -67,13 +70,17 @@ uni
 upm
 ushare
 ushell
-util-linux' | while read -r pkg_name; do
-	ROOT_DIR="$target_dir" sh "$script_dir"/spm.sh install "$(cat "$scripr_dir")"/../.meta/gns)" "$pkg_name"
-done
-
+util-linux' | {
+	gnunet_namespace="$(cat "$scripr_dir"/../.meta/gns)"
+	while read -r pkg_name; do
+		ROOT_DIR="$target_dir" sh "$script_dir"/upm.sh install "$gnunet_namespace" "$pkg_name"
+	done
+}
 # set root password
 
 # useradd --create-home --home-dir /nu --shell /usr/bin/ushell
 
-echo; echo -n "SPM Linux installed successfully; press any key to exit"
-read -rsn1
+echo; echo "installation completed successfully"
+printf "reboot the system? (Y/n) "
+read -r ans
+[ "$ans" != n ] && [ "$ans" != no ] && reboot

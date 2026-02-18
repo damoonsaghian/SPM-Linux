@@ -9,9 +9,16 @@ script_dir="$(dirname "$(readlink -f "$0")")"
 # https://gobolinux.org/doc/articles/clueless.html
 # https://github.com/gobolinux
 
-# if run by non'root, and --sandbox
-# run Ubuild.sh files as user 65534 (nobody)
-# create executables that run as nobody
+# if run by non'root
+# run Ubuild.sh inside bubblewrap sandbox, witch have write access only to it's own installation dir
+# https://wiki.archlinux.org/title/Bubblewrap/Examples
+
+# reproducible builds
+# during building, a file will be created that contains all the build dependencies and their versions,
+# 	in the order mensioned in the Ubuild.sh file
+# if this file is equal to the one in the official gnunet namespace,
+# 	the built files will be compared (using the CHK of files in gnunet),
+# 	and if there is any incompatabilities, the user will be notified
 
 # ROOT_DIR
 

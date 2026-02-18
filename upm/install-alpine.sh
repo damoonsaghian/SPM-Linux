@@ -4,12 +4,15 @@
 # https://gitlab.alpinelinux.org/alpine/aports/-/tree/master/main/openrc
 # https://gitlab.alpinelinux.org/alpine/aports/-/tree/master/main/busybox
 
+# if this script is run by any user other than root, just install "upm" to user's home directory, and exit
+if [ $(id -u) != 0 ]; then
+	# https://gitlab.postmarketos.org/postmarketOS/coldbrew
+	# https://gitlab.postmarketos.org/postmarketOS/coldbrew/-/blob/main/coldbrew
+fi
 
 mkdir -p "$new_root"/dev "$new_root"/proc
 mount --bind /dev "$new_root"/dev
 mount --bind /proc "$new_root"/proc
-
-btrfs subvolume create "$new_root/usr"
 
 mkdir -p "$new_root"/usr/bin "$new_root"/usr/sbin "$new_root"/usr/lib
 ln -s usr/bin usr/sbin usr/lib var/etc "$new_root"/
