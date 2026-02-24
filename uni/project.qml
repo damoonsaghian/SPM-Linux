@@ -5,17 +5,19 @@
 /*
 class Project {
 	pull() {
-		// ushare pull
+		// cp --rflink=auto "$project_dir"/* "$project_dir"/.cache/ushare/pull/
 		// show a three'way diff, based on the main branch, pristine, and the working directory
 		// then the user will be asked to accept all or some parts of the diff
 	}
 	
 	pullRequest() {
-		// ushare pullreq
+		// first publish the pristine and the working directory (except .cache)
+		// then send the two addresses to the main developer
 	}
 	
 	pullRequestRetrieve(pristineUri, wdirUri) {
-		// `ushare pullret ${pristineUri} ${wdirUri}`
+		// send a message to the main developer
+		// unpublish the two links (printine and the working directory)
 	}
 	
 	pullRequestAnswer(pristineUri, branchUri) {
