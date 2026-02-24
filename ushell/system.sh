@@ -16,6 +16,10 @@ fi
 # [ "$(cat /sys/block/"$device"/queue/discard_granularity)" -gt 0 ] &&
 # [ "$(cat /sys/block/"$device"/queue/discard_max_bytes)" -lt 2147483648 ] &&
 
+# if "inhibit suspend" is active, or there is high network activity, and a shutdown is requested,
+# 	lock the session, notice the user, and ask to confirm
+# wait for the inhibition and network activity to end, then do shutdown/restart/suspend
+
 # https://networkmanager.dev/docs/
 # https://networkmanager.dev/docs/api/latest/nmcli.html
 # https://wiki.archlinux.org/index.php/NetworkManager
