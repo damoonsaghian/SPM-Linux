@@ -34,6 +34,11 @@ pkg=avahi
 
 # skip avahi-glib
 
+pkg=bash
+
+# bash (for interactive shell)
+# https://cgit.git.savannah.gnu.org/cgit/bash.git
+
 pkg=bluez
 
 # https://www.bluez.org/
@@ -469,22 +474,6 @@ upm_import qt-wayland
 # https://git.outfoxxed.me/quickshell/quickshell/src/branch/master/BUILD.md
 # -DSERVICE_PAM=OFF
 
-pkg=sbase
-
-# https://git.suckless.org/sbase/file/README.html
-
-# https://git.suckless.org/ubase/file/id.c.html
-
-# absent tools: stty
-
-pkg=sh
-
-# dash (as "sh" command to run system scripts)
-# https://git.kernel.org/pub/scm/utils/dash/dash.git/tree/
-
-# bash (for interactive shell)
-# https://cgit.git.savannah.gnu.org/cgit/bash.git
-
 pkg=ssh
 
 # https://git.lysator.liu.se/lsh/lsh
@@ -507,23 +496,28 @@ pkg=tpm2-tools
 
 # tmp-getkey.sh
 
-pkg=util-linux
+pkg=utils
 
+# https://git.busybox.net/busybox/tree
+# -D _PATH_PASSWD=\"/var/etc/passwd\" -D _PATH_GROUP=\"/var/etc/group\" -D _PATH_SHADOW=\"/var/etc/shadow\"
+# https://gitlab.alpinelinux.org/alpine/aports/-/blob/master/main/busybox/busyboxconfig
+# enable: rtcwake
+# disable: *mount* *volumid* eject fstrim *blk* blockdev findfs *fdisk* *_label *swap*
+
+# for mount and block device commands, use util-linux instead
 # https://pkgs.alpinelinux.org/package/edge/main/x86_64/util-linux
-# https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git/tree/
 # https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git/tree/meson_options.txt
-# mount umount libmount mountpoint lsblk blkid libblkid uuidgen libuuid blkdiscard blkzone blockdev sfdisk fdisk libfdisk
-# exch findfs findmnt mkswap swapon swapoff eject losetup fallocate wipefs flock fstrim
-# dmesg setpriv pivot_root switch_root unshare hwclock rfkill renice taskset rtcwake
+# https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git/tree/
+# mount umount libmount mountpoint findmnt eject fstrim
+# lsblk blkid libblkid blkdiscard blkzone blockdev findfs wipefs
+# fdisk libfdisk mkswap swapon swapoff
+# uuidgen libuuid
 # lscpu lsmem
-# disable: su runuser login mcookie logger partx cfdisk setarch ...
+# disable: su runuser login mcookie logger partx sfdisk cfdisk setarch ...
 
-# https://github.com/shadow-maint/shadow
-# without pam
-# -D PASSWD_FILE=\"/var/etc/passwd\"
-
-# agetty service for vt1: /usr/bin/agetty --skip-login -l /usr/bin/autologin tty1 linux
-# agetty service for vt2: /usr/bin/agetty --skip-login -l /usr/bin/autologin tty2 linux
+# create executable from autologin.sh
+# getty service for tty1: /usr/bin/getty -n -l /usr/bin/autologin 38400 tty1
+# getty service for tty2: /usr/bin/getty --skip-login -l /usr/bin/autologin tty2 linux
 
 cp "$script_dir"/autologin.sh /usr/bin/autologin
 chmod +x /usr/bin/autologin
@@ -541,5 +535,3 @@ chmod +x /usr/bin/home-services
 # suspend system with support for hooks (needed for some drivers)
 # https://github.com/jirutka/zzz
 # doas rules
-
-# autologin.sh
