@@ -5,16 +5,17 @@
 /*
 class Project {
 	pull() {
-		// first a three'way diff will be shown, based on the main branch, pristine, and the working directory
+		// ushare pull
+		// show a three'way diff, based on the main branch, pristine, and the working directory
 		// then the user will be asked to accept all or some parts of the diff
 	}
 	
 	pullRequest() {
-		// first publish the pristine and the working directory (except .cache)
-		// then send the two addresses to the main developer
-		
-		// a pull request can be removed by sending a message to the main developer,
-		// and unpublishing the two links
+		// ushare pullreq
+	}
+	
+	pullRequestRetrieve(pristineUri, wdirUri) {
+		// `ushare pullret ${pristineUri} ${wdirUri}`
 	}
 	
 	pullRequestAnswer(pristineUri, branchUri) {
