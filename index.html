@@ -212,8 +212,9 @@ body {
 <h2>3, installation</h2><div>Uni is build and installed using UPM (unified package manager)
 </div><div>UPM uses a simple method to unify software building and package management
 </div><div>
-</div><div>UPM can be used as a software builder and package manager, on any Linux system
-</div><div>you just need to have "bubblewrap" and either "curl" or "wget" on your system
+</div><div>UPM can be used as a software builder and package manager, on any Posix system
+</div><div>you just need to have either "curl" or "wget" on your system
+</div><div>if "bubblewrap" is available, UPM will use it to sandbox packages
 </div><div>to bootstrap from source, these extra programs are required too:
 </div><div>	clang git ssh-keygen
 </div><div>now just run this command:
