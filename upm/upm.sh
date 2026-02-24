@@ -10,7 +10,8 @@ script_dir="$(dirname "$(readlink -f "$0")")"
 # https://github.com/gobolinux
 
 # if run by non'root
-# run Ubuild.sh inside bubblewrap sandbox, witch have write access only to it's own installation dir
+# if bubblewrap is available, run Ubuild.sh inside bubblewrap sandbox,
+# 	which have write access only to it's own installation dir
 # https://wiki.archlinux.org/title/Bubblewrap/Examples
 
 # reproducible builds
