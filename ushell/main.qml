@@ -5,6 +5,8 @@
 // https://git.outfoxxed.me/quickshell/quickshell
 // https://git.outfoxxed.me/quickshell/quickshell-examples
 // https://github.com/caelestia-dots/shell
+// https://github.com/noctalia-dev/noctalia-shell
+// https://github.com/AvengeMedia/DankMaterialShell
 
 // https://github.com/qt/qtwayland
 // https://doc.qt.io/qt-6/qtwaylandcompositor-index.html
@@ -13,6 +15,11 @@
 // https://github.com/lirios/shell
 
 // https://doc.qt.io/qt-6/qml-qtnetwork-networkinformation.html
+
+// https://doc.qt.io/QtApplicationManager/
+
+// https://www.qt.io/product/qt6/qml-book
+// https://doc.qt.io/qt-6/qtquick-qml-runtime.html
 
 // apps will open in separate desktops
 // extra windows will be floating with border shadow, and will be closed when unfocused
